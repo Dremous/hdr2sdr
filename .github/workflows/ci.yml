@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Flutter 前端：依赖安装 → 静态分析 → 测试
+  # ──────────────────────────────────────────────
+  flutter:
+    name: Flutter (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  # ──────────────────────────────────────────────
+  # C++ 原生库：CMake 构建（需要 FFmpeg dev 包）
+  # ──────────────────────────────────────────────
+  native:
+    name: Native (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      # Linux — Ubuntu apt（pkg-config 自动搜索系统路径）
+      - name: Install FFmpeg dev (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libavcodec-dev libavformat-dev libavutil-dev \
+            libswresample-dev libswscale-dev \
+            cmake pkg-config
+
+      # macOS — Homebrew（pkg-config 自动搜索 /usr/local 路径）
+      - name: Install FFmpeg dev (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg cmake pkg-config
+
+      # Windows — vcpkg（GitHub Actions 预装，缓存加速）
+      - name: Setup vcpkg (Windows)
+        if: runner.os == 'Windows'
+        id: vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgJsonGlob: native/vcpkg.json
+          vcpkgCacheKey: vcpkg-${{ runner.os }}-${{ hashFiles('native/vcpkg.json') }}
+          runVcpkgInstall: true
+
+      - name: Set PKG_CONFIG_PATH for vcpkg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # 使用系统 vcpkg 路径（lukka/run-vcpkg 默认复用 C:\vcpkg）
+          $pkgCfgDir = "C:\vcpkg\installed\x64-windows\lib\pkgconfig"
+          "PKG_CONFIG_PATH=$pkgCfgDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Configure CMake
+        run: cmake -B build -S native
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      # ── 上传编译产物：各平台的动态库 ──
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libhdr_converter-${{ runner.os }}
+          path: |
+            build/*.dll
+            build/*.pdb
+            build/*.so
+            build/*.dylib
+            build/*.lib
+            build/lib/**
+            build/bin/**
