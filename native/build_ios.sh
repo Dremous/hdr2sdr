@@ -6,6 +6,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR"
 IOS_DIR="$PROJECT_DIR/../ios"
 
+echo "安装 FFmpeg（仅获取头文件，链接用 CocoaPod）..."
+brew install ffmpeg 2>/dev/null || true
+
 echo "编译 iOS arm64 静态库..."
 
 cmake -B build/ios \

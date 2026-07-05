@@ -1,0 +1,345 @@
+﻿2026-07-05T14:46:14.2163352Z Current runner version: '2.335.1'
+2026-07-05T14:46:14.2191000Z ##[group]Runner Image Provisioner
+2026-07-05T14:46:14.2191938Z Hosted Compute Agent
+2026-07-05T14:46:14.2192456Z Version: 20260624.560
+2026-07-05T14:46:14.2193023Z Commit: 925d229a51159bc391ae97e54a2dd1fe20af789d
+2026-07-05T14:46:14.2193717Z Build Date: 2026-06-24T18:26:47Z
+2026-07-05T14:46:14.2194337Z Worker ID: {47f0ece1-977e-4eff-8602-0c3829c38fcb}
+2026-07-05T14:46:14.2195005Z Azure Region: westcentralus
+2026-07-05T14:46:14.2195553Z ##[endgroup]
+2026-07-05T14:46:14.2196863Z ##[group]Operating System
+2026-07-05T14:46:14.2197507Z Microsoft Windows Server 2025
+2026-07-05T14:46:14.2198018Z 10.0.26100
+2026-07-05T14:46:14.2198464Z Datacenter
+2026-07-05T14:46:14.2198961Z ##[endgroup]
+2026-07-05T14:46:14.2199446Z ##[group]Runner Image
+2026-07-05T14:46:14.2200035Z Image: windows-2025-vs2026
+2026-07-05T14:46:14.2200590Z Version: 20260628.158.1
+2026-07-05T14:46:14.2202115Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260628.158/images/windows/Windows2025-VS2026-Readme.md
+2026-07-05T14:46:14.2203690Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260628.158
+2026-07-05T14:46:14.2204594Z ##[endgroup]
+2026-07-05T14:46:14.2206205Z ##[group]GITHUB_TOKEN Permissions
+2026-07-05T14:46:14.2208327Z Contents: read
+2026-07-05T14:46:14.2208854Z Metadata: read
+2026-07-05T14:46:14.2209353Z Packages: read
+2026-07-05T14:46:14.2209865Z ##[endgroup]
+2026-07-05T14:46:14.2212159Z Secret source: Actions
+2026-07-05T14:46:14.2212822Z Prepare workflow directory
+2026-07-05T14:46:14.2590798Z Prepare all required actions
+2026-07-05T14:46:14.2631426Z Getting action download info
+2026-07-05T14:46:14.5436145Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-07-05T14:46:14.6584288Z Download action repository 'subosito/flutter-action@v2' (SHA:1a449444c387b1966244ae4d4f8c696479add0b2)
+2026-07-05T14:46:15.1539399Z Getting action download info
+2026-07-05T14:46:15.2830698Z Download action repository 'actions/cache@v5' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-07-05T14:46:15.9129897Z Complete job name: Flutter (windows-latest)
+2026-07-05T14:46:16.0599884Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-05T14:46:16.0609539Z ##[group]Run actions/checkout@v4
+2026-07-05T14:46:16.0610512Z with:
+2026-07-05T14:46:16.0611210Z   repository: Dremous/hdr2sdr
+2026-07-05T14:46:16.0614330Z   token: ***
+2026-07-05T14:46:16.0615041Z   ssh-strict: true
+2026-07-05T14:46:16.0615731Z   ssh-user: git
+2026-07-05T14:46:16.0616520Z   persist-credentials: true
+2026-07-05T14:46:16.0617493Z   clean: true
+2026-07-05T14:46:16.0618185Z   sparse-checkout-cone-mode: true
+2026-07-05T14:46:16.0619017Z   fetch-depth: 1
+2026-07-05T14:46:16.0619799Z   fetch-tags: false
+2026-07-05T14:46:16.0620517Z   show-progress: true
+2026-07-05T14:46:16.0621241Z   lfs: false
+2026-07-05T14:46:16.0621959Z   submodules: false
+2026-07-05T14:46:16.0622683Z   set-safe-directory: true
+2026-07-05T14:46:16.0623641Z ##[endgroup]
+2026-07-05T14:46:16.2173131Z Syncing repository: Dremous/hdr2sdr
+2026-07-05T14:46:16.2175567Z ##[group]Getting Git version info
+2026-07-05T14:46:16.2176456Z Working directory is 'D:\a\hdr2sdr\hdr2sdr'
+2026-07-05T14:46:16.3041390Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-07-05T14:46:16.6573302Z git version 2.54.0.windows.1
+2026-07-05T14:46:16.6627773Z ##[endgroup]
+2026-07-05T14:46:16.6648747Z Temporarily overriding HOME='D:\a\_temp\f566afbe-562e-483a-b4a9-62e2d7c3f091' before making global git config changes
+2026-07-05T14:46:16.6650128Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-05T14:46:16.6659041Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\hdr2sdr\hdr2sdr
+2026-07-05T14:46:16.7388867Z Deleting the contents of 'D:\a\hdr2sdr\hdr2sdr'
+2026-07-05T14:46:16.7395425Z ##[group]Initializing the repository
+2026-07-05T14:46:16.7404810Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\hdr2sdr\hdr2sdr
+2026-07-05T14:46:16.8447470Z Initialized empty Git repository in D:/a/hdr2sdr/hdr2sdr/.git/
+2026-07-05T14:46:16.8504414Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/Dremous/hdr2sdr
+2026-07-05T14:46:16.9030577Z ##[endgroup]
+2026-07-05T14:46:16.9031336Z ##[group]Disabling automatic garbage collection
+2026-07-05T14:46:16.9039998Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-07-05T14:46:16.9353560Z ##[endgroup]
+2026-07-05T14:46:16.9354222Z ##[group]Setting up auth
+2026-07-05T14:46:16.9365598Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-07-05T14:46:16.9694231Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-07-05T14:46:18.3780300Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-05T14:46:18.4089424Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-07-05T14:46:18.9560952Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-05T14:46:18.9868513Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-07-05T14:46:19.5340335Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-07-05T14:46:19.5658089Z ##[endgroup]
+2026-07-05T14:46:19.5661366Z ##[group]Fetching the repository
+2026-07-05T14:46:19.5671917Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +c22e8d84bee61d5056acf2e5c301f15e51f4021f:refs/remotes/origin/master
+2026-07-05T14:46:20.6272412Z From https://github.com/Dremous/hdr2sdr
+2026-07-05T14:46:20.6273713Z  * [new ref]         c22e8d84bee61d5056acf2e5c301f15e51f4021f -> origin/master
+2026-07-05T14:46:20.6599770Z ##[endgroup]
+2026-07-05T14:46:20.6600464Z ##[group]Determining the checkout info
+2026-07-05T14:46:20.6601168Z ##[endgroup]
+2026-07-05T14:46:20.6611007Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-07-05T14:46:20.7110949Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-07-05T14:46:20.7416434Z ##[group]Checking out the ref
+2026-07-05T14:46:20.7425225Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B master refs/remotes/origin/master
+2026-07-05T14:46:20.8278550Z Reset branch 'master'
+2026-07-05T14:46:20.8408737Z branch 'master' set up to track 'origin/master'.
+2026-07-05T14:46:20.8468725Z ##[endgroup]
+2026-07-05T14:46:20.8848179Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-07-05T14:46:20.9124221Z c22e8d84bee61d5056acf2e5c301f15e51f4021f
+2026-07-05T14:46:20.9718091Z ##[group]Run subosito/flutter-action@v2
+2026-07-05T14:46:20.9718575Z with:
+2026-07-05T14:46:20.9718905Z   channel: stable
+2026-07-05T14:46:20.9719211Z   architecture: X64
+2026-07-05T14:46:20.9719483Z   cache: false
+2026-07-05T14:46:20.9719790Z   pub-cache-path: default
+2026-07-05T14:46:20.9720101Z   dry-run: false
+2026-07-05T14:46:20.9720482Z   git-source: https://github.com/flutter/flutter.git
+2026-07-05T14:46:20.9720895Z ##[endgroup]
+2026-07-05T14:46:20.9960875Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+2026-07-05T14:46:20.9962435Z [36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"[0m
+2026-07-05T14:46:20.9978048Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-07-05T14:46:20.9978569Z ##[endgroup]
+2026-07-05T14:46:21.2082326Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+2026-07-05T14:46:21.2082873Z [36;1m$GITHUB_ACTION_PATH/setup.sh -p \[0m
+2026-07-05T14:46:21.2083243Z [36;1m  -n '' \[0m
+2026-07-05T14:46:21.2083660Z [36;1m  -f '' \[0m
+2026-07-05T14:46:21.2083951Z [36;1m  -a 'X64' \[0m
+2026-07-05T14:46:21.2084217Z [36;1m  -k '' \[0m
+2026-07-05T14:46:21.2084519Z [36;1m  -c '' \[0m
+2026-07-05T14:46:21.2084793Z [36;1m  -l '' \[0m
+2026-07-05T14:46:21.2085067Z [36;1m  -d 'default' \[0m
+2026-07-05T14:46:21.2085475Z [36;1m  -g 'https://github.com/flutter/flutter.git' \[0m
+2026-07-05T14:46:21.2085853Z [36;1m  stable[0m
+2026-07-05T14:46:21.2096473Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-07-05T14:46:21.2096963Z ##[endgroup]
+2026-07-05T14:46:24.5161288Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+2026-07-05T14:46:24.5161714Z [36;1m$GITHUB_ACTION_PATH/setup.sh \[0m
+2026-07-05T14:46:24.5162050Z [36;1m  -n '3.44.4' \[0m
+2026-07-05T14:46:24.5162368Z [36;1m  -a 'x64' \[0m
+2026-07-05T14:46:24.5162750Z [36;1m  -c 'C:\hostedtoolcache\windows\flutter\stable-3.44.4-x64' \[0m
+2026-07-05T14:46:24.5163226Z [36;1m  -d 'C:\Users\runneradmin\AppData\Local\Pub\Cache' \[0m
+2026-07-05T14:46:24.5163621Z [36;1m  stable[0m
+2026-07-05T14:46:24.5172958Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-07-05T14:46:24.5173504Z ##[endgroup]
+2026-07-05T14:46:26.9401678Z   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+2026-07-05T14:46:26.9405652Z                                  Dload  Upload  Total   Spent   Left   Speed
+2026-07-05T14:46:26.9406570Z 
+2026-07-05T14:46:27.9391012Z   0      0   0      0   0      0      0      0                              0
+2026-07-05T14:46:28.9380524Z  13  1.76G  13 249.1M   0      0 249.2M      0   00:07           00:07 249.4M
+2026-07-05T14:46:29.9831621Z  39  1.76G  39 707.1M   0      0 353.7M      0   00:05   00:01   00:04 353.9M
+2026-07-05T14:46:30.9820487Z  66  1.76G  66  1.18G   0      0 397.8M      0   00:04   00:03   00:01 397.9M
+2026-07-05T14:46:31.1235138Z  95  1.76G  95  1.68G   0      0 427.8M      0   00:04   00:04         427.9M
+2026-07-05T14:46:31.1236167Z 100  1.76G 100  1.76G   0      0 432.9M      0   00:04   00:04         427.9M
+2026-07-05T14:46:31.1237078Z 100  1.76G 100  1.76G   0      0 432.9M      0   00:04   00:04         427.9M
+2026-07-05T14:46:31.1237779Z 100  1.76G 100  1.76G   0      0 432.9M      0   00:04   00:04         427.9M
+2026-07-05T14:47:47.0160878Z ##[group]Run flutter pub get
+2026-07-05T14:47:47.0161353Z [36;1mflutter pub get[0m
+2026-07-05T14:47:47.1009970Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-07-05T14:47:47.1010616Z env:
+2026-07-05T14:47:47.1011027Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.4-x64/flutter
+2026-07-05T14:47:47.1011524Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+2026-07-05T14:47:47.1012340Z ##[endgroup]
+2026-07-05T14:48:04.4606312Z Building flutter tool... 
+2026-07-05T14:48:04.4640864Z Running pub upgrade... 
+2026-07-05T14:48:04.5067179Z Resolving dependencies...
+2026-07-05T14:48:05.0485976Z Downloading packages...
+2026-07-05T14:48:19.1359606Z Got dependencies.
+2026-07-05T14:48:35.7015161Z Resolving dependencies...
+2026-07-05T14:48:36.0457327Z Downloading packages...
+2026-07-05T14:48:42.0557714Z + args 2.7.0
+2026-07-05T14:48:42.0558294Z + async 2.13.1
+2026-07-05T14:48:42.0558732Z + boolean_selector 2.1.2
+2026-07-05T14:48:42.0559330Z + characters 1.4.1
+2026-07-05T14:48:42.0559733Z + clock 1.1.2
+2026-07-05T14:48:42.0560098Z + code_assets 1.2.1
+2026-07-05T14:48:42.0560438Z + collection 1.19.1
+2026-07-05T14:48:42.0560807Z + cross_file 0.3.5+4
+2026-07-05T14:48:42.0561798Z + crypto 3.0.7
+2026-07-05T14:48:42.0562221Z + desktop_drop 0.4.4 (0.7.1 available)
+2026-07-05T14:48:42.0562648Z + fake_async 1.3.3
+2026-07-05T14:48:42.0563071Z + ffi 2.2.0
+2026-07-05T14:48:42.0563513Z + file_picker 6.2.1 (11.0.2 available)
+2026-07-05T14:48:42.0563980Z + flutter 0.0.0 from sdk flutter
+2026-07-05T14:48:42.0564430Z + flutter_lints 3.0.2 (6.0.0 available)
+2026-07-05T14:48:42.0564899Z + flutter_plugin_android_lifecycle 2.0.35
+2026-07-05T14:48:42.0565354Z + flutter_test 0.0.0 from sdk flutter
+2026-07-05T14:48:42.0565846Z + flutter_web_plugins 0.0.0 from sdk flutter
+2026-07-05T14:48:42.0566310Z + hooks 2.0.2
+2026-07-05T14:48:42.0566585Z + intl 0.19.0 (0.20.3 available)
+2026-07-05T14:48:42.0566898Z + jni 1.0.0
+2026-07-05T14:48:42.0567224Z + jni_flutter 1.0.1
+2026-07-05T14:48:42.0567508Z + leak_tracker 11.0.2
+2026-07-05T14:48:42.0567811Z + leak_tracker_flutter_testing 3.0.10
+2026-07-05T14:48:42.0568151Z + leak_tracker_testing 3.0.2
+2026-07-05T14:48:42.0568492Z + lints 3.0.0 (6.1.0 available)
+2026-07-05T14:48:42.0568900Z + logging 1.3.0
+2026-07-05T14:48:42.0569179Z + matcher 0.12.19 (0.12.20 available)
+2026-07-05T14:48:42.0569530Z + material_color_utilities 0.13.0
+2026-07-05T14:48:42.0569858Z + meta 1.18.0 (1.18.3 available)
+2026-07-05T14:48:42.0570169Z + nested 1.0.0
+2026-07-05T14:48:42.0570452Z + objective_c 9.4.1
+2026-07-05T14:48:42.0570733Z + package_config 2.2.0 (3.0.0 available)
+2026-07-05T14:48:42.0571139Z + path 1.9.1
+2026-07-05T14:48:42.0571444Z + path_provider 2.1.6
+2026-07-05T14:48:42.0571734Z + path_provider_android 2.3.1
+2026-07-05T14:48:42.0572072Z + path_provider_foundation 2.6.0
+2026-07-05T14:48:42.0572393Z + path_provider_linux 2.2.2
+2026-07-05T14:48:42.0572728Z + path_provider_platform_interface 2.1.3
+2026-07-05T14:48:42.0573072Z + path_provider_windows 2.3.0
+2026-07-05T14:48:42.0573360Z + platform 3.1.6
+2026-07-05T14:48:42.0573677Z + plugin_platform_interface 2.1.8
+2026-07-05T14:48:42.0573992Z + provider 6.1.5+1
+2026-07-05T14:48:42.0574273Z + pub_semver 2.2.0
+2026-07-05T14:48:42.0574564Z + record_use 0.6.0
+2026-07-05T14:48:42.0574856Z + sky_engine 0.0.0 from sdk flutter
+2026-07-05T14:48:42.0575185Z + source_span 1.10.2
+2026-07-05T14:48:42.0575470Z + stack_trace 1.12.1
+2026-07-05T14:48:42.0575760Z + stream_channel 2.1.4
+2026-07-05T14:48:42.0576070Z + string_scanner 1.4.1
+2026-07-05T14:48:42.0576353Z + term_glyph 1.2.2
+2026-07-05T14:48:42.0576629Z + test_api 0.7.11 (0.7.13 available)
+2026-07-05T14:48:42.0576955Z + typed_data 1.4.0
+2026-07-05T14:48:42.0577235Z + vector_math 2.2.0 (2.4.0 available)
+2026-07-05T14:48:42.0577560Z + vm_service 15.2.0
+2026-07-05T14:48:42.0577833Z + web 1.1.1
+2026-07-05T14:48:42.0578088Z + win32 5.15.0 (6.3.0 available)
+2026-07-05T14:48:42.0580691Z + xdg_directories 1.1.0
+2026-07-05T14:48:42.0581074Z + yaml 3.1.3
+2026-07-05T14:48:42.0581400Z Changed 59 dependencies!
+2026-07-05T14:48:42.0582203Z 11 packages have newer versions incompatible with dependency constraints.
+2026-07-05T14:48:42.0582713Z Try `flutter pub outdated` for more information.
+2026-07-05T14:48:42.2298932Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.2300216Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.2300993Z 
+2026-07-05T14:48:42.2301458Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.2303500Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.2304318Z 
+2026-07-05T14:48:42.2304915Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.2306080Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.2306873Z 
+2026-07-05T14:48:42.3312153Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.3314002Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.3315167Z 
+2026-07-05T14:48:42.3315885Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.3317831Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.3319054Z 
+2026-07-05T14:48:42.3320287Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.3322747Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.3323700Z 
+2026-07-05T14:48:42.3403239Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.3405205Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.3406018Z 
+2026-07-05T14:48:42.3406440Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.3407596Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.3408369Z 
+2026-07-05T14:48:42.3410747Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:42.3411937Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:42.3412758Z 
+2026-07-05T14:48:42.6702481Z ##[group]Run flutter analyze
+2026-07-05T14:48:42.6703069Z [36;1mflutter analyze[0m
+2026-07-05T14:48:42.6766137Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-07-05T14:48:42.6766556Z env:
+2026-07-05T14:48:42.6767058Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.4-x64/flutter
+2026-07-05T14:48:42.6767637Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+2026-07-05T14:48:42.6768202Z ##[endgroup]
+2026-07-05T14:48:43.9277849Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:43.9279038Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:43.9281982Z 
+2026-07-05T14:48:43.9282999Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:43.9284875Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:43.9286171Z 
+2026-07-05T14:48:43.9286749Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:43.9289174Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:43.9290357Z 
+2026-07-05T14:48:44.0252151Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:44.0254456Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:44.0255773Z 
+2026-07-05T14:48:44.0256369Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:44.0258063Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:44.0259183Z 
+2026-07-05T14:48:44.0259776Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:44.0261609Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:44.0262845Z 
+2026-07-05T14:48:44.0376032Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:44.0378326Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:44.0379562Z 
+2026-07-05T14:48:44.0380057Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:44.0384558Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:44.0385923Z 
+2026-07-05T14:48:44.0386516Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:44.0388321Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:44.0389588Z 
+2026-07-05T14:48:52.9466210Z Analyzing hdr2sdr...                                            
+2026-07-05T14:48:52.9506022Z No issues found! (ran in 8.5s)
+2026-07-05T14:48:53.1163007Z ##[group]Run flutter test
+2026-07-05T14:48:53.1163536Z [36;1mflutter test[0m
+2026-07-05T14:48:53.1222050Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-07-05T14:48:53.1222367Z env:
+2026-07-05T14:48:53.1222705Z   FLUTTER_ROOT: C:\hostedtoolcache\windows\flutter\stable-3.44.4-x64/flutter
+2026-07-05T14:48:53.1223081Z   PUB_CACHE: C:\Users\runneradmin\AppData\Local\Pub\Cache
+2026-07-05T14:48:53.1223345Z ##[endgroup]
+2026-07-05T14:48:54.2670672Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.2671902Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.2672972Z 
+2026-07-05T14:48:54.2673627Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.2674977Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.2675740Z 
+2026-07-05T14:48:54.2676088Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.2677171Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.2677919Z 
+2026-07-05T14:48:54.3507701Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.3509255Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.3510321Z 
+2026-07-05T14:48:54.3510679Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.3511702Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.3512448Z 
+2026-07-05T14:48:54.3512800Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.3513851Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.3514580Z 
+2026-07-05T14:48:54.3633639Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.3635220Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.3636087Z 
+2026-07-05T14:48:54.3636467Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.3639764Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.3640723Z 
+2026-07-05T14:48:54.3641062Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:54.3642104Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:54.3642834Z 
+2026-07-05T14:48:56.4384134Z 
+2026-07-05T14:48:56.6095802Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:56.6097848Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:56.6099170Z 
+2026-07-05T14:48:56.6100008Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:56.6101964Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:56.6113945Z 
+2026-07-05T14:48:56.6115107Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:48:56.6118873Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:48:56.6123393Z 
+2026-07-05T14:49:06.4633533Z ✅ 应用启动测试 — 验证 Provider 和 App 正常构建
+2026-07-05T14:49:06.4682781Z ✅ Hdr2SdrApp 可构建
+2026-07-05T14:49:06.5518971Z 
+2026-07-05T14:49:06.5524676Z 🎉 2 tests passed.
+2026-07-05T14:49:06.7679277Z Post job cleanup.
+2026-07-05T14:49:06.7860343Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-05T14:49:06.7862334Z Post job cleanup.
+2026-07-05T14:49:06.9622078Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-07-05T14:49:06.9946461Z git version 2.54.0.windows.1
+2026-07-05T14:49:07.0029195Z Temporarily overriding HOME='D:\a\_temp\40758fc3-a526-4dee-9c89-ffd1541e321e' before making global git config changes
+2026-07-05T14:49:07.0030562Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-05T14:49:07.0044587Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\hdr2sdr\hdr2sdr
+2026-07-05T14:49:07.0375829Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-07-05T14:49:07.0697859Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-07-05T14:49:07.6138279Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-05T14:49:07.6407297Z http.https://github.com/.extraheader
+2026-07-05T14:49:07.6459080Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-07-05T14:49:07.6769778Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-07-05T14:49:08.2042449Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-05T14:49:08.2352529Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-07-05T14:49:08.8018713Z Cleaning up orphan processes
+2026-07-05T14:49:08.8422753Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

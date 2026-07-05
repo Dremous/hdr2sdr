@@ -1,0 +1,34 @@
+﻿2026-07-05T14:46:14.2136010Z Current runner version: '2.335.1'
+2026-07-05T14:46:14.2190958Z ##[group]Runner Image Provisioner
+2026-07-05T14:46:14.2191933Z Hosted Compute Agent
+2026-07-05T14:46:14.2192452Z Version: 20260624.560
+2026-07-05T14:46:14.2193019Z Commit: 925d229a51159bc391ae97e54a2dd1fe20af789d
+2026-07-05T14:46:14.2193669Z Build Date: 2026-06-24T18:26:47Z
+2026-07-05T14:46:14.2194289Z Worker ID: {47f0ece1-977e-4eff-8602-0c3829c38fcb}
+2026-07-05T14:46:14.2195002Z Azure Region: westcentralus
+2026-07-05T14:46:14.2195505Z ##[endgroup]
+2026-07-05T14:46:14.2196858Z ##[group]Operating System
+2026-07-05T14:46:14.2197459Z Microsoft Windows Server 2025
+2026-07-05T14:46:14.2198012Z 10.0.26100
+2026-07-05T14:46:14.2198462Z Datacenter
+2026-07-05T14:46:14.2198958Z ##[endgroup]
+2026-07-05T14:46:14.2199443Z ##[group]Runner Image
+2026-07-05T14:46:14.2200031Z Image: windows-2025-vs2026
+2026-07-05T14:46:14.2200536Z Version: 20260628.158.1
+2026-07-05T14:46:14.2201623Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260628.158/images/windows/Windows2025-VS2026-Readme.md
+2026-07-05T14:46:14.2203686Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260628.158
+2026-07-05T14:46:14.2204591Z ##[endgroup]
+2026-07-05T14:46:14.2206192Z ##[group]GITHUB_TOKEN Permissions
+2026-07-05T14:46:14.2208318Z Contents: read
+2026-07-05T14:46:14.2208851Z Metadata: read
+2026-07-05T14:46:14.2209351Z Packages: read
+2026-07-05T14:46:14.2209863Z ##[endgroup]
+2026-07-05T14:46:14.2212144Z Secret source: Actions
+2026-07-05T14:46:14.2212817Z Prepare workflow directory
+2026-07-05T14:46:14.2590751Z Prepare all required actions
+2026-07-05T14:46:14.2631369Z Getting action download info
+2026-07-05T14:46:14.5436110Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-07-05T14:46:14.6584248Z Download action repository 'subosito/flutter-action@v2' (SHA:1a449444c387b1966244ae4d4f8c696479add0b2)
+2026-07-05T14:46:15.1539334Z Getting action download info
+2026-07-05T14:46:15.2830660Z Download action repository 'actions/cache@v5' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-07-05T14:46:15.9129850Z Complete job name: Flutter (windows-latest)

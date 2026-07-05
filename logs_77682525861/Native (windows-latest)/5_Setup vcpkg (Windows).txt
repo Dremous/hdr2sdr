@@ -1,0 +1,64 @@
+﻿2026-07-05T14:46:19.9472959Z ##[group]Run lukka/run-vcpkg@v11
+2026-07-05T14:46:19.9473330Z with:
+2026-07-05T14:46:19.9473535Z   vcpkgJsonGlob: native/vcpkg.json
+2026-07-05T14:46:19.9473797Z   runVcpkgInstall: true
+2026-07-05T14:46:19.9474007Z   doNotCache: true
+2026-07-05T14:46:19.9474201Z   doNotUpdateVcpkg: true
+2026-07-05T14:46:19.9474438Z   vcpkgDirectory: D:\a\hdr2sdr\hdr2sdr/vcpkg
+2026-07-05T14:46:19.9474815Z   vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+2026-07-05T14:46:19.9475174Z   vcpkgJsonIgnores: ['**/vcpkg/**']
+2026-07-05T14:46:19.9475492Z   vcpkgConfigurationJsonGlob: **/vcpkg-configuration.json
+2026-07-05T14:46:19.9476988Z   runVcpkgFormatString: [`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]
+2026-07-05T14:46:19.9477678Z   useShell: true
+2026-07-05T14:46:19.9478170Z   logCollectionRegExps: \s*"(.+CMakeOutput\.log)"\.\s*;\s*"(.+CMakeError\.log)"\.\s*;\s*(.+out\.log)\s*;\s+(.+err\.log)\s*;\s*(.+vcpkg.+\.log)\s*
+2026-07-05T14:46:19.9478784Z ##[endgroup]
+2026-07-05T14:46:20.1238298Z ##[group]Prepare output directories
+2026-07-05T14:46:20.1239770Z The vpckg root directory: 'D:\a\hdr2sdr\hdr2sdr\vcpkg'
+2026-07-05T14:46:20.1254730Z (node:7604) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-07-05T14:46:20.1255466Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-07-05T14:46:20.1290498Z ##[endgroup]
+2026-07-05T14:46:20.1291183Z ⏱ elapsed: 0.005 seconds
+2026-07-05T14:46:20.2326388Z Running command '"C:\Program Files\Git\bin\git.exe"' with args '^"submodule^",^"status^",^"D:\a\hdr2sdr\hdr2sdr\vcpkg^"' in current directory 'D:\a\hdr2sdr\hdr2sdr'.
+2026-07-05T14:46:20.2385486Z (node:7604) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+2026-07-05T14:46:20.7672390Z error: pathspec 'D:\a\hdr2sdr\hdr2sdr\vcpkg' did not match any file(s) known to git
+2026-07-05T14:46:20.7784883Z ##[group]Searching for vcpkg.json with glob expression 'native/vcpkg.json'
+2026-07-05T14:46:20.7855993Z Found vcpkg.json at 'native/vcpkg.json'.
+2026-07-05T14:46:20.7859233Z ##[endgroup]
+2026-07-05T14:46:20.7859634Z ⏱ elapsed: 0.007 seconds
+2026-07-05T14:46:20.7860471Z ##[group]The vcpkgCommitId is not provided, searching for a vcpkg-configuration.json using **/vcpkg-configuration.json
+2026-07-05T14:46:20.7865816Z Searching for 'vcpkg-configuration.json' using: '**/vcpkg-configuration.json'
+2026-07-05T14:46:20.7954039Z Found **/vcpkg-configuration.json at 'native/vcpkg-configuration.json'.
+2026-07-05T14:46:20.7957759Z Found vpckg-configuration.json at: native/vcpkg-configuration.json
+2026-07-05T14:46:20.7987040Z ##[endgroup]
+2026-07-05T14:46:20.7987476Z ⏱ elapsed: 0.013 seconds
+2026-07-05T14:46:20.7988272Z Found baseline 'f6a52d3e9a7ecb304a30b8a66e7e0fc88be2102f', this is the Git commit id going to be used to fetch vcpkg from the repository
+2026-07-05T14:46:20.8017449Z ##[group]Setup to run on GitHub Action runners
+2026-07-05T14:46:20.8018394Z Set the workflow environment variable 'VCPKG_BINARY_SOURCES' to value 'clear;x-gha,readwrite'
+2026-07-05T14:46:20.8019461Z ##[endgroup]
+2026-07-05T14:46:20.8019812Z ⏱ elapsed: 0.001 seconds
+2026-07-05T14:46:20.8020264Z ##[group]Retrieving the vcpkg Git commit id at: 'D:\a\hdr2sdr\hdr2sdr\vcpkg'
+2026-07-05T14:46:20.8764199Z Fetching the Git commit id at 'D:\a\hdr2sdr\hdr2sdr\vcpkg' ...
+2026-07-05T14:46:20.8768821Z Running command '"C:\Program Files\Git\bin\git.exe"' with args '^"rev-parse^",^"HEAD^"' in current directory 'D:\a\hdr2sdr\hdr2sdr\vcpkg'.
+2026-07-05T14:46:20.9101950Z c22e8d84bee61d5056acf2e5c301f15e51f4021f
+2026-07-05T14:46:20.9150482Z ##[endgroup]
+2026-07-05T14:46:20.9151162Z ⏱ elapsed: 0.114 seconds
+2026-07-05T14:46:20.9152542Z The 'doNotUpdateVcpkg' input is 'true', skipping any check to update the vcpkg directory (D:\a\hdr2sdr\hdr2sdr\vcpkg).
+2026-07-05T14:46:20.9156185Z ##[group]Check whether last vcpkg's build is up to date with sources
+2026-07-05T14:46:20.9156943Z Checking last vcpkg build commit id in file 'D:\a\hdr2sdr\hdr2sdr\vcpkg\vcpkgLastBuiltCommitId' ...
+2026-07-05T14:46:20.9209695Z There is no file containing last built commit id of vcpkg, forcing a rebuild.
+2026-07-05T14:46:20.9210792Z ##[endgroup]
+2026-07-05T14:46:20.9211460Z ⏱ elapsed: 0.006 seconds
+2026-07-05T14:46:20.9212112Z ##[group]Build vcpkg executable
+2026-07-05T14:46:21.0041126Z Running command '"C:\Windows\system32\cmd.exe"' with args '^"/c^",^"D:\a\hdr2sdr\hdr2sdr\vcpkg\bootstrap-vcpkg.bat^"' in current directory 'D:\a\hdr2sdr\hdr2sdr\vcpkg'.
+2026-07-05T14:46:21.0178840Z '"D:\a\hdr2sdr\hdr2sdr\vcpkg\bootstrap-vcpkg.bat' is not recognized as an internal or external command,
+2026-07-05T14:46:21.0179472Z operable program or batch file.
+2026-07-05T14:46:21.0230498Z ##[error]Last command execution failed with error code '1'.
+2026-07-05T14:46:21.0236874Z ##[endgroup]
+2026-07-05T14:46:21.0237365Z ⏱ elapsed: 0.100 seconds
+2026-07-05T14:46:21.0238260Z Error: Last command execution failed with error code '1'.
+2026-07-05T14:46:21.0238941Z     at BaseUtilLib.throwIfErrorCode (D:\a\_actions\lukka\run-vcpkg\v11\dist\index.js:44357:19)
+2026-07-05T14:46:21.0239709Z     at VcpkgRunner.<anonymous> (D:\a\_actions\lukka\run-vcpkg\v11\dist\index.js:46711:32)
+2026-07-05T14:46:21.0240193Z     at Generator.next (<anonymous>)
+2026-07-05T14:46:21.0240685Z     at fulfilled (D:\a\_actions\lukka\run-vcpkg\v11\dist\index.js:46278:58)
+2026-07-05T14:46:21.0241346Z     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-07-05T14:46:21.0243083Z ##[error]run-vcpkg action execution failed: Last command execution failed with error code '1'.

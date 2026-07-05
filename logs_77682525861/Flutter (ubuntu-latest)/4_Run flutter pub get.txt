@@ -1,0 +1,98 @@
+﻿2026-07-05T14:47:12.4481562Z ##[group]Run flutter pub get
+2026-07-05T14:47:12.4482069Z [36;1mflutter pub get[0m
+2026-07-05T14:47:12.4525356Z shell: /usr/bin/bash -e {0}
+2026-07-05T14:47:12.4525901Z env:
+2026-07-05T14:47:12.4526234Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.44.4-x64/flutter
+2026-07-05T14:47:12.4526664Z   PUB_CACHE: /home/runner/.pub-cache
+2026-07-05T14:47:12.4526928Z ##[endgroup]
+2026-07-05T14:47:16.8153877Z Resolving dependencies...
+2026-07-05T14:47:17.0799969Z Downloading packages...
+2026-07-05T14:47:19.6937775Z + args 2.7.0
+2026-07-05T14:47:19.6940056Z + async 2.13.1
+2026-07-05T14:47:19.6940542Z + boolean_selector 2.1.2
+2026-07-05T14:47:19.6940820Z + characters 1.4.1
+2026-07-05T14:47:19.6941033Z + clock 1.1.2
+2026-07-05T14:47:19.6941256Z + code_assets 1.2.1
+2026-07-05T14:47:19.6941476Z + collection 1.19.1
+2026-07-05T14:47:19.6941716Z + cross_file 0.3.5+4
+2026-07-05T14:47:19.6941930Z + crypto 3.0.7
+2026-07-05T14:47:19.6942164Z + desktop_drop 0.4.4 (0.7.1 available)
+2026-07-05T14:47:19.6942435Z + fake_async 1.3.3
+2026-07-05T14:47:19.6943186Z + ffi 2.2.0
+2026-07-05T14:47:19.6943400Z + file_picker 6.2.1 (11.0.2 available)
+2026-07-05T14:47:19.6943686Z + flutter 0.0.0 from sdk flutter
+2026-07-05T14:47:19.6943952Z + flutter_lints 3.0.2 (6.0.0 available)
+2026-07-05T14:47:19.6944236Z + flutter_plugin_android_lifecycle 2.0.35
+2026-07-05T14:47:19.6944556Z + flutter_test 0.0.0 from sdk flutter
+2026-07-05T14:47:19.6944870Z + flutter_web_plugins 0.0.0 from sdk flutter
+2026-07-05T14:47:19.6945144Z + hooks 2.0.2
+2026-07-05T14:47:19.6945345Z + intl 0.19.0 (0.20.3 available)
+2026-07-05T14:47:19.6945976Z + jni 1.0.0
+2026-07-05T14:47:19.6946187Z + jni_flutter 1.0.1
+2026-07-05T14:47:19.6946394Z + leak_tracker 11.0.2
+2026-07-05T14:47:19.6946648Z + leak_tracker_flutter_testing 3.0.10
+2026-07-05T14:47:19.6947418Z + leak_tracker_testing 3.0.2
+2026-07-05T14:47:19.6948049Z + lints 3.0.0 (6.1.0 available)
+2026-07-05T14:47:19.6948487Z + logging 1.3.0
+2026-07-05T14:47:19.6948843Z + matcher 0.12.19 (0.12.20 available)
+2026-07-05T14:47:19.6949329Z + material_color_utilities 0.13.0
+2026-07-05T14:47:19.6949605Z + meta 1.18.0 (1.18.3 available)
+2026-07-05T14:47:19.6949852Z + nested 1.0.0
+2026-07-05T14:47:19.6950055Z + objective_c 9.4.1
+2026-07-05T14:47:19.6950284Z + package_config 2.2.0 (3.0.0 available)
+2026-07-05T14:47:19.6950551Z + path 1.9.1
+2026-07-05T14:47:19.6950752Z + path_provider 2.1.6
+2026-07-05T14:47:19.6950985Z + path_provider_android 2.3.1
+2026-07-05T14:47:19.6951238Z + path_provider_foundation 2.6.0
+2026-07-05T14:47:19.6951496Z + path_provider_linux 2.2.2
+2026-07-05T14:47:19.6951752Z + path_provider_platform_interface 2.1.3
+2026-07-05T14:47:19.6952035Z + path_provider_windows 2.3.0
+2026-07-05T14:47:19.6952281Z + platform 3.1.6
+2026-07-05T14:47:19.6952521Z + plugin_platform_interface 2.1.8
+2026-07-05T14:47:19.6952773Z + provider 6.1.5+1
+2026-07-05T14:47:19.6952980Z + pub_semver 2.2.0
+2026-07-05T14:47:19.6953183Z + record_use 0.6.0
+2026-07-05T14:47:19.6953400Z + sky_engine 0.0.0 from sdk flutter
+2026-07-05T14:47:19.6953652Z + source_span 1.10.2
+2026-07-05T14:47:19.6953879Z + stack_trace 1.12.1
+2026-07-05T14:47:19.6954097Z + stream_channel 2.1.4
+2026-07-05T14:47:19.6954317Z + string_scanner 1.4.1
+2026-07-05T14:47:19.6954532Z + term_glyph 1.2.2
+2026-07-05T14:47:19.6954752Z + test_api 0.7.11 (0.7.13 available)
+2026-07-05T14:47:19.6955005Z + typed_data 1.4.0
+2026-07-05T14:47:19.6955221Z + vector_math 2.2.0 (2.4.0 available)
+2026-07-05T14:47:19.6955466Z + vm_service 15.2.0
+2026-07-05T14:47:19.6956356Z + web 1.1.1
+2026-07-05T14:47:19.6956586Z + win32 5.15.0 (6.3.0 available)
+2026-07-05T14:47:19.6956836Z + xdg_directories 1.1.0
+2026-07-05T14:47:19.6957048Z + yaml 3.1.3
+2026-07-05T14:47:19.6957258Z Changed 59 dependencies!
+2026-07-05T14:47:19.6957623Z 11 packages have newer versions incompatible with dependency constraints.
+2026-07-05T14:47:19.6958061Z Try `flutter pub outdated` for more information.
+2026-07-05T14:47:19.8548382Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.8551315Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.8552999Z 
+2026-07-05T14:47:19.8553792Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.8568319Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.8570311Z 
+2026-07-05T14:47:19.8571530Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.8574464Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.8577028Z 
+2026-07-05T14:47:19.9516587Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.9519380Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.9521283Z 
+2026-07-05T14:47:19.9522148Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.9525007Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.9527398Z 
+2026-07-05T14:47:19.9528165Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.9530522Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.9532206Z 
+2026-07-05T14:47:19.9611254Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.9613857Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.9616424Z 
+2026-07-05T14:47:19.9616852Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.9618163Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.9619053Z 
+2026-07-05T14:47:19.9619456Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.9620720Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.9621607Z 

@@ -1,0 +1,48 @@
+﻿2026-07-05T14:47:25.2296650Z ##[group]Run flutter test
+2026-07-05T14:47:25.2296890Z [36;1mflutter test[0m
+2026-07-05T14:47:25.2328190Z shell: /bin/bash -e {0}
+2026-07-05T14:47:25.2328380Z env:
+2026-07-05T14:47:25.2328660Z   FLUTTER_ROOT: /Users/runner/hostedtoolcache/flutter/stable-3.44.4-arm64/flutter
+2026-07-05T14:47:25.2329030Z   PUB_CACHE: /Users/runner/.pub-cache
+2026-07-05T14:47:25.2329230Z ##[endgroup]
+2026-07-05T14:47:25.5804840Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.5906930Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6021880Z 
+2026-07-05T14:47:25.6122760Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.6224460Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6326460Z 
+2026-07-05T14:47:25.6456060Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.6578740Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6680080Z 
+2026-07-05T14:47:25.6781120Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.6879060Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6918280Z 
+2026-07-05T14:47:25.6929050Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.6930990Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6932010Z 
+2026-07-05T14:47:25.6932370Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.6933410Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6934210Z 
+2026-07-05T14:47:25.6934540Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.6935560Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6936260Z 
+2026-07-05T14:47:25.6936720Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.6937730Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6938910Z 
+2026-07-05T14:47:25.6939240Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:25.6940250Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:25.6940960Z 
+2026-07-05T14:47:34.3151050Z 
+2026-07-05T14:47:34.4167470Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:34.4168760Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:34.4169510Z 
+2026-07-05T14:47:34.4169810Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:34.4170840Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:34.4171580Z 
+2026-07-05T14:47:34.4171910Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:34.4172920Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:34.4173620Z 
+2026-07-05T14:47:41.0970590Z ✅ 应用启动测试 — 验证 Provider 和 App 正常构建
+2026-07-05T14:47:41.1031030Z ✅ Hdr2SdrApp 可构建
+2026-07-05T14:47:41.1108240Z 
+2026-07-05T14:47:41.1111540Z 🎉 2 tests passed.

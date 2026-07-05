@@ -1,0 +1,46 @@
+﻿2026-07-05T14:46:20.9718061Z ##[group]Run subosito/flutter-action@v2
+2026-07-05T14:46:20.9718570Z with:
+2026-07-05T14:46:20.9718901Z   channel: stable
+2026-07-05T14:46:20.9719209Z   architecture: X64
+2026-07-05T14:46:20.9719481Z   cache: false
+2026-07-05T14:46:20.9719787Z   pub-cache-path: default
+2026-07-05T14:46:20.9720098Z   dry-run: false
+2026-07-05T14:46:20.9720477Z   git-source: https://github.com/flutter/flutter.git
+2026-07-05T14:46:20.9720892Z ##[endgroup]
+2026-07-05T14:46:20.9960842Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+2026-07-05T14:46:20.9962429Z [36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"[0m
+2026-07-05T14:46:20.9978028Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-07-05T14:46:20.9978565Z ##[endgroup]
+2026-07-05T14:46:21.2082301Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+2026-07-05T14:46:21.2082867Z [36;1m$GITHUB_ACTION_PATH/setup.sh -p \[0m
+2026-07-05T14:46:21.2083239Z [36;1m  -n '' \[0m
+2026-07-05T14:46:21.2083507Z [36;1m  -f '' \[0m
+2026-07-05T14:46:21.2083947Z [36;1m  -a 'X64' \[0m
+2026-07-05T14:46:21.2084214Z [36;1m  -k '' \[0m
+2026-07-05T14:46:21.2084517Z [36;1m  -c '' \[0m
+2026-07-05T14:46:21.2084791Z [36;1m  -l '' \[0m
+2026-07-05T14:46:21.2085064Z [36;1m  -d 'default' \[0m
+2026-07-05T14:46:21.2085472Z [36;1m  -g 'https://github.com/flutter/flutter.git' \[0m
+2026-07-05T14:46:21.2085850Z [36;1m  stable[0m
+2026-07-05T14:46:21.2096422Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-07-05T14:46:21.2096919Z ##[endgroup]
+2026-07-05T14:46:24.5161265Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+2026-07-05T14:46:24.5161710Z [36;1m$GITHUB_ACTION_PATH/setup.sh \[0m
+2026-07-05T14:46:24.5162047Z [36;1m  -n '3.44.4' \[0m
+2026-07-05T14:46:24.5162365Z [36;1m  -a 'x64' \[0m
+2026-07-05T14:46:24.5162747Z [36;1m  -c 'C:\hostedtoolcache\windows\flutter\stable-3.44.4-x64' \[0m
+2026-07-05T14:46:24.5163205Z [36;1m  -d 'C:\Users\runneradmin\AppData\Local\Pub\Cache' \[0m
+2026-07-05T14:46:24.5163618Z [36;1m  stable[0m
+2026-07-05T14:46:24.5172952Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-07-05T14:46:24.5173496Z ##[endgroup]
+2026-07-05T14:46:26.9401623Z   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+2026-07-05T14:46:26.9405615Z                                  Dload  Upload  Total   Spent   Left   Speed
+2026-07-05T14:46:26.9406525Z 
+2026-07-05T14:46:27.9390726Z   0      0   0      0   0      0      0      0                              0
+2026-07-05T14:46:28.9380467Z  13  1.76G  13 249.1M   0      0 249.2M      0   00:07           00:07 249.4M
+2026-07-05T14:46:29.9831493Z  39  1.76G  39 707.1M   0      0 353.7M      0   00:05   00:01   00:04 353.9M
+2026-07-05T14:46:30.9820440Z  66  1.76G  66  1.18G   0      0 397.8M      0   00:04   00:03   00:01 397.9M
+2026-07-05T14:46:31.1235078Z  95  1.76G  95  1.68G   0      0 427.8M      0   00:04   00:04         427.9M
+2026-07-05T14:46:31.1236114Z 100  1.76G 100  1.76G   0      0 432.9M      0   00:04   00:04         427.9M
+2026-07-05T14:46:31.1237075Z 100  1.76G 100  1.76G   0      0 432.9M      0   00:04   00:04         427.9M
+2026-07-05T14:46:31.1237773Z 100  1.76G 100  1.76G   0      0 432.9M      0   00:04   00:04         427.9M

@@ -1,0 +1,36 @@
+﻿2026-07-05T14:47:19.0296450Z ##[group]Run flutter analyze
+2026-07-05T14:47:19.0296760Z [36;1mflutter analyze[0m
+2026-07-05T14:47:19.0327250Z shell: /bin/bash -e {0}
+2026-07-05T14:47:19.0327480Z env:
+2026-07-05T14:47:19.0327790Z   FLUTTER_ROOT: /Users/runner/hostedtoolcache/flutter/stable-3.44.4-arm64/flutter
+2026-07-05T14:47:19.0328180Z   PUB_CACHE: /Users/runner/.pub-cache
+2026-07-05T14:47:19.0328480Z ##[endgroup]
+2026-07-05T14:47:19.3070260Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3071560Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3072320Z 
+2026-07-05T14:47:19.3072670Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3073890Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3074630Z 
+2026-07-05T14:47:19.3075000Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3076110Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3076800Z 
+2026-07-05T14:47:19.3396220Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3397550Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3398540Z 
+2026-07-05T14:47:19.3399020Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3400290Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3401120Z 
+2026-07-05T14:47:19.3401540Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3402680Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3404030Z 
+2026-07-05T14:47:19.3467940Z Package file_picker:linux references file_picker:linux as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3469120Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: linux: default_package: file_picker` or add an inline implementation to file_picker via `platforms: linux:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3469870Z 
+2026-07-05T14:47:19.3470160Z Package file_picker:macos references file_picker:macos as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3471180Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: macos: default_package: file_picker` or add an inline implementation to file_picker via `platforms: macos:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3472390Z 
+2026-07-05T14:47:19.3472700Z Package file_picker:windows references file_picker:windows as the default plugin, but it does not provide an inline implementation.
+2026-07-05T14:47:19.3473740Z Ask the maintainers of file_picker to either avoid referencing a default implementation via `platforms: windows: default_package: file_picker` or add an inline implementation to file_picker via `platforms: windows:` `pluginClass` or `dartPluginClass`.
+2026-07-05T14:47:19.3474480Z 
+2026-07-05T14:47:25.1933540Z Analyzing hdr2sdr...                                            
+2026-07-05T14:47:25.1939610Z No issues found! (ran in 5.5s)

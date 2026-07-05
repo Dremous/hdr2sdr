@@ -57,7 +57,7 @@ jobs:
           HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
         run: brew install ffmpeg cmake pkgconf
 
-      # Windows — vcpkg（GitHub Actions 预装）
+      # Windows — vcpkg（克隆最新版安装 FFmpeg）
       - name: Setup vcpkg (Windows)
         if: runner.os == 'Windows'
         id: vcpkg
@@ -65,8 +65,6 @@ jobs:
         with:
           vcpkgJsonGlob: native/vcpkg.json
           runVcpkgInstall: true
-          doNotCache: true
-          doNotUpdateVcpkg: true
 
       - name: Set PKG_CONFIG_PATH for vcpkg (Windows)
         if: runner.os == 'Windows'
@@ -105,7 +103,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Android NDK
-        run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
+        run: |
+          NDK_DIR=$(ls -d "$ANDROID_HOME/ndk/"*/ 2>/dev/null | tail -1 | sed 's|/$||')
+          if [ -z "$NDK_DIR" ]; then
+            echo "错误: 未找到 Android NDK, 请先安装"
+            exit 1
+          fi
+          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
+          echo "使用 NDK: $NDK_DIR"
       - name: Build native lib
         run: |
           chmod +x native/build_android.sh
@@ -130,7 +135,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: brew install cmake pkgconf
+        run: brew install cmake pkgconf ffmpeg
       - name: Build native lib
         run: |
           chmod +x native/build_ios.sh
