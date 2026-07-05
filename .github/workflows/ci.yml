@@ -96,12 +96,11 @@ jobs:
             build/bin/**
 
   # ──────────────────────────────────────────────
-  # Android APK 构建（仅 workflow_dispatch）
+  # Android APK 构建
   # ──────────────────────────────────────────────
   android-build:
     name: Build Android APK
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
       - name: Install Android NDK
@@ -122,12 +121,11 @@ jobs:
             build/app/outputs/flutter-apk/*.apk
 
   # ──────────────────────────────────────────────
-  # iOS IPA 构建（仅 workflow_dispatch）
+  # iOS IPA 构建
   # ──────────────────────────────────────────────
   ios-build:
     name: Build iOS IPA
     runs-on: macos-latest
-    if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
