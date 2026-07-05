@@ -65,7 +65,8 @@ jobs:
         with:
           vcpkgJsonGlob: native/vcpkg.json
           runVcpkgInstall: true
-          doNotCache: false
+          doNotCache: true
+          doNotUpdateVcpkg: true
 
       - name: Set PKG_CONFIG_PATH for vcpkg (Windows)
         if: runner.os == 'Windows'
