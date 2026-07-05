@@ -99,19 +99,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Android NDK
-        run: |
-          NDK_DIR=$(ls -d "$ANDROID_HOME/ndk/"*/ 2>/dev/null | tail -1 | sed 's|/$||')
-          if [ -z "$NDK_DIR" ]; then
-            echo "错误: 未找到 Android NDK, 请先安装"
-            exit 1
-          fi
-          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
-          echo "使用 NDK: $NDK_DIR"
-      - name: Build native lib
-        run: |
-          chmod +x native/build_android.sh
-          native/build_android.sh
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -120,8 +107,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: hdr2sdr-apk
-          path: |
-            build/app/outputs/flutter-apk/*.apk
+          path: build/app/outputs/flutter-apk/*.apk
 
   # ──────────────────────────────────────────────
   # iOS IPA 构建
@@ -131,12 +117,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: brew install cmake pkgconf ffmpeg
-      - name: Build native lib
-        run: |
-          chmod +x native/build_ios.sh
-          native/build_ios.sh
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
