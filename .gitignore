@@ -1,0 +1,20 @@
+# Flutter
+.dart_tool/
+.packages
+build/
+*.iml
+.idea/
+.vscode/
+*.lock
+
+# Native
+native/build/
+*.o
+*.obj
+*.dll
+*.dylib
+*.so
+
+# Misc
+.DS_Store
+Thumbs.db

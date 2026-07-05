@@ -19,7 +19,7 @@ class NativeBridge {
   late final int Function(
     Pointer<Void>,
     Pointer<Uint8>,
-    Int64,
+    int,
     Pointer<Int32>,
     Pointer<Int32>,
   ) _getFrame;

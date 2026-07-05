@@ -1,5 +1,3 @@
-import 'video_file.dart';
-
 /// 视频信息数据模型
 class VideoInfo {
   final int width;
