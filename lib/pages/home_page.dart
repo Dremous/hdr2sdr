@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+/// 主页组件 - 应用的主界面
+///
+/// 提供拖放区域，供用户将视频文件拖入以进行 HDR↔SDR 转换。
+/// 当前为占位版本，后续将集成拖放和文件选择功能。
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 

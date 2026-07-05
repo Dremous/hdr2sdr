@@ -1,0 +1,119 @@
+﻿## Commits
+99557c5 feat: 鍒濆 Flutter 椤圭洰鑴氭墜鏋?
+
+## Files changed
+ lib/app.dart             | 20 ++++++++++++++++++++
+ lib/main.dart            |  7 +++++++
+ lib/pages/home_page.dart | 28 ++++++++++++++++++++++++++++
+ pubspec.yaml             | 25 +++++++++++++++++++++++++
+ 4 files changed, 80 insertions(+)
+
+## Diff
+diff --git a/lib/app.dart b/lib/app.dart
+new file mode 100644
+index 0000000..5e1ad96
+--- /dev/null
++++ b/lib/app.dart
+@@ -0,0 +1,20 @@
++import 'package:flutter/material.dart';
++import 'pages/home_page.dart';
++
++class Hdr2SdrApp extends StatelessWidget {
++  const Hdr2SdrApp({super.key});
++
++  @override
++  Widget build(BuildContext context) {
++    return MaterialApp(
++      title: 'HDR鈫擲DR Converter',
++      debugShowCheckedModeBanner: false,
++      theme: ThemeData(
++        colorSchemeSeed: Colors.blue,
++        useMaterial3: true,
++        brightness: Brightness.dark,
++      ),
++      home: const HomePage(),
++    );
++  }
++}
+\ No newline at end of file
+diff --git a/lib/main.dart b/lib/main.dart
+new file mode 100644
+index 0000000..f9bf6b2
+--- /dev/null
++++ b/lib/main.dart
+@@ -0,0 +1,7 @@
++import 'package:flutter/material.dart';
++import 'app.dart';
++
++void main() {
++  WidgetsFlutterBinding.ensureInitialized();
++  runApp(const Hdr2SdrApp());
++}
+\ No newline at end of file
+diff --git a/lib/pages/home_page.dart b/lib/pages/home_page.dart
+new file mode 100644
+index 0000000..05c85f8
+--- /dev/null
++++ b/lib/pages/home_page.dart
+@@ -0,0 +1,28 @@
++import 'package:flutter/material.dart';
++
++class HomePage extends StatelessWidget {
++  const HomePage({super.key});
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      appBar: AppBar(
++        title: const Text('HDR鈫擲DR Converter'),
++        centerTitle: true,
++      ),
++      body: const Center(
++        child: Column(
++          mainAxisAlignment: MainAxisAlignment.center,
++          children: [
++            Icon(Icons.video_library, size: 80, color: Colors.grey),
++            SizedBox(height: 16),
++            Text(
++              '鎷栨斁瑙嗛鏂囦欢鍒版澶勫紑濮嬭浆鎹?,
++              style: TextStyle(fontSize: 18, color: Colors.grey),
++            ),
++          ],
++        ),
++      ),
++    );
++  }
++}
+\ No newline at end of file
+diff --git a/pubspec.yaml b/pubspec.yaml
+new file mode 100644
+index 0000000..acf9d4d
+--- /dev/null
++++ b/pubspec.yaml
+@@ -0,0 +1,25 @@
++name: hdr2sdr
++description: HDR鈫擲DR 瑙嗛杞崲宸ュ叿
++publish_to: 'none'
++version: 1.0.0+1
++
++environment:
++  sdk: '>=3.0.0 <4.0.0'
++
++dependencies:
++  flutter:
++    sdk: flutter
++  ffi: ^2.1.0
++  path_provider: ^2.1.0
++  file_picker: ^6.1.0
++  provider: ^6.1.0
++  desktop_drop: ^0.4.0
++  intl: ^0.19.0
++
++dev_dependencies:
++  flutter_test:
++    sdk: flutter
++  flutter_lints: ^3.0.0
++
++flutter:
++  uses-material-design: true
+\ No newline at end of file
