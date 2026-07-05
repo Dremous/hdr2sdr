@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import '../models/convert_params.dart';
 
@@ -38,11 +39,16 @@ class BackgroundService {
     required ConvertParams params,
   }) async {
     initialize();
-    await _channel.invokeMethod('startConversion', {
-      'filePath': filePath,
-      'outputPath': outputPath,
-      'params': params.toJson(),
-    });
+    if (Platform.isIOS) {
+      // iOS 后台仅触发 BGTaskScheduler 注册，无需传递参数
+      await _channel.invokeMethod('startConversion');
+    } else {
+      await _channel.invokeMethod('startConversion', {
+        'filePath': filePath,
+        'outputPath': outputPath,
+        'params': params.toJson(),
+      });
+    }
   }
 
   static Future<void> cancelConversion() async {
