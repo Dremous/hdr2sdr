@@ -7,7 +7,24 @@ import '../widgets/slider_row.dart';
 import '../widgets/preset_selector.dart';
 
 class ParamPanel extends StatelessWidget {
-  const ParamPanel({super.key});
+  final bool isMobile;
+
+  const ParamPanel({super.key, this.isMobile = false});
+
+  String _encoderLabel(EncoderType type) {
+    switch (type) {
+      case EncoderType.h264:
+        return 'H.264';
+      case EncoderType.h265:
+        return 'H.265';
+      case EncoderType.av1:
+        return 'AV1';
+      case EncoderType.h264Hardware:
+        return 'H.264 (硬件)';
+      case EncoderType.h265Hardware:
+        return 'H.265 (硬件)';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +36,6 @@ class ParamPanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 转换方向
               Row(
                 children: [
                   const Text('转换方向'),
@@ -42,7 +58,6 @@ class ParamPanel extends StatelessWidget {
                 ],
               ),
               const Divider(),
-              // 自动模式
               SwitchListTile(
                 title: const Text('自动模式'),
                 subtitle: const Text('自动检测 HDR 类型并设置最佳参数'),
@@ -52,7 +67,8 @@ class ParamPanel extends StatelessWidget {
                 },
               ),
               const Divider(),
-              const Text('预设风格', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('预设风格',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               PresetSelector(
                 current: params.presetStyle,
@@ -118,19 +134,38 @@ class ParamPanel extends StatelessWidget {
                 const Text('编码设置',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                SegmentedButton<EncoderType>(
-                  segments: const [
-                    ButtonSegment(
-                        value: EncoderType.h264, label: Text('H.264')),
-                    ButtonSegment(
-                        value: EncoderType.h265, label: Text('H.265')),
-                    ButtonSegment(value: EncoderType.av1, label: Text('AV1')),
-                  ],
-                  selected: {params.encoder},
-                  onSelectionChanged: (set) {
-                    provider.updateParams(params.copyWith(encoder: set.first));
-                  },
-                ),
+                if (isMobile)
+                  DropdownButton<EncoderType>(
+                    value: params.encoder,
+                    isExpanded: true,
+                    items: EncoderType.values.map((e) {
+                      return DropdownMenuItem(
+                        value: e,
+                        child: Text(_encoderLabel(e)),
+                      );
+                    }).toList(),
+                    onChanged: (v) {
+                      if (v != null) {
+                        provider.updateParams(params.copyWith(encoder: v));
+                      }
+                    },
+                  )
+                else
+                  SegmentedButton<EncoderType>(
+                    segments: const [
+                      ButtonSegment(
+                          value: EncoderType.h264, label: Text('H.264')),
+                      ButtonSegment(
+                          value: EncoderType.h265, label: Text('H.265')),
+                      ButtonSegment(
+                          value: EncoderType.av1, label: Text('AV1')),
+                    ],
+                    selected: {params.encoder},
+                    onSelectionChanged: (set) {
+                      provider.updateParams(
+                          params.copyWith(encoder: set.first));
+                    },
+                  ),
                 SliderRow(
                   label: 'CRF',
                   value: params.crf.toDouble(),
