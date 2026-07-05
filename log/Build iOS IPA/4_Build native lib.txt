@@ -1,0 +1,44 @@
+﻿2026-07-05T15:06:00.3971400Z ##[group]Run chmod +x native/build_ios.sh
+2026-07-05T15:06:00.3971810Z [36;1mchmod +x native/build_ios.sh[0m
+2026-07-05T15:06:00.3972150Z [36;1mnative/build_ios.sh[0m
+2026-07-05T15:06:00.4015410Z shell: /bin/bash -e {0}
+2026-07-05T15:06:00.4016440Z ##[endgroup]
+2026-07-05T15:06:00.4662820Z 安装 FFmpeg（仅获取头文件，链接用 CocoaPod）...
+2026-07-05T15:06:01.7403290Z 编译 iOS arm64 静态库...
+2026-07-05T15:06:04.7487110Z -- The CXX compiler identification is AppleClang 21.0.0.21000101
+2026-07-05T15:06:05.4406300Z -- Detecting CXX compiler ABI info
+2026-07-05T15:06:06.4690690Z -- Detecting CXX compiler ABI info - done
+2026-07-05T15:06:06.4919610Z -- Check for working CXX compiler: /usr/bin/c++ - skipped
+2026-07-05T15:06:06.4927340Z -- Detecting CXX compile features
+2026-07-05T15:06:06.4937260Z -- Detecting CXX compile features - done
+2026-07-05T15:06:06.5861970Z -- Found PkgConfig: /opt/homebrew/bin/pkg-config (found version "2.5.1")
+2026-07-05T15:06:06.5881060Z -- Checking for module 'libavcodec'
+2026-07-05T15:06:06.6292540Z --   Found libavcodec, version 62.28.102
+2026-07-05T15:06:06.6974350Z -- Checking for module 'libavformat'
+2026-07-05T15:06:06.7131910Z --   Found libavformat, version 62.12.102
+2026-07-05T15:06:06.7732610Z -- Checking for module 'libavutil'
+2026-07-05T15:06:06.7880800Z --   Found libavutil, version 60.26.102
+2026-07-05T15:06:06.8720290Z -- Checking for module 'libswresample'
+2026-07-05T15:06:06.8924850Z --   Found libswresample, version 6.3.102
+2026-07-05T15:06:06.9374640Z -- Checking for module 'libswscale'
+2026-07-05T15:06:06.9516280Z --   Found libswscale, version 9.5.102
+2026-07-05T15:06:07.0080760Z -- Configuring done (5.2s)
+2026-07-05T15:06:07.0286980Z CMake Warning:
+2026-07-05T15:06:07.0287350Z -- Generating done (0.0s)
+2026-07-05T15:06:07.0388730Z   Manually-specified variables were not used by the project:
+2026-07-05T15:06:07.0389330Z -- Build files have been written to: /Users/runner/work/hdr2sdr/hdr2sdr/build/ios
+2026-07-05T15:06:07.0490470Z 
+2026-07-05T15:06:07.0591510Z     CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED
+2026-07-05T15:06:07.0698480Z 
+2026-07-05T15:06:07.0798970Z 
+2026-07-05T15:06:07.1505260Z [ 11%] Building CXX object CMakeFiles/hdr_converter.dir/src/decoder.cpp.o
+2026-07-05T15:06:09.0816900Z [ 22%] Building CXX object CMakeFiles/hdr_converter.dir/src/hdr_analyzer.cpp.o
+2026-07-05T15:06:09.4882200Z In file included from /Users/runner/work/hdr2sdr/hdr2sdr/native/src/hdr_analyzer.cpp:1:
+2026-07-05T15:06:09.4883500Z /Users/runner/work/hdr2sdr/hdr2sdr/native/src/hdr_analyzer.h:9:10: fatal error: 'libavutil/content_light_metadata.h' file not found
+2026-07-05T15:06:09.4884420Z     9 | #include <libavutil/content_light_metadata.h>
+2026-07-05T15:06:09.4884930Z       |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2026-07-05T15:06:09.4925330Z 1 error generated.
+2026-07-05T15:06:09.4955860Z make[2]: *** [CMakeFiles/hdr_converter.dir/src/hdr_analyzer.cpp.o] Error 1
+2026-07-05T15:06:09.4962740Z make[1]: *** [CMakeFiles/hdr_converter.dir/all] Error 2
+2026-07-05T15:06:09.4967810Z make: *** [all] Error 2
+2026-07-05T15:06:09.5000240Z ##[error]Process completed with exit code 2.

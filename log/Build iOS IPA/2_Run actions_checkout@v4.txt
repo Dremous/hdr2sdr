@@ -1,0 +1,74 @@
+﻿2026-07-05T15:05:49.3890000Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-05T15:05:49.3897160Z ##[group]Run actions/checkout@v4
+2026-07-05T15:05:49.3897650Z with:
+2026-07-05T15:05:49.3897980Z   repository: Dremous/hdr2sdr
+2026-07-05T15:05:49.3900920Z   token: ***
+2026-07-05T15:05:49.3901240Z   ssh-strict: true
+2026-07-05T15:05:49.3901540Z   ssh-user: git
+2026-07-05T15:05:49.3901860Z   persist-credentials: true
+2026-07-05T15:05:49.3902200Z   clean: true
+2026-07-05T15:05:49.3902530Z   sparse-checkout-cone-mode: true
+2026-07-05T15:05:49.3903070Z   fetch-depth: 1
+2026-07-05T15:05:49.3903380Z   fetch-tags: false
+2026-07-05T15:05:49.3903690Z   show-progress: true
+2026-07-05T15:05:49.3904020Z   lfs: false
+2026-07-05T15:05:49.3904310Z   submodules: false
+2026-07-05T15:05:49.3904670Z   set-safe-directory: true
+2026-07-05T15:05:49.3905340Z ##[endgroup]
+2026-07-05T15:05:50.0444200Z Syncing repository: Dremous/hdr2sdr
+2026-07-05T15:05:50.0445570Z ##[group]Getting Git version info
+2026-07-05T15:05:50.0446160Z Working directory is '/Users/runner/work/hdr2sdr/hdr2sdr'
+2026-07-05T15:05:50.0446940Z [command]/opt/homebrew/bin/git version
+2026-07-05T15:05:50.0499940Z git version 2.55.0
+2026-07-05T15:05:50.0511000Z ##[endgroup]
+2026-07-05T15:05:50.0519020Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/1a6dac98-8219-4af8-a4bd-d2ce53e1ae6b/.gitconfig'
+2026-07-05T15:05:50.0526040Z Temporarily overriding HOME='/Users/runner/work/_temp/1a6dac98-8219-4af8-a4bd-d2ce53e1ae6b' before making global git config changes
+2026-07-05T15:05:50.0527970Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-05T15:05:50.0529700Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/hdr2sdr/hdr2sdr
+2026-07-05T15:05:50.0665250Z Deleting the contents of '/Users/runner/work/hdr2sdr/hdr2sdr'
+2026-07-05T15:05:50.0670770Z ##[group]Initializing the repository
+2026-07-05T15:05:50.0676040Z [command]/opt/homebrew/bin/git init /Users/runner/work/hdr2sdr/hdr2sdr
+2026-07-05T15:05:50.1326230Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-07-05T15:05:50.1366090Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-07-05T15:05:50.1368750Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-07-05T15:05:50.1370510Z hint: call:
+2026-07-05T15:05:50.1371950Z hint:
+2026-07-05T15:05:50.1375080Z hint: 	git config --global init.defaultBranch <name>
+2026-07-05T15:05:50.1375780Z hint:
+2026-07-05T15:05:50.1376370Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-07-05T15:05:50.1377100Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-07-05T15:05:50.1377740Z hint:
+2026-07-05T15:05:50.1378820Z hint: 	git branch -m <name>
+2026-07-05T15:05:50.1379260Z hint:
+2026-07-05T15:05:50.1379800Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-07-05T15:05:50.1380890Z Initialized empty Git repository in /Users/runner/work/hdr2sdr/hdr2sdr/.git/
+2026-07-05T15:05:50.1383070Z [command]/opt/homebrew/bin/git remote add origin https://github.com/Dremous/hdr2sdr
+2026-07-05T15:05:50.1574270Z ##[endgroup]
+2026-07-05T15:05:50.1575300Z ##[group]Disabling automatic garbage collection
+2026-07-05T15:05:50.1576190Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2026-07-05T15:05:50.1967820Z ##[endgroup]
+2026-07-05T15:05:50.1979280Z ##[group]Setting up auth
+2026-07-05T15:05:50.1980640Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-07-05T15:05:50.1983280Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-07-05T15:05:50.3592940Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-05T15:05:50.3654290Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-07-05T15:05:50.4474860Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-05T15:05:50.4541420Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-07-05T15:05:50.6366480Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-07-05T15:05:50.6383150Z ##[endgroup]
+2026-07-05T15:05:50.6384290Z ##[group]Fetching the repository
+2026-07-05T15:05:50.6386210Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f750734cce19b5b1ed87d0df5ac23a2b01e99952:refs/remotes/origin/master
+2026-07-05T15:05:51.1268000Z From https://github.com/Dremous/hdr2sdr
+2026-07-05T15:05:51.1269680Z  * [new ref]         f750734cce19b5b1ed87d0df5ac23a2b01e99952 -> origin/master
+2026-07-05T15:05:51.1273120Z ##[endgroup]
+2026-07-05T15:05:51.1274340Z ##[group]Determining the checkout info
+2026-07-05T15:05:51.1275570Z ##[endgroup]
+2026-07-05T15:05:51.1282910Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2026-07-05T15:05:51.1395060Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2026-07-05T15:05:51.1485280Z ##[group]Checking out the ref
+2026-07-05T15:05:51.1487920Z [command]/opt/homebrew/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-07-05T15:05:51.2087780Z Reset branch 'master'
+2026-07-05T15:05:51.2191470Z branch 'master' set up to track 'origin/master'.
+2026-07-05T15:05:51.2505700Z ##[endgroup]
+2026-07-05T15:05:51.2822080Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2026-07-05T15:05:51.2925990Z f750734cce19b5b1ed87d0df5ac23a2b01e99952

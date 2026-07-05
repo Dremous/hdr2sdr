@@ -57,20 +57,17 @@ jobs:
           HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
         run: brew install ffmpeg cmake pkgconf
 
-      # Windows — vcpkg（克隆最新版安装 FFmpeg）
-      - name: Setup vcpkg (Windows)
-        if: runner.os == 'Windows'
-        id: vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgJsonGlob: native/vcpkg.json
-          runVcpkgInstall: true
-
-      - name: Set PKG_CONFIG_PATH for vcpkg (Windows)
+      # Windows — 使用系统安装的 vcpkg（GitHub Actions 预装在 C:\vcpkg）
+      - name: Install FFmpeg via vcpkg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          # 使用系统 vcpkg 路径（lukka/run-vcpkg 默认复用 C:\vcpkg）
+          $vcpkg = "C:\vcpkg\vcpkg.exe"
+          if (-not (Test-Path $vcpkg)) {
+            Write-Error "vcpkg not found at $vcpkg"
+            exit 1
+          }
+          & $vcpkg install ffmpeg:x64-windows --recurse --clean-after-build
           $pkgCfgDir = "C:\vcpkg\installed\x64-windows\lib\pkgconfig"
           "PKG_CONFIG_PATH=$pkgCfgDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 

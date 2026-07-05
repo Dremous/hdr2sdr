@@ -1,0 +1,88 @@
+﻿2026-07-05T15:05:49.1727940Z ##[group]Run brew install ffmpeg cmake pkgconf
+2026-07-05T15:05:49.1729310Z [36;1mbrew install ffmpeg cmake pkgconf[0m
+2026-07-05T15:05:49.1768960Z shell: /bin/bash -e {0}
+2026-07-05T15:05:49.1769780Z env:
+2026-07-05T15:05:49.1770480Z   HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
+2026-07-05T15:05:49.1771340Z ##[endgroup]
+2026-07-05T15:05:51.5807180Z [33mWarning:[0m cmake 4.3.4 is already installed and up-to-date.
+2026-07-05T15:05:51.5832690Z To reinstall 4.3.4, run:
+2026-07-05T15:05:51.5852380Z   brew reinstall cmake
+2026-07-05T15:05:51.6008770Z [33mWarning:[0m pkgconf 2.5.1 is already installed and up-to-date.
+2026-07-05T15:05:51.6115550Z To reinstall 2.5.1, run:
+2026-07-05T15:05:51.6223850Z   brew reinstall pkgconf
+2026-07-05T15:05:52.4945230Z [34m==>[0m [1mWould install 1 formula:[0m
+2026-07-05T15:05:52.4964670Z ffmpeg
+2026-07-05T15:05:52.5073090Z [34m==>[0m [1mDownloading https://ghcr.io/v2/homebrew/core/ffmpeg/manifests/8.1.2[0m
+2026-07-05T15:05:53.1407930Z [34m==>[0m [1mWould install 10 dependencies for ffmpeg:[0m
+2026-07-05T15:05:53.1409140Z dav1d
+2026-07-05T15:05:53.1439620Z lame
+2026-07-05T15:05:53.1471670Z libvmaf
+2026-07-05T15:05:53.1472130Z libvpx
+2026-07-05T15:05:53.1472430Z opus
+2026-07-05T15:05:53.1472810Z sdl3
+2026-07-05T15:05:53.1473120Z sdl2-compat
+2026-07-05T15:05:53.1473460Z svt-av1
+2026-07-05T15:05:53.1473680Z x264
+2026-07-05T15:05:53.1473980Z x265
+2026-07-05T15:05:53.1474660Z [32m==>[0m [1mFetching downloads for: [32mffmpeg[39m[0m
+2026-07-05T15:05:53.5262320Z ✔︎ Bottle Manifest dav1d (1.5.3)
+2026-07-05T15:05:53.5363530Z ✔︎ Bottle Manifest libvmaf (3.2.0)
+2026-07-05T15:05:53.6658320Z ✔︎ Bottle dav1d (1.5.3)
+2026-07-05T15:05:53.6764110Z ✔︎ Bottle Manifest lame (3.100)
+2026-07-05T15:05:53.7360890Z ✔︎ Bottle lame (3.100)
+2026-07-05T15:05:53.7368670Z ✔︎ Bottle libvmaf (3.2.0)
+2026-07-05T15:05:53.9344070Z ✔︎ Bottle Manifest libvpx (1.16.0)
+2026-07-05T15:05:53.9956930Z ✔︎ Bottle Manifest opus (1.6.1)
+2026-07-05T15:05:54.0470380Z ✔︎ Bottle libvpx (1.16.0)
+2026-07-05T15:05:54.0472620Z ✔︎ Bottle opus (1.6.1)
+2026-07-05T15:05:54.1062560Z ✔︎ Bottle Manifest sdl3 (3.4.10)
+2026-07-05T15:05:54.1632940Z ✔︎ Bottle sdl3 (3.4.10)
+2026-07-05T15:05:54.2545810Z ✔︎ Bottle Manifest sdl2-compat (2.32.70)
+2026-07-05T15:05:54.3622150Z ✔︎ Bottle Manifest svt-av1 (4.1.0)
+2026-07-05T15:05:54.4796680Z ✔︎ Bottle sdl2-compat (2.32.70)
+2026-07-05T15:05:54.4799890Z ✔︎ Bottle Manifest x264 (r3222)
+2026-07-05T15:05:54.5396210Z ✔︎ Bottle svt-av1 (4.1.0)
+2026-07-05T15:05:54.5396760Z ✔︎ Bottle Manifest x265 (4.2)
+2026-07-05T15:05:54.7427730Z ✔︎ Bottle x264 (r3222)
+2026-07-05T15:05:55.0222570Z ✔︎ Bottle x265 (4.2)
+2026-07-05T15:05:55.5924130Z ✔︎ Bottle ffmpeg (8.1.2)
+2026-07-05T15:05:55.7790430Z [32m==>[0m [1mInstalling dependencies for ffmpeg: [32mdav1d[39m, [32mlame[39m, [32mlibvmaf[39m, [32mlibvpx[39m, [32mopus[39m, [32msdl3[39m, [32msdl2-compat[39m, [32msvt-av1[39m, [32mx264[39m and [32mx265[39m[0m
+2026-07-05T15:05:55.7820110Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mdav1d[39m[0m
+2026-07-05T15:05:55.7824380Z [34m==>[0m [1mPouring dav1d--1.5.3.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:55.9714250Z 🍺  /opt/homebrew/Cellar/dav1d/1.5.3: 16 files, 938.8KB
+2026-07-05T15:05:55.9721170Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mlame[39m[0m
+2026-07-05T15:05:55.9741890Z [34m==>[0m [1mPouring lame--3.100.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.0499050Z 🍺  /opt/homebrew/Cellar/lame/3.100: 28 files, 2.3MB
+2026-07-05T15:05:56.0503600Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mlibvmaf[39m[0m
+2026-07-05T15:05:56.0768710Z [34m==>[0m [1mPouring libvmaf--3.2.0.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.1689370Z 🍺  /opt/homebrew/Cellar/libvmaf/3.2.0: 243 files, 8.2MB
+2026-07-05T15:05:56.1694930Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mlibvpx[39m[0m
+2026-07-05T15:05:56.1714660Z [34m==>[0m [1mPouring libvpx--1.16.0.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.2299240Z 🍺  /opt/homebrew/Cellar/libvpx/1.16.0: 22 files, 4.4MB
+2026-07-05T15:05:56.2301120Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mopus[39m[0m
+2026-07-05T15:05:56.2321340Z [34m==>[0m [1mPouring opus--1.6.1.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.2885180Z 🍺  /opt/homebrew/Cellar/opus/1.6.1: 16 files, 1.1MB
+2026-07-05T15:05:56.3037230Z [32m==>[0m [1mInstalling ffmpeg dependency: [32msdl3[39m[0m
+2026-07-05T15:05:56.3090780Z [34m==>[0m [1mPouring sdl3--3.4.10.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.3695710Z 🍺  /opt/homebrew/Cellar/sdl3/3.4.10: 103 files, 6.3MB
+2026-07-05T15:05:56.3698790Z [32m==>[0m [1mInstalling ffmpeg dependency: [32msdl2-compat[39m[0m
+2026-07-05T15:05:56.3843340Z [34m==>[0m [1mPouring sdl2-compat--2.32.70.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.4564410Z 🍺  /opt/homebrew/Cellar/sdl2-compat/2.32.70: 117 files, 3.3MB
+2026-07-05T15:05:56.4568120Z [32m==>[0m [1mInstalling ffmpeg dependency: [32msvt-av1[39m[0m
+2026-07-05T15:05:56.4590300Z [34m==>[0m [1mPouring svt-av1--4.1.0.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.5158950Z 🍺  /opt/homebrew/Cellar/svt-av1/4.1.0: 23 files, 3.1MB
+2026-07-05T15:05:56.5161580Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mx264[39m[0m
+2026-07-05T15:05:56.5178160Z [34m==>[0m [1mPouring x264--r3222.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.5659430Z 🍺  /opt/homebrew/Cellar/x264/r3222: 12 files, 4.4MB
+2026-07-05T15:05:56.5661410Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mx265[39m[0m
+2026-07-05T15:05:56.5689210Z [34m==>[0m [1mPouring x265--4.2.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:56.6563730Z 🍺  /opt/homebrew/Cellar/x265/4.2: 12 files, 17.0MB
+2026-07-05T15:05:56.6572810Z [32m==>[0m [1mInstalling [32mffmpeg[39m[0m
+2026-07-05T15:05:56.6575270Z [34m==>[0m [1mPouring ffmpeg--8.1.2.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:58.0235800Z [34m==>[0m [1mCaveats[0m
+2026-07-05T15:05:58.0236830Z ffmpeg-full includes additional tools and libraries that are not included in the regular ffmpeg formula.
+2026-07-05T15:05:58.0237780Z [34m==>[0m [1mSummary[0m
+2026-07-05T15:05:58.0294720Z 🍺  /opt/homebrew/Cellar/ffmpeg/8.1.2: 287 files, 53.5MB
+2026-07-05T15:05:58.0300960Z [32m==>[0m [1mCaveats[0m
+2026-07-05T15:05:58.0301890Z [34m==>[0m [1mffmpeg[0m
+2026-07-05T15:05:58.0302540Z ffmpeg-full includes additional tools and libraries that are not included in the regular ffmpeg formula.

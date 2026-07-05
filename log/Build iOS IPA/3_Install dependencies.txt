@@ -1,0 +1,105 @@
+﻿2026-07-05T15:05:51.3180060Z ##[group]Run brew install cmake pkgconf ffmpeg
+2026-07-05T15:05:51.3181350Z [36;1mbrew install cmake pkgconf ffmpeg[0m
+2026-07-05T15:05:51.3239130Z shell: /bin/bash -e {0}
+2026-07-05T15:05:51.3239960Z ##[endgroup]
+2026-07-05T15:05:54.5217310Z [33mWarning:[0m cmake 4.3.4 is already installed and up-to-date.
+2026-07-05T15:05:54.5222220Z To reinstall 4.3.4, run:
+2026-07-05T15:05:54.5222650Z   brew reinstall cmake
+2026-07-05T15:05:54.5380180Z [33mWarning:[0m pkgconf 2.5.1 is already installed and up-to-date.
+2026-07-05T15:05:54.5398020Z To reinstall 2.5.1, run:
+2026-07-05T15:05:54.5402510Z   brew reinstall pkgconf
+2026-07-05T15:05:54.7873180Z ##[warning]The following taps are not trusted:
+  aws/tap
+
+Homebrew is currently ignoring formulae, casks and commands from these taps because tap trust is required.
+Untap them with:
+  brew untap aws/tap
+Trust specific formulae, casks and commands with:
+  brew trust --formula <user>/<tap>/<formula>
+  brew trust --cask <user>/<tap>/<cask>
+  brew trust --command <user>/<tap>/<command>
+Whole-tap trust is broader and includes all current and future formulae,
+casks and commands from the listed taps. Trust whole taps with:
+  brew trust aws/tap
+To disable trust checks:
+  export HOMEBREW_NO_REQUIRE_TAP_TRUST=1
+This is not recommended and will be removed in a later release.
+For more information, see:
+  https://docs.brew.sh/Tap-Trust
+
+2026-07-05T15:05:55.3431800Z [34m==>[0m [1mWould install 1 formula:[0m
+2026-07-05T15:05:55.3432850Z ffmpeg
+2026-07-05T15:05:55.3498670Z [34m==>[0m [1mDownloading https://ghcr.io/v2/homebrew/core/ffmpeg/manifests/8.1.2[0m
+2026-07-05T15:05:55.8349170Z [34m==>[0m [1mWould install 10 dependencies for ffmpeg:[0m
+2026-07-05T15:05:55.8349610Z dav1d
+2026-07-05T15:05:55.8349850Z lame
+2026-07-05T15:05:55.8350250Z libvmaf
+2026-07-05T15:05:55.8350450Z libvpx
+2026-07-05T15:05:55.8350790Z opus
+2026-07-05T15:05:55.8350940Z sdl3
+2026-07-05T15:05:55.8351200Z sdl2-compat
+2026-07-05T15:05:55.8351410Z svt-av1
+2026-07-05T15:05:55.8351590Z x264
+2026-07-05T15:05:55.8351840Z x265
+2026-07-05T15:05:55.8352530Z [32m==>[0m [1mFetching downloads for: [32mffmpeg[39m[0m
+2026-07-05T15:05:56.1471030Z ✔︎ Bottle Manifest dav1d (1.5.3)
+2026-07-05T15:05:56.2049400Z ✔︎ Bottle dav1d (1.5.3)
+2026-07-05T15:05:56.2722010Z ✔︎ Bottle Manifest lame (3.100)
+2026-07-05T15:05:56.2736560Z ✔︎ Bottle lame (3.100)
+2026-07-05T15:05:56.2759950Z ✔︎ Bottle Manifest libvmaf (3.2.0)
+2026-07-05T15:05:56.4183470Z ✔︎ Bottle libvmaf (3.2.0)
+2026-07-05T15:05:56.4287090Z ✔︎ Bottle Manifest libvpx (1.16.0)
+2026-07-05T15:05:56.4837100Z ✔︎ Bottle libvpx (1.16.0)
+2026-07-05T15:05:56.4931830Z ✔︎ Bottle Manifest opus (1.6.1)
+2026-07-05T15:05:56.5941470Z ✔︎ Bottle Manifest sdl3 (3.4.10)
+2026-07-05T15:05:56.6440810Z ✔︎ Bottle opus (1.6.1)
+2026-07-05T15:05:56.6956250Z ✔︎ Bottle Manifest sdl2-compat (2.32.70)
+2026-07-05T15:05:56.7482990Z ✔︎ Bottle sdl3 (3.4.10)
+2026-07-05T15:05:56.7493820Z ✔︎ Bottle sdl2-compat (2.32.70)
+2026-07-05T15:05:56.8215920Z ✔︎ Bottle Manifest svt-av1 (4.1.0)
+2026-07-05T15:05:56.8737670Z ✔︎ Bottle svt-av1 (4.1.0)
+2026-07-05T15:05:56.9455130Z ✔︎ Bottle Manifest x264 (r3222)
+2026-07-05T15:05:57.0211860Z ✔︎ Bottle x264 (r3222)
+2026-07-05T15:05:57.0212990Z ✔︎ Bottle Manifest x265 (4.2)
+2026-07-05T15:05:57.2719160Z ✔︎ Bottle x265 (4.2)
+2026-07-05T15:05:57.4456790Z ✔︎ Bottle ffmpeg (8.1.2)
+2026-07-05T15:05:57.5666000Z [32m==>[0m [1mInstalling dependencies for ffmpeg: [32mdav1d[39m, [32mlame[39m, [32mlibvmaf[39m, [32mlibvpx[39m, [32mopus[39m, [32msdl3[39m, [32msdl2-compat[39m, [32msvt-av1[39m, [32mx264[39m and [32mx265[39m[0m
+2026-07-05T15:05:57.5676500Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mdav1d[39m[0m
+2026-07-05T15:05:57.5812010Z [34m==>[0m [1mPouring dav1d--1.5.3.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:57.7561860Z 🍺  /opt/homebrew/Cellar/dav1d/1.5.3: 16 files, 938.8KB
+2026-07-05T15:05:57.7566410Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mlame[39m[0m
+2026-07-05T15:05:57.7612660Z [34m==>[0m [1mPouring lame--3.100.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:57.8662460Z 🍺  /opt/homebrew/Cellar/lame/3.100: 28 files, 2.3MB
+2026-07-05T15:05:57.8681950Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mlibvmaf[39m[0m
+2026-07-05T15:05:57.8823930Z [34m==>[0m [1mPouring libvmaf--3.2.0.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:57.9836530Z 🍺  /opt/homebrew/Cellar/libvmaf/3.2.0: 243 files, 8.2MB
+2026-07-05T15:05:57.9845340Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mlibvpx[39m[0m
+2026-07-05T15:05:57.9866350Z [34m==>[0m [1mPouring libvpx--1.16.0.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:58.0455800Z 🍺  /opt/homebrew/Cellar/libvpx/1.16.0: 22 files, 4.4MB
+2026-07-05T15:05:58.0458120Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mopus[39m[0m
+2026-07-05T15:05:58.0480380Z [34m==>[0m [1mPouring opus--1.6.1.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:58.1074310Z 🍺  /opt/homebrew/Cellar/opus/1.6.1: 16 files, 1.1MB
+2026-07-05T15:05:58.1080260Z [32m==>[0m [1mInstalling ffmpeg dependency: [32msdl3[39m[0m
+2026-07-05T15:05:58.1123970Z [34m==>[0m [1mPouring sdl3--3.4.10.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:58.1977830Z 🍺  /opt/homebrew/Cellar/sdl3/3.4.10: 103 files, 6.3MB
+2026-07-05T15:05:58.1984550Z [32m==>[0m [1mInstalling ffmpeg dependency: [32msdl2-compat[39m[0m
+2026-07-05T15:05:58.2139530Z [34m==>[0m [1mPouring sdl2-compat--2.32.70.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:58.2933340Z 🍺  /opt/homebrew/Cellar/sdl2-compat/2.32.70: 117 files, 3.3MB
+2026-07-05T15:05:58.2936420Z [32m==>[0m [1mInstalling ffmpeg dependency: [32msvt-av1[39m[0m
+2026-07-05T15:05:58.2965540Z [34m==>[0m [1mPouring svt-av1--4.1.0.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:58.3670660Z 🍺  /opt/homebrew/Cellar/svt-av1/4.1.0: 23 files, 3.1MB
+2026-07-05T15:05:58.3675140Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mx264[39m[0m
+2026-07-05T15:05:58.3705390Z [34m==>[0m [1mPouring x264--r3222.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:58.4333350Z 🍺  /opt/homebrew/Cellar/x264/r3222: 12 files, 4.4MB
+2026-07-05T15:05:58.4336200Z [32m==>[0m [1mInstalling ffmpeg dependency: [32mx265[39m[0m
+2026-07-05T15:05:58.4363950Z [34m==>[0m [1mPouring x265--4.2.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:05:58.5283280Z 🍺  /opt/homebrew/Cellar/x265/4.2: 12 files, 17.0MB
+2026-07-05T15:05:58.5286050Z [32m==>[0m [1mInstalling [32mffmpeg[39m[0m
+2026-07-05T15:05:58.5288950Z [34m==>[0m [1mPouring ffmpeg--8.1.2.arm64_tahoe.bottle.tar.gz[0m
+2026-07-05T15:06:00.3377630Z [34m==>[0m [1mCaveats[0m
+2026-07-05T15:06:00.3378290Z ffmpeg-full includes additional tools and libraries that are not included in the regular ffmpeg formula.
+2026-07-05T15:06:00.3378990Z [34m==>[0m [1mSummary[0m
+2026-07-05T15:06:00.3429290Z 🍺  /opt/homebrew/Cellar/ffmpeg/8.1.2: 287 files, 53.5MB
+2026-07-05T15:06:00.3434860Z [32m==>[0m [1mCaveats[0m
+2026-07-05T15:06:00.3435220Z [34m==>[0m [1mffmpeg[0m
+2026-07-05T15:06:00.3435760Z ffmpeg-full includes additional tools and libraries that are not included in the regular ffmpeg formula.

@@ -1,0 +1,176 @@
+﻿2026-07-05T15:05:46.0230378Z Current runner version: '2.335.1'
+2026-07-05T15:05:46.0258444Z ##[group]Runner Image Provisioner
+2026-07-05T15:05:46.0259240Z Hosted Compute Agent
+2026-07-05T15:05:46.0260093Z Version: 20260624.560
+2026-07-05T15:05:46.0260702Z Commit: 925d229a51159bc391ae97e54a2dd1fe20af789d
+2026-07-05T15:05:46.0261378Z Build Date: 2026-06-24T18:26:47Z
+2026-07-05T15:05:46.0262183Z Worker ID: {f5da97e5-5095-4830-8d1b-a15225a266a1}
+2026-07-05T15:05:46.0263644Z Azure Region: northcentralus
+2026-07-05T15:05:46.0264242Z ##[endgroup]
+2026-07-05T15:05:46.0265660Z ##[group]Operating System
+2026-07-05T15:05:46.0266352Z Microsoft Windows Server 2025
+2026-07-05T15:05:46.0266885Z 10.0.26100
+2026-07-05T15:05:46.0267366Z Datacenter
+2026-07-05T15:05:46.0267791Z ##[endgroup]
+2026-07-05T15:05:46.0268257Z ##[group]Runner Image
+2026-07-05T15:05:46.0268849Z Image: windows-2025-vs2026
+2026-07-05T15:05:46.0269389Z Version: 20260628.158.1
+2026-07-05T15:05:46.0271205Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260628.158/images/windows/Windows2025-VS2026-Readme.md
+2026-07-05T15:05:46.0272772Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260628.158
+2026-07-05T15:05:46.0273730Z ##[endgroup]
+2026-07-05T15:05:46.0274832Z ##[group]GITHUB_TOKEN Permissions
+2026-07-05T15:05:46.0277069Z Contents: read
+2026-07-05T15:05:46.0277585Z Metadata: read
+2026-07-05T15:05:46.0278071Z Packages: read
+2026-07-05T15:05:46.0278577Z ##[endgroup]
+2026-07-05T15:05:46.0280597Z Secret source: Actions
+2026-07-05T15:05:46.0281238Z Prepare workflow directory
+2026-07-05T15:05:46.0701632Z Prepare all required actions
+2026-07-05T15:05:46.0747127Z Getting action download info
+2026-07-05T15:05:46.2722087Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-07-05T15:05:46.3956714Z Download action repository 'lukka/run-vcpkg@v11' (SHA:b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2)
+2026-07-05T15:05:46.6838338Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-07-05T15:05:47.3639912Z Complete job name: Native (windows-latest)
+2026-07-05T15:05:47.8570765Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-05T15:05:47.8582834Z ##[group]Run actions/checkout@v4
+2026-07-05T15:05:47.8584024Z with:
+2026-07-05T15:05:47.8584866Z   repository: Dremous/hdr2sdr
+2026-07-05T15:05:47.8591747Z   token: ***
+2026-07-05T15:05:47.8592544Z   ssh-strict: true
+2026-07-05T15:05:47.8593378Z   ssh-user: git
+2026-07-05T15:05:47.8594194Z   persist-credentials: true
+2026-07-05T15:05:47.8595072Z   clean: true
+2026-07-05T15:05:47.8595891Z   sparse-checkout-cone-mode: true
+2026-07-05T15:05:47.8596822Z   fetch-depth: 1
+2026-07-05T15:05:47.8597656Z   fetch-tags: false
+2026-07-05T15:05:47.8598495Z   show-progress: true
+2026-07-05T15:05:47.8599619Z   lfs: false
+2026-07-05T15:05:47.8600801Z   submodules: false
+2026-07-05T15:05:47.8601662Z   set-safe-directory: true
+2026-07-05T15:05:47.8602791Z ##[endgroup]
+2026-07-05T15:05:48.0148542Z Syncing repository: Dremous/hdr2sdr
+2026-07-05T15:05:48.0151703Z ##[group]Getting Git version info
+2026-07-05T15:05:48.0152988Z Working directory is 'D:\a\hdr2sdr\hdr2sdr'
+2026-07-05T15:05:48.0814534Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-07-05T15:05:48.3355160Z git version 2.54.0.windows.1
+2026-07-05T15:05:48.3404809Z ##[endgroup]
+2026-07-05T15:05:48.3424100Z Temporarily overriding HOME='D:\a\_temp\fc928f0a-c3e4-4029-bb49-4f38eeeb7c59' before making global git config changes
+2026-07-05T15:05:48.3426490Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-05T15:05:48.3434591Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\hdr2sdr\hdr2sdr
+2026-07-05T15:05:48.3760439Z Deleting the contents of 'D:\a\hdr2sdr\hdr2sdr'
+2026-07-05T15:05:48.3767170Z ##[group]Initializing the repository
+2026-07-05T15:05:48.3777104Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\hdr2sdr\hdr2sdr
+2026-07-05T15:05:48.4208630Z Initialized empty Git repository in D:/a/hdr2sdr/hdr2sdr/.git/
+2026-07-05T15:05:48.4280380Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/Dremous/hdr2sdr
+2026-07-05T15:05:48.4670634Z ##[endgroup]
+2026-07-05T15:05:48.4672200Z ##[group]Disabling automatic garbage collection
+2026-07-05T15:05:48.4679936Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-07-05T15:05:48.4981830Z ##[endgroup]
+2026-07-05T15:05:48.4983749Z ##[group]Setting up auth
+2026-07-05T15:05:48.4999791Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-07-05T15:05:48.5325762Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-07-05T15:05:49.5057830Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-05T15:05:49.5360686Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-07-05T15:05:50.0726210Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-05T15:05:50.1042280Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-07-05T15:05:50.6467634Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-07-05T15:05:50.6783197Z ##[endgroup]
+2026-07-05T15:05:50.6787087Z ##[group]Fetching the repository
+2026-07-05T15:05:50.6797667Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f750734cce19b5b1ed87d0df5ac23a2b01e99952:refs/remotes/origin/master
+2026-07-05T15:05:51.2515736Z From https://github.com/Dremous/hdr2sdr
+2026-07-05T15:05:51.2516756Z  * [new ref]         f750734cce19b5b1ed87d0df5ac23a2b01e99952 -> origin/master
+2026-07-05T15:05:51.2718207Z ##[endgroup]
+2026-07-05T15:05:51.2718825Z ##[group]Determining the checkout info
+2026-07-05T15:05:51.2720676Z ##[endgroup]
+2026-07-05T15:05:51.2734562Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-07-05T15:05:51.3073498Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-07-05T15:05:51.3369165Z ##[group]Checking out the ref
+2026-07-05T15:05:51.3378115Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B master refs/remotes/origin/master
+2026-07-05T15:05:51.4037162Z Reset branch 'master'
+2026-07-05T15:05:51.4048217Z branch 'master' set up to track 'origin/master'.
+2026-07-05T15:05:51.4412524Z ##[endgroup]
+2026-07-05T15:05:51.4420707Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-07-05T15:05:51.4689789Z f750734cce19b5b1ed87d0df5ac23a2b01e99952
+2026-07-05T15:05:51.5221289Z ##[group]Run lukka/run-vcpkg@v11
+2026-07-05T15:05:51.5221786Z with:
+2026-07-05T15:05:51.5222093Z   vcpkgJsonGlob: native/vcpkg.json
+2026-07-05T15:05:51.5222439Z   runVcpkgInstall: true
+2026-07-05T15:05:51.5222806Z   vcpkgDirectory: D:\a\hdr2sdr\hdr2sdr/vcpkg
+2026-07-05T15:05:51.5223246Z   vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+2026-07-05T15:05:51.5223635Z   doNotUpdateVcpkg: false
+2026-07-05T15:05:51.5223995Z   doNotCache: true
+2026-07-05T15:05:51.5224341Z   vcpkgJsonIgnores: ['**/vcpkg/**']
+2026-07-05T15:05:51.5225563Z   vcpkgConfigurationJsonGlob: **/vcpkg-configuration.json
+2026-07-05T15:05:51.5226682Z   runVcpkgFormatString: [`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]
+2026-07-05T15:05:51.5227441Z   useShell: true
+2026-07-05T15:05:51.5228228Z   logCollectionRegExps: \s*"(.+CMakeOutput\.log)"\.\s*;\s*"(.+CMakeError\.log)"\.\s*;\s*(.+out\.log)\s*;\s+(.+err\.log)\s*;\s*(.+vcpkg.+\.log)\s*
+2026-07-05T15:05:51.5228858Z ##[endgroup]
+2026-07-05T15:05:51.6976251Z ##[group]Prepare output directories
+2026-07-05T15:05:51.6977633Z The vpckg root directory: 'D:\a\hdr2sdr\hdr2sdr\vcpkg'
+2026-07-05T15:05:51.6993635Z (node:8448) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-07-05T15:05:51.7008418Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-07-05T15:05:51.7032649Z ##[endgroup]
+2026-07-05T15:05:51.7033380Z ⏱ elapsed: 0.006 seconds
+2026-07-05T15:05:51.7733098Z Running command '"C:\Program Files\Git\bin\git.exe"' with args '^"submodule^",^"status^",^"D:\a\hdr2sdr\hdr2sdr\vcpkg^"' in current directory 'D:\a\hdr2sdr\hdr2sdr'.
+2026-07-05T15:05:51.7798894Z (node:8448) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+2026-07-05T15:05:52.3265666Z error: pathspec 'D:\a\hdr2sdr\hdr2sdr\vcpkg' did not match any file(s) known to git
+2026-07-05T15:05:52.3377979Z ##[group]Searching for vcpkg.json with glob expression 'native/vcpkg.json'
+2026-07-05T15:05:52.3440747Z Found vcpkg.json at 'native/vcpkg.json'.
+2026-07-05T15:05:52.3444158Z ##[endgroup]
+2026-07-05T15:05:52.3444856Z ⏱ elapsed: 0.007 seconds
+2026-07-05T15:05:52.3446073Z ##[group]The vcpkgCommitId is not provided, searching for a vcpkg-configuration.json using **/vcpkg-configuration.json
+2026-07-05T15:05:52.3448835Z Searching for 'vcpkg-configuration.json' using: '**/vcpkg-configuration.json'
+2026-07-05T15:05:52.3509664Z Found **/vcpkg-configuration.json at 'native/vcpkg-configuration.json'.
+2026-07-05T15:05:52.3511659Z Found vpckg-configuration.json at: native/vcpkg-configuration.json
+2026-07-05T15:05:52.3532933Z ##[endgroup]
+2026-07-05T15:05:52.3533790Z ⏱ elapsed: 0.009 seconds
+2026-07-05T15:05:52.3534917Z Found baseline 'f6a52d3e9a7ecb304a30b8a66e7e0fc88be2102f', this is the Git commit id going to be used to fetch vcpkg from the repository
+2026-07-05T15:05:52.3565803Z ##[group]Setup to run on GitHub Action runners
+2026-07-05T15:05:52.3566977Z Set the workflow environment variable 'VCPKG_BINARY_SOURCES' to value 'clear;x-gha,readwrite'
+2026-07-05T15:05:52.3568143Z ##[endgroup]
+2026-07-05T15:05:52.3568635Z ⏱ elapsed: 0.001 seconds
+2026-07-05T15:05:52.3569179Z ##[group]Retrieving the vcpkg Git commit id at: 'D:\a\hdr2sdr\hdr2sdr\vcpkg'
+2026-07-05T15:05:52.4132151Z Fetching the Git commit id at 'D:\a\hdr2sdr\hdr2sdr\vcpkg' ...
+2026-07-05T15:05:52.4135603Z Running command '"C:\Program Files\Git\bin\git.exe"' with args '^"rev-parse^",^"HEAD^"' in current directory 'D:\a\hdr2sdr\hdr2sdr\vcpkg'.
+2026-07-05T15:05:52.4477718Z f750734cce19b5b1ed87d0df5ac23a2b01e99952
+2026-07-05T15:05:52.4534206Z ##[endgroup]
+2026-07-05T15:05:52.4535226Z ⏱ elapsed: 0.098 seconds
+2026-07-05T15:05:52.4535830Z ##[group]Check whether vcpkg repository is up to date
+2026-07-05T15:05:52.4540018Z Checking whether vcpkg's repository is updated to commit id 'f750734cce19b5b1ed87d0df5ac23a2b01e99952' ...
+2026-07-05T15:05:52.4541280Z Current commit id of vcpkg: 'f750734cce19b5b1ed87d0df5ac23a2b01e99952'.
+2026-07-05T15:05:52.4541952Z Is vcpkg repository updated? No
+2026-07-05T15:05:52.4542683Z ##[endgroup]
+2026-07-05T15:05:52.4543118Z ⏱ elapsed: 0.001 seconds
+2026-07-05T15:05:52.4543651Z ##[group]Download vcpkg source code repository
+2026-07-05T15:05:52.4544272Z Cloning vcpkg in 'D:\a\hdr2sdr\hdr2sdr\vcpkg'...
+2026-07-05T15:05:52.5101636Z Running command '"C:\Program Files\Git\bin\git.exe"' with args '^"clone^",^"https://github.com/microsoft/vcpkg.git^",^"-n^",^".^"' in current directory 'D:\a\hdr2sdr\hdr2sdr\vcpkg'.
+2026-07-05T15:05:52.5442884Z Cloning into '.'...
+2026-07-05T15:06:05.8741363Z Running command '"C:\Program Files\Git\bin\git.exe"' with args '^"checkout^",^"--force^",^"f6a52d3e9a7ecb304a30b8a66e7e0fc88be2102f^"' in current directory 'D:\a\hdr2sdr\hdr2sdr\vcpkg'.
+2026-07-05T15:06:05.9081408Z fatal: unable to read tree (f6a52d3e9a7ecb304a30b8a66e7e0fc88be2102f)
+2026-07-05T15:06:05.9156844Z ##[error]Last command execution failed with error code '128'.
+2026-07-05T15:06:05.9164106Z ##[endgroup]
+2026-07-05T15:06:05.9164772Z ⏱ elapsed: 13.460 seconds
+2026-07-05T15:06:05.9235477Z Error: Last command execution failed with error code '128'.
+2026-07-05T15:06:05.9236586Z     at BaseUtilLib.throwIfErrorCode (D:\a\_actions\lukka\run-vcpkg\v11\dist\index.js:44357:19)
+2026-07-05T15:06:05.9237969Z     at VcpkgRunner.<anonymous> (D:\a\_actions\lukka\run-vcpkg\v11\dist\index.js:46663:28)
+2026-07-05T15:06:05.9238824Z     at Generator.next (<anonymous>)
+2026-07-05T15:06:05.9239614Z     at fulfilled (D:\a\_actions\lukka\run-vcpkg\v11\dist\index.js:46278:58)
+2026-07-05T15:06:05.9241867Z     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-07-05T15:06:05.9244690Z ##[error]run-vcpkg action execution failed: Last command execution failed with error code '128'.
+2026-07-05T15:06:05.9633524Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-05T15:06:05.9634890Z Post job cleanup.
+2026-07-05T15:06:06.1356190Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-07-05T15:06:06.1635996Z git version 2.54.0.windows.1
+2026-07-05T15:06:06.1716830Z Temporarily overriding HOME='D:\a\_temp\6ffbcdfe-db88-4935-94a2-ea827e7d5f11' before making global git config changes
+2026-07-05T15:06:06.1718430Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-05T15:06:06.1729939Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\hdr2sdr\hdr2sdr
+2026-07-05T15:06:06.2066883Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-07-05T15:06:06.2451542Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-07-05T15:06:06.8128109Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-05T15:06:06.8378459Z http.https://github.com/.extraheader
+2026-07-05T15:06:06.8428296Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-07-05T15:06:06.8731814Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-07-05T15:06:07.3977602Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-05T15:06:07.4290290Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-07-05T15:06:07.9758321Z Cleaning up orphan processes
+2026-07-05T15:06:07.9794525Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

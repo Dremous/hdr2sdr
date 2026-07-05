@@ -1,0 +1,24 @@
+﻿2026-07-05T15:06:12.2642632Z ##[group]Run cmake -B build -S native
+2026-07-05T15:06:12.2643005Z [36;1mcmake -B build -S native[0m
+2026-07-05T15:06:12.2676369Z shell: /usr/bin/bash -e {0}
+2026-07-05T15:06:12.2676632Z ##[endgroup]
+2026-07-05T15:06:13.7467836Z -- The CXX compiler identification is GNU 13.3.0
+2026-07-05T15:06:13.7876938Z -- Detecting CXX compiler ABI info
+2026-07-05T15:06:13.9515755Z -- Detecting CXX compiler ABI info - done
+2026-07-05T15:06:13.9691656Z -- Check for working CXX compiler: /usr/bin/c++ - skipped
+2026-07-05T15:06:13.9697940Z -- Detecting CXX compile features
+2026-07-05T15:06:13.9707628Z -- Detecting CXX compile features - done
+2026-07-05T15:06:14.0256478Z -- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1")
+2026-07-05T15:06:14.0263776Z -- Checking for module 'libavcodec'
+2026-07-05T15:06:14.0352606Z --   Found libavcodec, version 60.31.102
+2026-07-05T15:06:14.0579468Z -- Checking for module 'libavformat'
+2026-07-05T15:06:14.0663925Z --   Found libavformat, version 60.16.100
+2026-07-05T15:06:14.0888577Z -- Checking for module 'libavutil'
+2026-07-05T15:06:14.0972514Z --   Found libavutil, version 58.29.100
+2026-07-05T15:06:14.1174796Z -- Checking for module 'libswresample'
+2026-07-05T15:06:14.1257166Z --   Found libswresample, version 4.12.100
+2026-07-05T15:06:14.1465134Z -- Checking for module 'libswscale'
+2026-07-05T15:06:14.1546789Z --   Found libswscale, version 7.5.100
+2026-07-05T15:06:14.1750398Z -- Configuring done (1.9s)
+2026-07-05T15:06:14.1790196Z -- Generating done (0.0s)
+2026-07-05T15:06:14.1795058Z -- Build files have been written to: /home/runner/work/hdr2sdr/hdr2sdr/build

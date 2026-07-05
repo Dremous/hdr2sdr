@@ -1,0 +1,31 @@
+﻿2026-07-05T15:05:48.3775528Z ##[group]Run chmod +x native/build_android.sh
+2026-07-05T15:05:48.3777146Z [36;1mchmod +x native/build_android.sh[0m
+2026-07-05T15:05:48.3779007Z [36;1mnative/build_android.sh[0m
+2026-07-05T15:05:48.3824095Z shell: /usr/bin/bash -e {0}
+2026-07-05T15:05:48.3824944Z env:
+2026-07-05T15:05:48.3825805Z   ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/29.0.14206865
+2026-07-05T15:05:48.3827016Z ##[endgroup]
+2026-07-05T15:05:48.3951379Z 编译 arm64-v8a...
+2026-07-05T15:05:48.8453153Z -- Android: Targeting API '24' with architecture 'arm64', ABI 'arm64-v8a', and processor 'aarch64'
+2026-07-05T15:05:48.9096968Z -- Android: Selected unified Clang toolchain
+2026-07-05T15:05:52.7222110Z -- The CXX compiler identification is Clang 21.0.0
+2026-07-05T15:05:52.8311238Z -- Detecting CXX compiler ABI info
+2026-07-05T15:05:53.7406340Z -- Detecting CXX compiler ABI info - done
+2026-07-05T15:05:53.7619100Z -- Check for working CXX compiler: /usr/local/lib/android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ - skipped
+2026-07-05T15:05:53.7660220Z -- Detecting CXX compile features
+2026-07-05T15:05:53.7716270Z -- Detecting CXX compile features - done
+2026-07-05T15:05:53.8344158Z -- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1")
+2026-07-05T15:05:53.8352141Z -- Checking for module 'libavcodec'
+2026-07-05T15:05:53.9655386Z --   Package 'libavcodec', required by 'virtual:world', not found
+2026-07-05T15:05:53.9657369Z CMake Error at /usr/local/share/cmake-3.31/Modules/FindPkgConfig.cmake:645 (message):
+2026-07-05T15:05:53.9658457Z   The following required packages were not found:
+2026-07-05T15:05:53.9658930Z 
+2026-07-05T15:05:53.9659104Z    - libavcodec
+2026-07-05T15:05:53.9659368Z 
+2026-07-05T15:05:53.9659592Z Call Stack (most recent call first):
+2026-07-05T15:05:53.9660590Z   /usr/local/share/cmake-3.31/Modules/FindPkgConfig.cmake:873 (_pkg_check_modules_internal)
+2026-07-05T15:05:53.9661694Z   CMakeLists.txt:9 (pkg_check_modules)
+2026-07-05T15:05:53.9662070Z 
+2026-07-05T15:05:53.9662088Z 
+2026-07-05T15:05:53.9681207Z -- Configuring incomplete, errors occurred!
+2026-07-05T15:05:53.9772791Z ##[error]Process completed with exit code 1.
