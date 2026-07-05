@@ -38,6 +38,7 @@ class BackgroundService {
     required String outputPath,
     required ConvertParams params,
   }) async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     initialize();
     if (Platform.isIOS) {
       // iOS 后台仅触发 BGTaskScheduler 注册，无需传递参数
@@ -52,6 +53,7 @@ class BackgroundService {
   }
 
   static Future<void> cancelConversion() async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     await _channel.invokeMethod('cancelConversion');
   }
 

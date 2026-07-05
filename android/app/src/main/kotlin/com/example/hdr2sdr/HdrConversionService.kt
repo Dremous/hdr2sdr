@@ -18,7 +18,8 @@ class HdrConversionService : Service() {
         const val ACTION_CANCEL = "com.example.hdr2sdr.action.CANCEL_CONVERSION"
         const val EXTRA_FILE_PATH = "filePath"
         const val EXTRA_OUTPUT_PATH = "outputPath"
-        const val EXTRA_PARAMS = "params"
+        const val EXTRA_ENCODER = "encoder"
+        const val EXTRA_CRF = "crf"
     }
 
     override fun onCreate() {
@@ -26,11 +27,16 @@ class HdrConversionService : Service() {
         createNotificationChannel()
     }
 
+    private var encoder: Int = 1
+    private var crf: Int = 23
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
                 val filePath = intent.getStringExtra(EXTRA_FILE_PATH)
                 val outputPath = intent.getStringExtra(EXTRA_OUTPUT_PATH)
+                encoder = intent.getIntExtra(EXTRA_ENCODER, 1)
+                crf = intent.getIntExtra(EXTRA_CRF, 23)
                 if (filePath != null && outputPath != null) {
                     startForeground(NOTIFICATION_ID, buildNotification("转换中..."))
                     MainActivity.sendBackgroundEvent(mapOf(

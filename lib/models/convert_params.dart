@@ -35,7 +35,7 @@ class ConvertParams {
     'exposure': exposure,
     'saturation': saturation,
     'targetColorSpace': targetColorSpace.name,
-    'encoder': encoder.name,
+    'encoder': encoder.index,
     'crf': crf,
     'targetWidth': targetWidth,
     'targetHeight': targetHeight,

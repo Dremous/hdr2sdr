@@ -35,7 +35,8 @@ class MainActivity : FlutterActivity() {
                                 putExtra(HdrConversionService.EXTRA_FILE_PATH, filePath)
                                 putExtra(HdrConversionService.EXTRA_OUTPUT_PATH, outputPath)
                                 if (params != null) {
-                                    putExtra(HdrConversionService.EXTRA_PARAMS, params.toString())
+                                    putExtra(HdrConversionService.EXTRA_ENCODER, (params["encoder"] as? Number)?.toInt() ?: 1)
+                                    putExtra(HdrConversionService.EXTRA_CRF, (params["crf"] as? Number)?.toInt() ?: 23)
                                 }
                             }
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
