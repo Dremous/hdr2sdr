@@ -1,0 +1,346 @@
+﻿## Commits
+5713fa1 fix: Task 1 review - 娣诲姞涓枃娉ㄩ噴鍜屾枃浠舵湯灏炬崲琛?
+
+## Files changed
+ .superpowers/sdd/review-bc881cc..99557c5.diff | 119 ++++++++++++++++++++++++++
+ .superpowers/sdd/task-1-brief.md              |  95 ++++++++++++++++++++
+ .superpowers/sdd/task-1-report.md             |  25 ++++++
+ lib/app.dart                                  |   2 +-
+ lib/main.dart                                 |   2 +-
+ lib/pages/home_page.dart                      |   6 +-
+ pubspec.yaml                                  |   2 +-
+ 7 files changed, 247 insertions(+), 4 deletions(-)
+
+## Diff
+diff --git a/.superpowers/sdd/review-bc881cc..99557c5.diff b/.superpowers/sdd/review-bc881cc..99557c5.diff
+new file mode 100644
+index 0000000..cad2e0b
+--- /dev/null
++++ b/.superpowers/sdd/review-bc881cc..99557c5.diff
+@@ -0,0 +1,119 @@
++锘?# Commits
++99557c5 feat: 閸掓繂顫?Flutter 妞ゅ湱娲伴懘姘閺?
++
++## Files changed
++ lib/app.dart             | 20 ++++++++++++++++++++
++ lib/main.dart            |  7 +++++++
++ lib/pages/home_page.dart | 28 ++++++++++++++++++++++++++++
++ pubspec.yaml             | 25 +++++++++++++++++++++++++
++ 4 files changed, 80 insertions(+)
++
++## Diff
++diff --git a/lib/app.dart b/lib/app.dart
++new file mode 100644
++index 0000000..5e1ad96
++--- /dev/null
+++++ b/lib/app.dart
++@@ -0,0 +1,20 @@
+++import 'package:flutter/material.dart';
+++import 'pages/home_page.dart';
+++
+++class Hdr2SdrApp extends StatelessWidget {
+++  const Hdr2SdrApp({super.key});
+++
+++  @override
+++  Widget build(BuildContext context) {
+++    return MaterialApp(
+++      title: 'HDR閳摬DR Converter',
+++      debugShowCheckedModeBanner: false,
+++      theme: ThemeData(
+++        colorSchemeSeed: Colors.blue,
+++        useMaterial3: true,
+++        brightness: Brightness.dark,
+++      ),
+++      home: const HomePage(),
+++    );
+++  }
+++}
++\ No newline at end of file
++diff --git a/lib/main.dart b/lib/main.dart
++new file mode 100644
++index 0000000..f9bf6b2
++--- /dev/null
+++++ b/lib/main.dart
++@@ -0,0 +1,7 @@
+++import 'package:flutter/material.dart';
+++import 'app.dart';
+++
+++void main() {
+++  WidgetsFlutterBinding.ensureInitialized();
+++  runApp(const Hdr2SdrApp());
+++}
++\ No newline at end of file
++diff --git a/lib/pages/home_page.dart b/lib/pages/home_page.dart
++new file mode 100644
++index 0000000..05c85f8
++--- /dev/null
+++++ b/lib/pages/home_page.dart
++@@ -0,0 +1,28 @@
+++import 'package:flutter/material.dart';
+++
+++class HomePage extends StatelessWidget {
+++  const HomePage({super.key});
+++
+++  @override
+++  Widget build(BuildContext context) {
+++    return Scaffold(
+++      appBar: AppBar(
+++        title: const Text('HDR閳摬DR Converter'),
+++        centerTitle: true,
+++      ),
+++      body: const Center(
+++        child: Column(
+++          mainAxisAlignment: MainAxisAlignment.center,
+++          children: [
+++            Icon(Icons.video_library, size: 80, color: Colors.grey),
+++            SizedBox(height: 16),
+++            Text(
+++              '閹锋牗鏂佺憴鍡涱暥閺傚洣娆㈤崚鐗堫劃婢跺嫬绱戞慨瀣祮閹?,
+++              style: TextStyle(fontSize: 18, color: Colors.grey),
+++            ),
+++          ],
+++        ),
+++      ),
+++    );
+++  }
+++}
++\ No newline at end of file
++diff --git a/pubspec.yaml b/pubspec.yaml
++new file mode 100644
++index 0000000..acf9d4d
++--- /dev/null
+++++ b/pubspec.yaml
++@@ -0,0 +1,25 @@
+++name: hdr2sdr
+++description: HDR閳摬DR 鐟欏棝顣舵潪顒佸床瀹搞儱鍙?++publish_to: 'none'
+++version: 1.0.0+1
+++
+++environment:
+++  sdk: '>=3.0.0 <4.0.0'
+++
+++dependencies:
+++  flutter:
+++    sdk: flutter
+++  ffi: ^2.1.0
+++  path_provider: ^2.1.0
+++  file_picker: ^6.1.0
+++  provider: ^6.1.0
+++  desktop_drop: ^0.4.0
+++  intl: ^0.19.0
+++
+++dev_dependencies:
+++  flutter_test:
+++    sdk: flutter
+++  flutter_lints: ^3.0.0
+++
+++flutter:
+++  uses-material-design: true
++\ No newline at end of file
+diff --git a/.superpowers/sdd/task-1-brief.md b/.superpowers/sdd/task-1-brief.md
+new file mode 100644
+index 0000000..e3bca94
+--- /dev/null
++++ b/.superpowers/sdd/task-1-brief.md
+@@ -0,0 +1,95 @@
++### Task 1: Flutter 椤圭洰鑴氭墜鏋?
++**Files:**
++- Create: `pubspec.yaml`
++- Create: `lib/main.dart`
++- Create: `lib/app.dart`
++
++**Interfaces:**
++- Produces: 鍙繍琛岀殑 Flutter 绌哄３搴旂敤
++
++- [ ] **Step 1: 鍒涘缓 pubspec.yaml**
++
++```yaml
++name: hdr2sdr
++description: HDR鈫擲DR 瑙嗛杞崲宸ュ叿
++publish_to: 'none'
++version: 1.0.0+1
++
++environment:
++  sdk: '>=3.0.0 <4.0.0'
++
++dependencies:
++  flutter:
++    sdk: flutter
++  ffi: ^2.1.0
++  path_provider: ^2.1.0
++  file_picker: ^6.1.0
++  provider: ^6.1.0
++  desktop_drop: ^0.4.0
++  intl: ^0.19.0
++
++dev_dependencies:
++  flutter_test:
++    sdk: flutter
++  flutter_lints: ^3.0.0
++
++flutter:
++  uses-material-design: true
++```
++
++- [ ] **Step 2: 鍒涘缓 lib/app.dart**
++
++```dart
++import 'package:flutter/material.dart';
++import 'pages/home_page.dart';
++
++class Hdr2SdrApp extends StatelessWidget {
++  const Hdr2SdrApp({super.key});
++
++  @override
++  Widget build(BuildContext context) {
++    return MaterialApp(
++      title: 'HDR鈫擲DR Converter',
++      debugShowCheckedModeBanner: false,
++      theme: ThemeData(
++        colorSchemeSeed: Colors.blue,
++        useMaterial3: true,
++        brightness: Brightness.dark,
++      ),
++      home: const HomePage(),
++    );
++  }
++}
++```
++
++- [ ] **Step 3: 鍒涘缓 lib/main.dart**
++
++```dart
++import 'package:flutter/material.dart';
++import 'app.dart';
++
++void main() {
++  WidgetsFlutterBinding.ensureInitialized();
++  runApp(const Hdr2SdrApp());
++}
++```
++
++- [ ] **Step 4: 楠岃瘉椤圭洰缁撴瀯**
++
++Run:
++```bash
++Set-Location -LiteralPath "E:\ai\hdr2sdr"
++flutter pub get
++```
++Expected: 渚濊禆涓嬭浇鎴愬姛锛屾棤閿欒
++
++- [ ] **Step 5: 鎻愪氦**
++
++```bash
++git init
++git add pubspec.yaml lib/
++git commit -m "feat: 鍒濆鍖?Flutter 椤圭洰鑴氭墜鏋?
++```
++
++---
++
+diff --git a/.superpowers/sdd/task-1-report.md b/.superpowers/sdd/task-1-report.md
+new file mode 100644
+index 0000000..1b2d511
+--- /dev/null
++++ b/.superpowers/sdd/task-1-report.md
+@@ -0,0 +1,25 @@
++# Task 1 鎶ュ憡锛欶lutter 椤圭洰鑴氭墜鏋?+
++## 瀹炵幇鍐呭
++- `pubspec.yaml` 鈥?椤圭洰閰嶇疆锛屼緷璧?ffi/path_provider/file_picker/provider/desktop_drop/intl
++- `lib/main.dart` 鈥?搴旂敤鍏ュ彛
++- `lib/app.dart` 鈥?MaterialApp 缁勪欢锛孧aterial 3 涓婚
++- `lib/pages/home_page.dart` 鈥?鍗犱綅棣栭〉锛屽惈鎷栨斁鎻愮ず UI
++
++## 娴嬭瘯鎯呭喌
++褰撳墠鐜鏈畨瑁?Flutter SDK锛屾棤娉曟墽琛?`flutter pub get` 楠岃瘉渚濊禆涓嬭浇銆?+浠ｇ爜缁撴瀯銆佽娉曞潎鎸夋爣鍑?Dart/Flutter 瑙勮寖缂栧啓锛屾棤缂栬瘧鏈熷彲棰勮鐨勯敊璇€?+
++## 鏂囦欢鍙樻洿
++- 鏂板 `pubspec.yaml`
++- 鏂板 `lib/main.dart`
++- 鏂板 `lib/app.dart`
++- 鏂板 `lib/pages/home_page.dart`
++
++## 鑷煡鍙戠幇
++1. `home_page.dart` 瀹炵幇浜嗗熀纭€鍗犱綅 UI锛堝浘鏍?鎻愮ず鏂囧瓧锛夛紝绗﹀悎瑙勮寖銆傚悗缁换鍔￠渶瑕佸鍔犳嫋鏀俱€佹枃浠堕€夋嫨绛変氦浜掋€?+2. 鎵€鏈夋枃浠剁鍚?brief 涓殑鍐呭瑕佹眰锛屾棤澶氫綑浠ｇ爜銆?+3. 鐢变簬鏃?Flutter SDK锛宍flutter pub get` 鏃犳硶杩愯锛岃繖鏄幆澧冮棶棰樿€岄潪浠ｇ爜闂銆?+
++## 闂涓庡叧娉?+- 鏃?Flutter SDK 鐜锛屾棤娉曞仛瀹屾暣楠岃瘉銆傚缓璁湪 CI 鎴栨湁 Flutter 鐨勭幆澧冧腑杩愯 `flutter pub get` 纭渚濊禆鏃犺銆?\ No newline at end of file
+diff --git a/lib/app.dart b/lib/app.dart
+index 5e1ad96..3ff9efd 100644
+--- a/lib/app.dart
++++ b/lib/app.dart
+@@ -10,11 +10,11 @@ class Hdr2SdrApp extends StatelessWidget {
+       title: 'HDR鈫擲DR Converter',
+       debugShowCheckedModeBanner: false,
+       theme: ThemeData(
+         colorSchemeSeed: Colors.blue,
+         useMaterial3: true,
+         brightness: Brightness.dark,
+       ),
+       home: const HomePage(),
+     );
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/lib/main.dart b/lib/main.dart
+index f9bf6b2..3c5f5a0 100644
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -1,7 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'app.dart';
+ 
+ void main() {
+   WidgetsFlutterBinding.ensureInitialized();
+   runApp(const Hdr2SdrApp());
+-}
+\ No newline at end of file
++}
+diff --git a/lib/pages/home_page.dart b/lib/pages/home_page.dart
+index 05c85f8..c5fe895 100644
+--- a/lib/pages/home_page.dart
++++ b/lib/pages/home_page.dart
+@@ -1,12 +1,16 @@
+ import 'package:flutter/material.dart';
+ 
++/// 涓婚〉缁勪欢 - 搴旂敤鐨勪富鐣岄潰
++///
++/// 鎻愪緵鎷栨斁鍖哄煙锛屼緵鐢ㄦ埛灏嗚棰戞枃浠舵嫋鍏ヤ互杩涜 HDR鈫擲DR 杞崲銆?+/// 褰撳墠涓哄崰浣嶇増鏈紝鍚庣画灏嗛泦鎴愭嫋鏀惧拰鏂囦欢閫夋嫨鍔熻兘銆? class HomePage extends StatelessWidget {
+   const HomePage({super.key});
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+         title: const Text('HDR鈫擲DR Converter'),
+         centerTitle: true,
+       ),
+@@ -18,11 +22,11 @@ class HomePage extends StatelessWidget {
+             SizedBox(height: 16),
+             Text(
+               '鎷栨斁瑙嗛鏂囦欢鍒版澶勫紑濮嬭浆鎹?,
+               style: TextStyle(fontSize: 18, color: Colors.grey),
+             ),
+           ],
+         ),
+       ),
+     );
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/pubspec.yaml b/pubspec.yaml
+index acf9d4d..1f7d39f 100644
+--- a/pubspec.yaml
++++ b/pubspec.yaml
+@@ -15,11 +15,11 @@ dependencies:
+   provider: ^6.1.0
+   desktop_drop: ^0.4.0
+   intl: ^0.19.0
+ 
+ dev_dependencies:
+   flutter_test:
+     sdk: flutter
+   flutter_lints: ^3.0.0
+ 
+ flutter:
+-  uses-material-design: true
+\ No newline at end of file
++  uses-material-design: true
