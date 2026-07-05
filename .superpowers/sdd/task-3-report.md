@@ -1,63 +1,40 @@
-# Task 3 报告：dart:ffi 绑定层
+# Task 3 Report: UI 三态自适应布局 + ParamPanel 移动端适配
 
-## 实现内容
+## 步骤与结果
 
-按照任务简报创建了 dart:ffi 绑定层，包含两个文件：
+### Step 1: home_page.dart 三态布局
 
-### lib/ffi/types.dart
-- `VideoInfoNative`：对应 C 端 `VideoInfo` 的原生结构体（Struct），字段包括 width/height/fps/frameCount/durationSec/isHdr/maxLuminance/pixelFormat
-- `ConvertParamsNative`：对应 C 端 `ConvertParams` 的原生结构体（Struct），字段包括 direction/autoMode/presetStyle/peakLuminance/exposure/saturation/targetColorSpace/encoder/crf/targetWidth/targetHeight/cropLeft/cropRight/cropTop/cropBottom
-- `ProgressCallbackNative`：进度回调函数类型签名
-- `CompletionCallbackNative`：完成回调函数类型签名
-- `ConverterHandle`：转换器句柄类型别名
+- 添加了 `_LayoutMode` 枚举：`desktopWide`(>900)、`desktopNarrow`(600-900)、`mobile`(<600)
+- `build()` 重构：`Consumer<ConvertProvider>` → `LayoutBuilder` → 按 mode 分发
+- **desktop 模式**：保留原有 `Scaffold` + 宽/窄布局，`_buildDesktopLayout()` 统一处理
+- **mobile 模式**：`DefaultTabController(length:4)` + 带 `TabBar` 的 `Scaffold`
+- Tab 0（文件）：`_buildMobileFileTab` — DropZone + 文件列表 + 输出目录
+- Tab 1（参数）：`ParamPanel(isMobile: true)`
+- Tab 2（预览）：`PreviewPanel`
+- Tab 3（进度+开始）：`_buildMobileProgressTab` — ProgressPanel + FilledButton
+- 避免了 Scaffold 嵌套：desktop/mobile 各自返回独立的 Scaffold
 
-### lib/ffi/native_bridge.dart
-- `NativeBridge` 单例类，封装所有 dart:ffi 调用
-- 构造函数中根据平台加载对应动态库（.dll/.dylib/.so）
-- 通过 `lookupFunction` 绑定 11 个 C 函数：create/destroy/open/close/getFrameCount/getInfo/setParams/getFrame/start/cancel
-- `getInfo()` 将原生结构体转换为 Dart 模型 `VideoInfo`
-- `setParams()` 将 Dart 模型 `ConvertParams` 转换为原生结构体
-- `open()` 和 `start()` 正确处理 Utf8 字符串的内存分配与释放
+### Step 2: ParamPanel 移动端编码器适配
 
-## 文件变更
+- 添加 `isMobile` 构造函数参数（默认 `false`）
+- 移动端：`DropdownButton<EncoderType>` 显示全部 5 种编码器（含 h264Hardware/h265Hardware）
+- 桌面端：`SegmentedButton<EncoderType>` 仅显示 3 种软件编码器
+- 添加 `_encoderLabel()` 辅助方法提供中文标签
 
-| 文件 | 操作 | 行数 |
-|------|------|------|
-| `lib/ffi/types.dart` | 新建 | 103 行 |
-| `lib/ffi/native_bridge.dart` | 新建 | 276 行 |
-
-## 自审发现
-
-### 与任务简报代码逐行对比
-
-1. **types.dart** — 与简报完全一致，无差异。
-2. **native_bridge.dart** — 与简报完全一致，无差异。
-
-### 代码检查
-
-1. `dart:ffi` 和 `package:ffi/ffi.dart` 导入正确
-2. 模型引用路径 `../models/convert_params.dart` 和 `../models/video_info.dart` 与 Task 2 产出一致
-3. `ConvertDirection`、`PresetStyle`、`ColorSpace`、`EncoderType` 的 `.index` 调用与 Task 2 枚举定义一致
-4. `ConverterHandle = Pointer<Void>` 已正确导出供外部使用
-5. 内存管理：`calloc.free()` 在 `open()`、`getInfo()`、`setParams()`、`start()` 中均已正确调用
-6. `VideoInfo` 构造函数中 `hdrType` 字段要求 `required`，`getInfo()` 已传入（`hdrType: nativeInfo.ref.isHdr`）
-7. 无额外导入、无未使用变量、无语法错误
-8. 文件末尾均以换行符结束
-
-### 潜在风险
-
-- 当前未验证 `ffi` 依赖包是否已添加到 `pubspec.yaml`。需要确保 `pubspec.yaml` 包含 `ffi: ^2.0.0` 依赖。
-
-### 验证情况
-
-Dart 项目尚未添加 `ffi` 依赖，暂无法运行 `dart analyze`。建议后续在 Task 5 集成测试前先确认 `pubspec.yaml` 已添加 `ffi` 依赖。
-
-## 提交
+### Step 3: flutter analyze 验证
 
 ```
-commit d525900
-Author: opencode <opencode@opencode.ai>
-Date:   Sun Jul 5 2026
-
-    feat: 添加 dart:ffi 绑定层（NativeBridge 单例 + 原生结构体定义）
+Analyzing hdr2sdr...
+No issues found! (ran in 5.0s)
 ```
+
+### Step 4: git commit
+
+```
+bb6384c feat: 三态自适应布局 + ParamPanel 移动端适配
+2 files changed, 202 insertions(+), 36 deletions(-)
+```
+
+## 问题记录
+
+无。

@@ -15,3 +15,7 @@ Task 17: complete (review clean)
  (commits 2103007)
 
 Task 18: complete (commits 2f8d128, review clean)
+Task 1: complete (commits 0706424..0437543, review clean after iOS deployment target fix)
+Task 2: complete (commits 0437543..6c5ac84, review clean)
+Task 3: complete (commits 6c5ac84..bb6384c, review clean)
+Task 4: complete (commits bb6384c..f9d0104, review clean)

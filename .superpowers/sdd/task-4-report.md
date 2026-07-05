@@ -1,35 +1,32 @@
-# Task 4 报告：C++ 公共 API 头文件和 CMake 构建配置
+# Task 4: 移动端文件输出路径处理 - 报告
 
-## 实现内容
+## 步骤结果
 
-### Step 1: `native/include/hdr_converter.h`
-- 定义 `EXPORT` 宏（`__declspec(dllexport)` / `__attribute__((visibility("default")))`）
-- 定义 `VideoInfo`、`ConvertParams` 结构体
-- 定义 `ProgressCallback`、`CompletionCallback` 函数指针类型
-- 声明 10 个 C 风格 API 函数：`converter_create/destroy/open/close/get_frame_count/get_info/set_params/get_frame/start/cancel`
-- 所有注释为中文
+- [x] Step 1: 创建 `lib/services/path_service.dart`
+- [x] Step 2: 创建 `android/.../PathPlugin.kt` + 注册到 `MainActivity.kt`
+- [x] Step 3: iOS 端在 `AppDelegate.swift` 的 `didInitializeImplicitFlutterEngine` 中直接注册 MethodChannel
+- [x] Step 4: ConvertProvider 构造函数调用 `_initOutputDirectory()` 自动获取输出目录
+- [x] Step 5: `flutter analyze` — 无新增问题
+- [x] Step 6: `git add` + `git commit`
 
-### Step 2: `native/CMakeLists.txt`
-- CMake 3.16+，C++17，位置无关代码
-- 通过 `pkg_check_modules` 查找 FFmpeg 5 模块（avcodec, avformat, avutil, swresample, swscale）
-- 构建共享库 `hdr_converter`，包含 8 个源文件
-- Windows 下设置 `PREFIX ""` 避免生成 `lib` 前缀
+## flutter analyze 输出
 
-### Step 3: `native/src/utils.h`
-- 包含 `avErrorToString` 工具函数
-- 已补充缺失的 `#include <libavutil/error.h>`
+```
+Analyzing hdr2sdr...                                            
+No issues found! (ran in 4.8s)
+```
 
-## 文件变更
+（仅 3 个 file_picker 第三方包警告，非本项目代码问题）
 
-| 文件 | 操作 |
-|------|------|
-| `native/include/hdr_converter.h` | 创建 |
-| `native/CMakeLists.txt` | 创建 |
-| `native/src/utils.h` | 创建 |
+## 设计说明
 
-## 自审
+- **MethodChannel**: `hdr2sdr/path`
+- **Android 路径**: `Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS).absolutePath`
+- **iOS 路径**: `NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, .userDomainMask, true).first`
+- **iOS 实现**: 不使用独立 Plugin 类，直接在 `AppDelegate.didInitializeImplicitFlutterEngine` 中设 MethodChannel
 
-- API 与 Task 3 的 dart:ffi 绑定完全对应
-- 解决了 brief 中 `utils.h` 未包含 `av_strerror` 所必需头文件的问题
-- 所有文件末尾均有换行符
-- 注释使用中文
+## Commit
+
+```
+f9d0104 feat: 移动端文件输出路径处理
+```

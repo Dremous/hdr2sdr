@@ -27,6 +27,24 @@ class ConvertParams {
   final int cropTop;
   final int cropBottom;
 
+  Map<String, dynamic> toJson() => {
+    'direction': direction.name,
+    'autoMode': autoMode,
+    'presetStyle': presetStyle.name,
+    'peakLuminance': peakLuminance,
+    'exposure': exposure,
+    'saturation': saturation,
+    'targetColorSpace': targetColorSpace.name,
+    'encoder': encoder.name,
+    'crf': crf,
+    'targetWidth': targetWidth,
+    'targetHeight': targetHeight,
+    'cropLeft': cropLeft,
+    'cropRight': cropRight,
+    'cropTop': cropTop,
+    'cropBottom': cropBottom,
+  };
+
   const ConvertParams({
     this.direction = ConvertDirection.hdrToSdr,
     this.autoMode = true,

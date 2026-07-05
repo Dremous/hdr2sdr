@@ -3,6 +3,7 @@ import '../models/video_file.dart';
 import '../models/convert_params.dart';
 import '../models/video_info.dart';
 import '../services/path_service.dart';
+import '../services/background_service.dart';
 
 class ConvertProvider extends ChangeNotifier {
   final List<VideoFile> _queue = [];
@@ -81,7 +82,19 @@ class ConvertProvider extends ChangeNotifier {
     _currentFile = _queue.firstWhere((f) => f.status == FileStatus.pending);
     _currentFile!.status = FileStatus.converting;
     notifyListeners();
-    // 实际的转换调用将在 NativeBridge 实现后完成
+
+    BackgroundService.onProgress = (p, current, total) {
+      updateProgress(p, current, total);
+    };
+    BackgroundService.onComplete = (success, error) {
+      onConversionComplete(success, error);
+    };
+
+    BackgroundService.startConversion(
+      filePath: _currentFile!.filePath,
+      outputPath: _outputDirectory ?? '',
+      params: _params,
+    );
   }
 
   void updateProgress(double p, int current, int total) {
@@ -104,6 +117,7 @@ class ConvertProvider extends ChangeNotifier {
 
   void cancelConversion() {
     _isConverting = false;
+    BackgroundService.cancelConversion();
     notifyListeners();
   }
 }
