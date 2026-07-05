@@ -19,7 +19,10 @@ class HomePage extends StatelessWidget {
     );
     if (result != null && context.mounted) {
       context.read<ConvertProvider>().addFiles(
-            result.files.map((f) => f.path ?? '').where((p) => p.isNotEmpty).toList(),
+            result.files
+                .map((f) => f.path ?? '')
+                .where((p) => p.isNotEmpty)
+                .toList(),
           );
     }
   }

@@ -9,10 +9,8 @@ extern "C" {
 class ColorConverter {
 public:
     ColorConverter();
-    ~ColorConverter();
+    ~ColorConverter() = default;
     int convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp);
-private:
-    SwsContext* sws_ctx_;
 };
 
 #endif

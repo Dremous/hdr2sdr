@@ -1,10 +1,19 @@
 #include "inverse_tone_mapper.h"
+#include "pixel_utils.h"
 #include <cmath>
 
 InverseToneMapper::InverseToneMapper() {}
 
 void InverseToneMapper::apply(AVFrame* frame, const InvToneMapParams& params) {
-    applyExpansion(frame, params);
+    if (!frame) return;
+
+    AVFrame* float_frame = convertToFloatPlanar(frame);
+    if (!float_frame) return;
+
+    applyExpansion(float_frame, params);
+
+    convertFromFloatPlanar(frame, float_frame);
+    av_frame_free(&float_frame);
 }
 
 void InverseToneMapper::applyExpansion(AVFrame* frame, const InvToneMapParams& params) {

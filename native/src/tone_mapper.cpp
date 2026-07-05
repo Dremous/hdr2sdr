@@ -1,4 +1,5 @@
 #include "tone_mapper.h"
+#include "pixel_utils.h"
 #include <cmath>
 #include <cstring>
 
@@ -10,7 +11,17 @@ void ToneMapper::setAlgorithm(int algo) {
 
 void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params) {
     if (!frame) return;
-    applyBt2390(frame, params);
+
+    // 转换为 GBRPF32 用于浮点 tone mapping
+    AVFrame* float_frame = convertToFloatPlanar(frame);
+    if (!float_frame) return;
+
+    // 在 float 帧上应用 BT.2390
+    applyBt2390(float_frame, params);
+
+    // 将结果写回原始帧
+    convertFromFloatPlanar(frame, float_frame);
+    av_frame_free(&float_frame);
 }
 
 void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params) {
@@ -20,10 +31,9 @@ void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params) {
     float ev = powf(2.0f, params.exposure);
     float sat = params.saturation;
 
-    // 对每个像素应用 BT.2390 tone mapping
+    // GBRPF32 格式：data[0]=R, data[1]=G, data[2]=B, 每像素 float
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            // 获取 RGB 值（假设 frame 数据为 float32 平面格式）
             float* r = (float*)(frame->data[0] + y * frame->linesize[0]) + x;
             float* g = (float*)(frame->data[1] + y * frame->linesize[1]) + x;
             float* b = (float*)(frame->data[2] + y * frame->linesize[2]) + x;

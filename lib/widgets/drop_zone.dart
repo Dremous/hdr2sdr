@@ -43,8 +43,7 @@ class DropZone extends StatelessWidget {
                 Icon(Icons.cloud_upload_outlined,
                     size: 48, color: theme.colorScheme.primary),
                 const SizedBox(height: 12),
-                Text('拖拽视频文件到此',
-                    style: theme.textTheme.titleMedium),
+                Text('拖拽视频文件到此', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 4),
                 Text('或点击选择文件',
                     style: theme.textTheme.bodyMedium

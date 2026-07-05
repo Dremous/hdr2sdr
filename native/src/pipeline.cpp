@@ -220,7 +220,6 @@ int Pipeline::start(const std::string& output_path,
     try {
         worker_thread_ = std::thread(&Pipeline::conversionThread, this,
                                       output_path, progress_cb, complete_cb, user_data);
-        worker_thread_.detach();
     } catch (...) {
         return -1;
     }

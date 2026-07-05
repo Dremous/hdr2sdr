@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/convert_provider.dart';
 import 'pages/home_page.dart';
 
 class Hdr2SdrApp extends StatelessWidget {
@@ -6,15 +8,18 @@ class Hdr2SdrApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'HDR↔SDR Converter',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        useMaterial3: true,
-        brightness: Brightness.dark,
+    return ChangeNotifierProvider(
+      create: (_) => ConvertProvider(),
+      child: MaterialApp(
+        title: 'HDR↔SDR Converter',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorSchemeSeed: Colors.blue,
+          useMaterial3: true,
+          brightness: Brightness.dark,
+        ),
+        home: const HomePage(),
       ),
-      home: const HomePage(),
     );
   }
 }

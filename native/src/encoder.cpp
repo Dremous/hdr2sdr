@@ -1,5 +1,8 @@
 #include "encoder.h"
 #include <iostream>
+extern "C" {
+#include <libavutil/pixdesc.h>
+}
 
 Encoder::Encoder()
     : fmt_ctx_(nullptr), enc_ctx_(nullptr), stream_(nullptr),
@@ -44,6 +47,12 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     enc_ctx_->color_trc = dec_ctx->color_trc;
     enc_ctx_->colorspace = dec_ctx->colorspace;
     enc_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+
+    // 提醒：编码器固定输出 YUV420P，输入帧需要确保格式一致
+    if (dec_ctx->pix_fmt != AV_PIX_FMT_YUV420P) {
+        std::cerr << "警告: 输入像素格式 " << av_get_pix_fmt_name(dec_ctx->pix_fmt)
+                  << " 将转换为 YUV420P 编码" << std::endl;
+    }
 
     if (codec->id == AV_CODEC_ID_H264 || codec->id == AV_CODEC_ID_H265) {
         av_opt_set(enc_ctx_->priv_data, "crf", std::to_string(crf).c_str(), 0);
@@ -112,6 +121,7 @@ int Encoder::finalize() {
     AVPacket* pkt = av_packet_alloc();
     while (true) {
         ret = avcodec_receive_packet(enc_ctx_, pkt);
+        if (ret == AVERROR(EAGAIN)) break; // 需要更多输入
         if (ret < 0) break;
         pkt->stream_index = 0;
         av_interleaved_write_frame(fmt_ctx_, pkt);

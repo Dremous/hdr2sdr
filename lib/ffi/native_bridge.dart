@@ -15,7 +15,8 @@ class NativeBridge {
   late final void Function(Pointer<Void>) _close;
   late final int Function(Pointer<Void>) _getFrameCount;
   late final void Function(Pointer<Void>, Pointer<VideoInfoNative>) _getInfo;
-  late final void Function(Pointer<Void>, Pointer<ConvertParamsNative>) _setParams;
+  late final void Function(Pointer<Void>, Pointer<ConvertParamsNative>)
+      _setParams;
   late final int Function(
     Pointer<Void>,
     Pointer<Uint8>,
@@ -43,29 +44,25 @@ class NativeBridge {
       throw UnsupportedError('不支持的平台');
     }
 
-    _create = _lib
-        .lookupFunction<Pointer<Void> Function(), Pointer<Void> Function()>(
+    _create =
+        _lib.lookupFunction<Pointer<Void> Function(), Pointer<Void> Function()>(
             'converter_create');
-    _destroy = _lib
-        .lookupFunction<Void Function(Pointer<Void>), void Function(Pointer<Void>)>(
-            'converter_destroy');
-    _open = _lib.lookupFunction<
-        Int32 Function(Pointer<Void>, Pointer<Utf8>),
+    _destroy = _lib.lookupFunction<Void Function(Pointer<Void>),
+        void Function(Pointer<Void>)>('converter_destroy');
+    _open = _lib.lookupFunction<Int32 Function(Pointer<Void>, Pointer<Utf8>),
         int Function(Pointer<Void>, Pointer<Utf8>)>('converter_open');
-    _close = _lib
-        .lookupFunction<Void Function(Pointer<Void>), void Function(Pointer<Void>)>(
-            'converter_close');
-    _getFrameCount = _lib.lookupFunction<
-        Int32 Function(Pointer<Void>),
+    _close = _lib.lookupFunction<Void Function(Pointer<Void>),
+        void Function(Pointer<Void>)>('converter_close');
+    _getFrameCount = _lib.lookupFunction<Int32 Function(Pointer<Void>),
         int Function(Pointer<Void>)>('converter_get_frame_count');
     _getInfo = _lib.lookupFunction<
         Void Function(Pointer<Void>, Pointer<VideoInfoNative>),
-        void Function(Pointer<Void>, Pointer<VideoInfoNative>)>(
-        'converter_get_info');
+        void Function(
+            Pointer<Void>, Pointer<VideoInfoNative>)>('converter_get_info');
     _setParams = _lib.lookupFunction<
         Void Function(Pointer<Void>, Pointer<ConvertParamsNative>),
-        void Function(Pointer<Void>, Pointer<ConvertParamsNative>)>(
-        'converter_set_params');
+        void Function(Pointer<Void>,
+            Pointer<ConvertParamsNative>)>('converter_set_params');
     _getFrame = _lib.lookupFunction<
         Int32 Function(Pointer<Void>, Pointer<Uint8>, Int64, Pointer<Int32>,
             Pointer<Int32>),
@@ -84,9 +81,8 @@ class NativeBridge {
             Pointer<NativeFunction<ProgressCallbackNative>>,
             Pointer<NativeFunction<CompletionCallbackNative>>,
             Pointer<Void>)>('converter_start');
-    _cancel = _lib
-        .lookupFunction<Void Function(Pointer<Void>), void Function(Pointer<Void>)>(
-            'converter_cancel');
+    _cancel = _lib.lookupFunction<Void Function(Pointer<Void>),
+        void Function(Pointer<Void>)>('converter_cancel');
   }
 
   /// 获取单例实例
@@ -105,7 +101,7 @@ class NativeBridge {
   int open(ConverterHandle handle, String path) {
     final ptr = path.toNativeUtf8();
     final result = _open(handle, ptr);
-    calloc.free(ptr);
+    malloc.free(ptr);
     return result;
   }
 
@@ -172,7 +168,7 @@ class NativeBridge {
   ) {
     final ptr = outputPath.toNativeUtf8();
     final result = _start(handle, ptr, progressCb, completeCb, userData);
-    calloc.free(ptr);
+    malloc.free(ptr);
     return result;
   }
 

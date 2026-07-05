@@ -35,8 +35,8 @@ class ParamPanel extends StatelessWidget {
                     ],
                     selected: {params.direction},
                     onSelectionChanged: (set) {
-                      provider.updateParams(
-                          params.copyWith(direction: set.first));
+                      provider
+                          .updateParams(params.copyWith(direction: set.first));
                     },
                   ),
                 ],
@@ -70,8 +70,7 @@ class ParamPanel extends StatelessWidget {
                   divisions: 99,
                   formatValue: (v) => '${v.toInt()} nit',
                   onChanged: (v) {
-                    provider.updateParams(
-                        params.copyWith(peakLuminance: v));
+                    provider.updateParams(params.copyWith(peakLuminance: v));
                   },
                 ),
                 SliderRow(
@@ -97,13 +96,17 @@ class ParamPanel extends StatelessWidget {
                   },
                 ),
                 const Divider(),
-                const Text('色彩空间', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('色彩空间',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 SegmentedButton<ColorSpace>(
                   segments: const [
-                    ButtonSegment(value: ColorSpace.bt709, label: Text('BT.709')),
-                    ButtonSegment(value: ColorSpace.bt2020, label: Text('BT.2020')),
-                    ButtonSegment(value: ColorSpace.dciP3, label: Text('DCI-P3')),
+                    ButtonSegment(
+                        value: ColorSpace.bt709, label: Text('BT.709')),
+                    ButtonSegment(
+                        value: ColorSpace.bt2020, label: Text('BT.2020')),
+                    ButtonSegment(
+                        value: ColorSpace.dciP3, label: Text('DCI-P3')),
                   ],
                   selected: {params.targetColorSpace},
                   onSelectionChanged: (set) {
@@ -117,14 +120,15 @@ class ParamPanel extends StatelessWidget {
                 const SizedBox(height: 8),
                 SegmentedButton<EncoderType>(
                   segments: const [
-                    ButtonSegment(value: EncoderType.h264, label: Text('H.264')),
-                    ButtonSegment(value: EncoderType.h265, label: Text('H.265')),
+                    ButtonSegment(
+                        value: EncoderType.h264, label: Text('H.264')),
+                    ButtonSegment(
+                        value: EncoderType.h265, label: Text('H.265')),
                     ButtonSegment(value: EncoderType.av1, label: Text('AV1')),
                   ],
                   selected: {params.encoder},
                   onSelectionChanged: (set) {
-                    provider.updateParams(
-                        params.copyWith(encoder: set.first));
+                    provider.updateParams(params.copyWith(encoder: set.first));
                   },
                 ),
                 SliderRow(
