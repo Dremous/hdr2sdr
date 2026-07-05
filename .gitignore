@@ -18,3 +18,5 @@ native/build/
 # Misc
 .DS_Store
 Thumbs.db
+# CI »’÷æ
+logs_*/

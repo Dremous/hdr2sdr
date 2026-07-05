@@ -1,8 +1,0 @@
-2026-07-05T14:46:10.2560000Z Evaluating native.if
-2026-07-05T14:46:10.2560000Z Evaluating: success()
-2026-07-05T14:46:10.2560000Z Result: true
-2026-07-05T14:46:10.7560000Z Requested labels: macos-latest
-2026-07-05T14:46:10.7560000Z Job defined at: Dremous/hdr2sdr/.github/workflows/ci.yml@refs/heads/master
-2026-07-05T14:46:10.7560000Z Waiting for a runner to pick up this job...
-2026-07-05T14:46:11.2900000Z Job is waiting for a hosted runner to come online.
-2026-07-05T14:46:11.2910000Z Job is about to start running on the hosted runner: GitHub Actions 1000000313
