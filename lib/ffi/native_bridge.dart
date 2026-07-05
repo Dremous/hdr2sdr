@@ -40,6 +40,10 @@ class NativeBridge {
       _lib = DynamicLibrary.open('libhdr_converter.dylib');
     } else if (Platform.isLinux) {
       _lib = DynamicLibrary.open('libhdr_converter.so');
+    } else if (Platform.isAndroid) {
+      _lib = DynamicLibrary.open('libhdr_converter.so');
+    } else if (Platform.isIOS) {
+      _lib = DynamicLibrary.process();
     } else {
       throw UnsupportedError('不支持的平台');
     }

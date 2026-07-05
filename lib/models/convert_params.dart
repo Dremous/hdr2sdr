@@ -7,7 +7,7 @@ enum PresetStyle { standard, vivid, cinematic, custom }
 enum ColorSpace { bt709, bt2020, dciP3 }
 
 /// 编码器类型枚举
-enum EncoderType { h264, h265, av1 }
+enum EncoderType { h264, h265, av1, h264Hardware, h265Hardware }
 
 /// 转换参数数据模型
 class ConvertParams {

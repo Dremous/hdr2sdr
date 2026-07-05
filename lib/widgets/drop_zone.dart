@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 
@@ -18,41 +20,49 @@ class DropZone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+
+    final content = InkWell(
+      onTap: onPickFiles,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        height: 180,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.5),
+            width: 2,
+            strokeAlign: BorderSide.strokeAlignInside,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_upload_outlined,
+                  size: 48, color: theme.colorScheme.primary),
+              const SizedBox(height: 12),
+              if (!isMobile) Text('拖拽视频文件到此', style: theme.textTheme.titleMedium),
+              if (!isMobile) const SizedBox(height: 4),
+              Text('或点击选择文件',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: theme.colorScheme.primary)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (isMobile) {
+      return content;
+    }
+
     return DropTarget(
       onDragDone: (detail) {
         final paths = detail.files.map((f) => f.path).toList();
         onFilesDropped(paths);
       },
-      child: InkWell(
-        onTap: onPickFiles,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          height: 180,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.5),
-              width: 2,
-              strokeAlign: BorderSide.strokeAlignInside,
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.cloud_upload_outlined,
-                    size: 48, color: theme.colorScheme.primary),
-                const SizedBox(height: 12),
-                Text('拖拽视频文件到此', style: theme.textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text('或点击选择文件',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: theme.colorScheme.primary)),
-              ],
-            ),
-          ),
-        ),
-      ),
+      child: content,
     );
   }
 }

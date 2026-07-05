@@ -30,7 +30,7 @@ typedef struct {
     double exposure;         // 曝光补偿
     double saturation;       // 饱和度
     int target_color_space;  // 目标色彩空间：0=BT.709, 1=BT.2020, 2=DCI-P3
-    int encoder;             // 编码器：0=H.264, 1=H.265, 2=AV1
+    int encoder;             // 编码器：0=H.264, 1=H.265, 2=AV1, 3=H.264_HW, 4=H.265_HW
     int crf;                 // CRF 质量值
     int target_width;        // 目标宽度
     int target_height;       // 目标高度
