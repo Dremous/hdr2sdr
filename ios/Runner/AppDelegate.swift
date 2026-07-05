@@ -12,5 +12,20 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    let channel = FlutterMethodChannel(
+      name: "hdr2sdr/path",
+      binaryMessenger: engineBridge.binaryMessenger
+    )
+    channel.setMethodCallHandler { call, result in
+      guard call.method == "getOutputDirectory" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      let documents = NSSearchPathForDirectoriesInDomains(
+        .documentDirectory, .userDomainMask, true
+      ).first
+      result(documents)
+    }
   }
 }

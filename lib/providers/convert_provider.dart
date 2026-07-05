@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/video_file.dart';
 import '../models/convert_params.dart';
 import '../models/video_info.dart';
+import '../services/path_service.dart';
 
 class ConvertProvider extends ChangeNotifier {
   final List<VideoFile> _queue = [];
@@ -13,6 +14,19 @@ class ConvertProvider extends ChangeNotifier {
   int _totalFrames = 0;
   bool _isConverting = false;
   String? _outputDirectory;
+
+  ConvertProvider() {
+    _initOutputDirectory();
+  }
+
+  Future<void> _initOutputDirectory() async {
+    try {
+      _outputDirectory = await PathService.getOutputDirectory();
+      notifyListeners();
+    } catch (_) {
+      // 静默失败，用户可手动设置
+    }
+  }
   String? _errorMessage;
   Uint8List? _previewFrame;
 
