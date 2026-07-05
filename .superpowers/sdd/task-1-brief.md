@@ -1,95 +1,27 @@
-### Task 1: Flutter 椤圭洰鑴氭墜鏋?
+# Task 1: 平台目录初始化
+
 **Files:**
-- Create: `pubspec.yaml`
-- Create: `lib/main.dart`
-- Create: `lib/app.dart`
+- Run: lutter create --project-name hdr2sdr --platforms ios,android .
+- Modify: ios/Podfile
+- Modify: ndroid/app/build.gradle
+- Create: ndroid/app/src/main/jniLibs/arm64-v8a/.gitkeep
+- Create: ndroid/app/src/main/jniLibs/x86_64/.gitkeep
 
-**Interfaces:**
-- Produces: 鍙繍琛岀殑 Flutter 绌哄３搴旂敤
+- [ ] **Step 1: 运行 flutter create 生成平台目录**
 
-- [ ] **Step 1: 鍒涘缓 pubspec.yaml**
+bash:
+cd E:\ai\hdr2sdr
+flutter create --project-name hdr2sdr --platforms ios,android .
 
-```yaml
-name: hdr2sdr
-description: HDR鈫擲DR 瑙嗛杞崲宸ュ叿
-publish_to: 'none'
-version: 1.0.0+1
+预期：生成 ios/ 和 android/ 目录及全部平台文件，不覆盖 lib/ 目录。
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
+- [ ] **Step 2: 配置 android/app/build.gradle**
+在 android { 块内修改/添加 minSdk 24、ndk abiFilters
 
-dependencies:
-  flutter:
-    sdk: flutter
-  ffi: ^2.1.0
-  path_provider: ^2.1.0
-  file_picker: ^6.1.0
-  provider: ^6.1.0
-  desktop_drop: ^0.4.0
-  intl: ^0.19.0
+- [ ] **Step 3: 创建 jniLibs 占位目录**
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.0
+- [ ] **Step 4: 在 ios/Podfile 追加 FFmpegKit 依赖 (pod 'ffmpeg-kit-ios-full', '~> 6.0')
 
-flutter:
-  uses-material-design: true
-```
+- [ ] **Step 5: 验证: flutter pub get && flutter analyze
 
-- [ ] **Step 2: 鍒涘缓 lib/app.dart**
-
-```dart
-import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
-
-class Hdr2SdrApp extends StatelessWidget {
-  const Hdr2SdrApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'HDR鈫擲DR Converter',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        useMaterial3: true,
-        brightness: Brightness.dark,
-      ),
-      home: const HomePage(),
-    );
-  }
-}
-```
-
-- [ ] **Step 3: 鍒涘缓 lib/main.dart**
-
-```dart
-import 'package:flutter/material.dart';
-import 'app.dart';
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const Hdr2SdrApp());
-}
-```
-
-- [ ] **Step 4: 楠岃瘉椤圭洰缁撴瀯**
-
-Run:
-```bash
-Set-Location -LiteralPath "E:\ai\hdr2sdr"
-flutter pub get
-```
-Expected: 渚濊禆涓嬭浇鎴愬姛锛屾棤閿欒
-
-- [ ] **Step 5: 鎻愪氦**
-
-```bash
-git init
-git add pubspec.yaml lib/
-git commit -m "feat: 鍒濆鍖?Flutter 椤圭洰鑴氭墜鏋?
-```
-
----
-
+- [ ] **Step 6: 提交
