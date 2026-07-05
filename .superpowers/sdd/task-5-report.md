@@ -1,22 +1,24 @@
-# Task 5 报告：C++ Decoder 模块
+# Task 5 报告: Android 后台转换 Service
 
-## 实现内容
-- 创建了 `native/src/decoder.h` — Decoder 类的头文件，声明了打开/关闭/解码/定位等接口
-- 创建了 `native/src/decoder.cpp` — Decoder 类的实现，封装 FFmpeg libavformat/libavcodec
+## 完成内容
 
-## 文件变更
-- `native/src/decoder.h` (新增) — 类声明，包含文件打开、帧解码、seek、属性查询等接口
-- `native/src/decoder.cpp` (新增) — 完整实现，包括：
-  - `open()` — 打开视频文件、查找视频流、初始化解码器
-  - `close()` — 释放所有 FFmpeg 资源
-  - `decodeNextFrame()` — 逐帧解码
-  - `seekAndDecode()` — 按微秒时间戳定位并解码
-  - `flush()` — 刷新解码器缓冲区
-  - 属性查询：帧数、帧率、宽高、时长、像素格式
+### 新建文件
+- `android/app/src/main/kotlin/com/example/hdr2sdr/HdrConversionService.kt` — Android 前台 Service
+  - 创建通知渠道 `hdr2sdr_conversion` (API 26+)
+  - `startForeground` 显示持久通知
+  - `ACTION_START` / `ACTION_CANCEL` 双 intent action 支持
+  - 通过 `MainActivity.sendBackgroundEvent()` 回传事件到 Dart
+- `lib/services/background_service.dart` — Dart 侧通道封装
+  - `MethodChannel('hdr2sdr/background')` 发起 start/cancel 调用
+  - `EventChannel('hdr2sdr/background_event')` 接收进度/完成事件
+  - 暴露 `onProgress` / `onComplete` 静态回调
 
-## 自审发现
-- 文件末尾均以空行结束 ✓
-- 所有代码注释为中文 ✓
-- 头文件使用 `#ifndef` 包含保护 ✓
-- 使用 `std::mutex` 保证线程安全 ✓
-- `AVERROR_DECODER_NOT_FOUND` 非标准错误码，但此符号在 FFmpeg 新版本中可用；若编译报错可替换为 `AVERROR(EINVAL)` ✓
+### 修改文件
+- `AndroidManifest.xml` — 添加 `<service>` 声明 + `FOREGROUND_SERVICE` 权限
+- `MainActivity.kt` — 注册 MethodChannel 与 EventChannel，处理 start/cancel 转 Intent
+- `convert_params.dart` — 新增 `toJson()` 序列化方法
+- `convert_provider.dart` — `startConversion()` 设置回调并调用 BackgroundService；`cancelConversion()` 调用 BackgroundService
+
+## 验证
+- `flutter analyze` — 0 issues
+- Git commit `c138ad4`

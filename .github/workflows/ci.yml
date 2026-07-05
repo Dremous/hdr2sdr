@@ -53,17 +53,19 @@ jobs:
       # macOS — Homebrew（pkg-config 自动搜索 /usr/local 路径）
       - name: Install FFmpeg dev (macOS)
         if: runner.os == 'macOS'
-        run: brew install ffmpeg cmake pkg-config
+        env:
+          HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
+        run: brew install ffmpeg cmake pkgconf
 
-      # Windows — vcpkg（GitHub Actions 预装，缓存加速）
+      # Windows — vcpkg（GitHub Actions 预装）
       - name: Setup vcpkg (Windows)
         if: runner.os == 'Windows'
         id: vcpkg
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgJsonGlob: native/vcpkg.json
-          vcpkgCacheKey: vcpkg-${{ runner.os }}-${{ hashFiles('native/vcpkg.json') }}
           runVcpkgInstall: true
+          doNotCache: false
 
       - name: Set PKG_CONFIG_PATH for vcpkg (Windows)
         if: runner.os == 'Windows'
@@ -128,6 +130,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: brew install cmake pkgconf
       - name: Build native lib
         run: |
           chmod +x native/build_ios.sh

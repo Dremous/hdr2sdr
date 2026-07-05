@@ -19,3 +19,6 @@ Task 1: complete (commits 0706424..0437543, review clean after iOS deployment ta
 Task 2: complete (commits 0437543..6c5ac84, review clean)
 Task 3: complete (commits 6c5ac84..bb6384c, review clean)
 Task 4: complete (commits bb6384c..f9d0104, review clean)
+Task 5: complete (commits f9d0104..c138ad4, review clean)
+Task 6: complete (commits c138ad4..6edbdb9, review clean)
+Task 7: complete (commits 6edbdb9..4ebd4b9, review clean)
