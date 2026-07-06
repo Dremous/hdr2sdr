@@ -51,6 +51,14 @@ for ABI in "${ABIS[@]}"; do
   CXX="$TOOLCHAIN/bin/${ARCH_NAME}-linux-android${API_LEVEL}-clang++"
   SYSROOT="$TOOLCHAIN/sysroot"
 
+  # ── 创建 gcc/g++ 符号链接（x264/FFmpeg configure 用 gcc 名字查找编译器） ──
+  WRAPPER_DIR="$BUILD_DIR/wrappers-$ABI"
+  mkdir -p "$WRAPPER_DIR"
+  ln -sf "$CC" "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-gcc"
+  ln -sf "$CXX" "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-g++"
+  ln -sf "$TOOLCHAIN/bin/llvm-ar" "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-ar"
+  export PATH="$WRAPPER_DIR:$TOOLCHAIN/bin:$PATH"
+
   # ── 编译 x264 ──
   if [ ! -f "$PREFIX/lib/libx264.so" ]; then
     echo "  编译 x264..."
@@ -62,12 +70,11 @@ for ABI in "${ABIS[@]}"; do
       --enable-static \
       --disable-cli \
       --host="${ARCH_NAME}-linux-android" \
-      --cross-prefix="$TOOLCHAIN/bin/llvm-" \
+      --cross-prefix="${ARCH_NAME}-linux-android${API_LEVEL}-" \
       --sysroot="$SYSROOT" \
-      --extra-cflags="-fPIC" \
-      > /dev/null 2>&1
-    make -j$(nproc) > /dev/null 2>&1
-    make install > /dev/null 2>&1
+      --extra-cflags="-fPIC"
+    make -j$(nproc)
+    make install
     cd "$SCRIPT_DIR"
   else
     echo "  x264 已存在，跳过"
@@ -93,7 +100,7 @@ for ABI in "${ABIS[@]}"; do
     --cpu="$CPU_NAME" \
     --cc="$CC" \
     --cxx="$CXX" \
-    --cross-prefix="$TOOLCHAIN/bin/llvm-" \
+    --cross-prefix="${ARCH_NAME}-linux-android${API_LEVEL}-" \
     --sysroot="$SYSROOT" \
     --pkg-config-flags="--static" \
     --extra-cflags="-I$PREFIX/include -fPIC" \
@@ -118,12 +125,11 @@ for ABI in "${ABIS[@]}"; do
     --enable-demuxer=mov,matroska,mp4,mpegts,avi \
     --enable-muxer=mp4,matroska,mpegts \
     --enable-protocol=file \
-    --enable-filter=scale,format,colorspace \
-    > /dev/null 2>&1
+    --enable-filter=scale,format,colorspace
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
-  make -j$(nproc) > /dev/null 2>&1
-  make install > /dev/null 2>&1
+  make -j$(nproc)
+  make install
 
   cd "$SCRIPT_DIR"
   echo "  $ABI 完成: $PREFIX/lib/"
