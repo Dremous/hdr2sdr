@@ -35,7 +35,7 @@ jobs:
       - run: flutter test
 
   # ──────────────────────────────────────────────
-  # C++ 原生库：CMake 构建（需要 FFmpeg dev 包）
+  # C++ 原生库 + 桌面 Flutter 可执行文件
   # ──────────────────────────────────────────────
   native:
     name: Native (${{ matrix.os }})
@@ -47,7 +47,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Linux — Ubuntu apt（pkg-config 自动搜索系统路径）
+      # ── Flutter SDK（桌面构建用） ──
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # ── Linux：FFmpeg + GTK（桌面构建依赖） ──
       - name: Install FFmpeg dev (Ubuntu)
         if: runner.os == 'Linux'
         run: |
@@ -55,16 +60,16 @@ jobs:
           sudo apt-get install -y \
             libavcodec-dev libavformat-dev libavutil-dev \
             libswresample-dev libswscale-dev \
-            cmake pkg-config
+            cmake pkg-config libgtk-3-dev liblzma-dev
 
-      # macOS — Homebrew（pkg-config 自动搜索 /usr/local 路径）
+      # ── macOS：Homebrew（pkg-config 自动搜索 /usr/local 路径） ──
       - name: Install FFmpeg dev (macOS)
         if: runner.os == 'macOS'
         env:
           HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
         run: brew install ffmpeg cmake pkgconf
 
-      # Windows — 使用系统安装的 vcpkg（GitHub Actions 预装在 C:\vcpkg）
+      # ── Windows：vcpkg + Flutter 桌面依赖 ──
       - name: Install FFmpeg via vcpkg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -81,14 +86,46 @@ jobs:
           "PKG_CONFIG_PATH=$pkgCfgDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "PATH=$env:PATH;C:\vcpkg\installed\x64-windows\tools\pkgconf" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
+      # ── CMake 构建原生 C++ 库 ──
       - name: Configure CMake
         run: cmake -B build -S native
 
-      - name: Build
+      - name: Build native library
         run: cmake --build build --config Release
 
-      # ── 上传编译产物：各平台的动态库（即使编译失败也上传已有文件） ──
-      - name: Upload artifact
+      # ── 将原生库复制到项目根目录（供 Flutter FFI Desktop 加载） ──
+      - name: Deploy native library to project root
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            cp build/libhdr_converter.so .
+          elif [ "$RUNNER_OS" = "Windows" ]; then
+            cp build/Release/hdr_converter.dll . 2>/dev/null || cp build/hdr_converter.dll .
+          else
+            cp build/libhdr_converter.dylib .
+          fi
+
+      # ── Flutter 桌面构建 ──
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build desktop executable
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            flutter build linux --release
+            mkdir -p build/linux/x64/release/bundle/lib
+            cp libhdr_converter.so build/linux/x64/release/bundle/lib/
+          elif [ "$RUNNER_OS" = "Windows" ]; then
+            flutter build windows --release
+            cp hdr_converter.dll build/windows/x64/runner/Release/
+          else
+            flutter build macos --release
+            cp libhdr_converter.dylib build/macos/Build/Products/Release/hdr2sdr.app/Contents/MacOS/
+          fi
+
+      # ── 上传原生库 ──
+      - name: Upload native library
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -101,6 +138,19 @@ jobs:
             build/*.lib
             build/lib/**
             build/bin/**
+            build/Release/*.dll
+            build/Release/*.pdb
+
+      # ── 上传桌面可执行文件 ──
+      - name: Upload desktop app
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hdr2sdr-desktop-${{ runner.os }}
+          path: |
+            build/linux/x64/release/bundle/**
+            build/windows/x64/runner/Release/**
+            build/macos/Build/Products/Release/hdr2sdr.app
 
   # ──────────────────────────────────────────────
   # Android APK 构建
