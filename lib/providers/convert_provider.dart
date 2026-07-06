@@ -16,7 +16,7 @@ class ConvertProvider extends ChangeNotifier {
   int _totalFrames = 0;
   bool _isConverting = false;
   String? _outputDirectory;
-  final bool _nativeAvailable = false; // 待原生库就绪后改为 true
+  final bool _nativeAvailable = true;
 
   ConvertProvider() {
     _initOutputDirectory();
