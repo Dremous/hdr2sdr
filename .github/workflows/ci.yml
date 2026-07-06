@@ -23,6 +23,13 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
@@ -61,6 +68,8 @@ jobs:
       - name: Install FFmpeg via vcpkg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
         run: |
           $vcpkg = "C:\vcpkg\vcpkg.exe"
           if (-not (Test-Path $vcpkg)) {
@@ -104,8 +113,16 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
       - run: flutter pub get
-      - run: flutter build apk --release
+      - name: Build APK
+        run: flutter build apk --release
         continue-on-error: true
       - uses: actions/upload-artifact@v4
         if: always()
@@ -126,8 +143,16 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
       - run: flutter pub get
-      - run: flutter build ios --no-codesign --release
+      - name: Build IPA
+        run: flutter build ios --no-codesign --release
         continue-on-error: true
       - uses: actions/upload-artifact@v4
         if: always()
