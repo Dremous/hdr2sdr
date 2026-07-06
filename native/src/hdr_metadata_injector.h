@@ -4,6 +4,7 @@
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libavutil/mastering_display_metadata.h>
 }
 
 struct HDRInjectParams {
