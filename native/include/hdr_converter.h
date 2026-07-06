@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef _WIN32
 #define EXPORT __declspec(dllexport)
 #else
@@ -73,5 +77,9 @@ EXPORT int   converter_start(void* handle, const char* output_path,
                               void* user_data);
 // 取消转换任务
 EXPORT void  converter_cancel(void* handle);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
