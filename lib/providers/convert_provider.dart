@@ -1,10 +1,11 @@
-import 'dart:io' show Platform;
+import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../models/video_file.dart';
 import '../models/convert_params.dart';
 import '../models/video_info.dart';
 import '../services/path_service.dart';
-import '../services/background_service.dart';
+import '../ffi/native_bridge.dart';
 
 class ConvertProvider extends ChangeNotifier {
   final List<VideoFile> _queue = [];
@@ -16,7 +17,6 @@ class ConvertProvider extends ChangeNotifier {
   int _totalFrames = 0;
   bool _isConverting = false;
   String? _outputDirectory;
-  final bool _nativeAvailable = true;
 
   ConvertProvider() {
     _initOutputDirectory();
@@ -30,6 +30,7 @@ class ConvertProvider extends ChangeNotifier {
   }
   String? _errorMessage;
   Uint8List? _previewFrame;
+  Uint8List? get previewFrame => _previewFrame;
 
   List<VideoFile> get queue => List.unmodifiable(_queue);
   ConvertParams get params => _params;
@@ -41,7 +42,6 @@ class ConvertProvider extends ChangeNotifier {
   bool get isConverting => _isConverting;
   String? get outputDirectory => _outputDirectory;
   String? get errorMessage => _errorMessage;
-  Uint8List? get previewFrame => _previewFrame;
 
   void addFiles(List<String> paths) {
     for (final path in paths) {
@@ -68,11 +68,6 @@ class ConvertProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updatePreviewFrame(Uint8List? frame) {
-    _previewFrame = frame;
-    notifyListeners();
-  }
-
   void startConversion() {
     if (_queue.isEmpty || _isConverting) return;
     _isConverting = true;
@@ -88,47 +83,49 @@ class ConvertProvider extends ChangeNotifier {
     _currentFile!.status = FileStatus.converting;
     notifyListeners();
 
-    if (!_nativeAvailable) {
-      onConversionComplete(false, _nativeMissingMessage());
-      return;
-    }
-
-    if (Platform.isAndroid || Platform.isIOS) {
-      _startMobileConversion();
-    } else {
-      _startDesktopConversion();
-    }
+    _tryNativeConversion();
   }
 
-  String _nativeMissingMessage() {
-    if (Platform.isWindows) {
-      return '缺少 hdr_converter.dll — 请用 MSYS2 编译原生库（cmake -B build -S native && cmake --build build）';
-    } else if (Platform.isLinux) {
-      return '缺少 libhdr_converter.so — 请编译原生库后放入可执行文件同目录';
-    } else if (Platform.isMacOS) {
-      return '缺少 libhdr_converter.dylib — 请编译原生库后放入 .app 包内';
-    } else {
-      return '缺少原生转换库 — 请先编译 C++ 核心';
+  void _tryNativeConversion() {
+    try {
+      final bridge = NativeBridge.instance;
+      final handle = bridge.create();
+      final outputFile = '${_outputDirectory ?? ''}/${_currentFile!.fileName}_sdr.mp4';
+
+      final openResult = bridge.open(handle, _currentFile!.filePath);
+      if (openResult < 0) {
+        bridge.destroy(handle);
+        onConversionComplete(false, '无法打开视频文件（错误码: $openResult）');
+        return;
+      }
+
+      bridge.setParams(handle, _params);
+
+      // 获取视频信息用于显示
+      final info = bridge.getInfo(handle);
+      if (info != null) {
+        _currentInfo = info;
+        _totalFrames = info.frameCount;
+      }
+
+      final startResult = bridge.start(
+        handle,
+        outputFile,
+        nullptr,
+        nullptr,
+        nullptr,
+      );
+      bridge.close(handle);
+      bridge.destroy(handle);
+
+      if (startResult == 0) {
+        onConversionComplete(true, null);
+      } else {
+        onConversionComplete(false, '转换失败（错误码: $startResult）');
+      }
+    } catch (e) {
+      onConversionComplete(false, '原生库错误: $e');
     }
-  }
-
-  void _startMobileConversion() {
-    BackgroundService.onProgress = (p, current, total) {
-      updateProgress(p, current, total);
-    };
-    BackgroundService.onComplete = (success, error) {
-      onConversionComplete(success, error);
-    };
-    BackgroundService.startConversion(
-      filePath: _currentFile!.filePath,
-      outputPath: _outputDirectory ?? '',
-      params: _params,
-    );
-  }
-
-  void _startDesktopConversion() {
-    // TODO: 接入 NativeBridge FFI
-    onConversionComplete(false, '桌面端转换待实现（NativeBridge 尚未接入）');
   }
 
   void updateProgress(double p, int current, int total) {
@@ -151,7 +148,6 @@ class ConvertProvider extends ChangeNotifier {
 
   void cancelConversion() {
     _isConverting = false;
-    BackgroundService.cancelConversion();
     notifyListeners();
   }
 }
