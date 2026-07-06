@@ -93,6 +93,8 @@ for ABI in "${ABIS[@]}"; do
   # 清理上次编译
   make clean > /dev/null 2>&1 || true
 
+  export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+
   ./configure \
     --prefix="$PREFIX" \
     --enable-cross-compile \
