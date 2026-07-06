@@ -15,10 +15,13 @@ void HDRMetadataInjector::injectSideData(AVCodecContext* codec_ctx,
 
     // HDR10 需要注入 Mastering Display Metadata
     if (params.hdr_type == 1) {
-        auto* mastering = (AVMasteringDisplayMetadata*)
-            av_mallocz(sizeof(AVMasteringDisplayMetadata));
-        if (!mastering) return;
+        // av_stream_new_side_data 在所有 FFmpeg 版本中均可用（兼容 6.x/8.x）
+        auto* sd = av_stream_new_side_data(fmt_ctx->streams[0],
+            AV_PKT_DATA_MASTERING_DISPLAY_METADATA,
+            sizeof(AVMasteringDisplayMetadata));
+        if (!sd) return;
 
+        auto* mastering = (AVMasteringDisplayMetadata*)sd->data;
         // BT.2020 基色
         mastering->display_primaries[0][0] = av_d2q(0.708, 100000);
         mastering->display_primaries[0][1] = av_d2q(0.292, 100000);
@@ -33,10 +36,5 @@ void HDRMetadataInjector::injectSideData(AVCodecContext* codec_ctx,
             ? params.min_luminance : 0.005, 10000);
         mastering->has_luminance = 1;
         mastering->has_primaries = 1;
-
-        av_stream_add_side_data(fmt_ctx->streams[0],
-            AV_PKT_DATA_MASTERING_DISPLAY_METADATA,
-            (uint8_t*)mastering,
-            sizeof(AVMasteringDisplayMetadata));
     }
 }
