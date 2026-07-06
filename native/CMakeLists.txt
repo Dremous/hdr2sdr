@@ -9,11 +9,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(COMPILE_ONLY "Only compile source files, skip linking (for CI cross-platform verification)" OFF)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(AVCODEC REQUIRED libavcodec)
-pkg_check_modules(AVFORMAT REQUIRED libavformat)
-pkg_check_modules(AVUTIL REQUIRED libavutil)
-pkg_check_modules(SWRESAMPLE REQUIRED libswresample)
-pkg_check_modules(SWSCALE REQUIRED libswscale)
+
+# IMPORTED_TARGET: 自动处理 include 路径、库路径、链接标志，跨平台最可靠
+pkg_check_modules(AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
+pkg_check_modules(AVFORMAT REQUIRED IMPORTED_TARGET libavformat)
+pkg_check_modules(AVUTIL REQUIRED IMPORTED_TARGET libavutil)
+pkg_check_modules(SWRESAMPLE REQUIRED IMPORTED_TARGET libswresample)
+pkg_check_modules(SWSCALE REQUIRED IMPORTED_TARGET libswscale)
 
 set(HDR_CONVERTER_SOURCES
     src/decoder.cpp
@@ -26,40 +28,30 @@ set(HDR_CONVERTER_SOURCES
     src/pipeline.cpp
 )
 
-# 编译模式：OBJECT 库（不链接）仅验证代码正确性
+# OBJECT 库：仅编译 .o 文件不链接（COMPILE_ONLY 模式用，CI 交叉编译验证）
 if(COMPILE_ONLY)
     add_library(hdr_converter OBJECT ${HDR_CONVERTER_SOURCES})
 else()
     add_library(hdr_converter SHARED ${HDR_CONVERTER_SOURCES})
 endif()
 
+# 项目自身头文件
 target_include_directories(hdr_converter
     PUBLIC include
     PRIVATE src
-    ${AVCODEC_INCLUDE_DIRS}
-    ${AVFORMAT_INCLUDE_DIRS}
-    ${AVUTIL_INCLUDE_DIRS}
-    ${SWRESAMPLE_INCLUDE_DIRS}
-    ${SWSCALE_INCLUDE_DIRS}
 )
 
+# IMPORTED_TARGET 自动提供 FFmpeg 的 include 路径 + 链接库
+target_link_libraries(hdr_converter
+    PkgConfig::AVCODEC
+    PkgConfig::AVFORMAT
+    PkgConfig::AVUTIL
+    PkgConfig::SWRESAMPLE
+    PkgConfig::SWSCALE
+)
+
+# 仅完整链接模式：平台特定设置
 if(NOT COMPILE_ONLY)
-    target_link_directories(hdr_converter PRIVATE
-        ${AVCODEC_LIBRARY_DIRS}
-        ${AVFORMAT_LIBRARY_DIRS}
-        ${AVUTIL_LIBRARY_DIRS}
-        ${SWRESAMPLE_LIBRARY_DIRS}
-        ${SWSCALE_LIBRARY_DIRS}
-    )
-
-    target_link_libraries(hdr_converter
-        ${AVCODEC_LIBRARIES}
-        ${AVFORMAT_LIBRARIES}
-        ${AVUTIL_LIBRARIES}
-        ${SWRESAMPLE_LIBRARIES}
-        ${SWSCALE_LIBRARIES}
-    )
-
     if(WIN32)
         set_target_properties(hdr_converter PROPERTIES PREFIX "")
     endif()
