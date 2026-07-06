@@ -15,12 +15,16 @@ void _runConversionInIsolate(List<dynamic> args) {
   final sendPort = args[3] as SendPort;
 
   try {
+    print('[hdr2sdr] Isolate 内部: 加载原生库...');
     final bridge = NativeBridge.instance;
+    print('[hdr2sdr] Isolate 内部: 原生库加载成功，创建 handle...');
     final handle = bridge.create();
+    print('[hdr2sdr] Isolate 内部: handle 创建成功，打开视频...');
 
     try {
       final openResult = bridge.open(handle, filePath);
       if (openResult < 0) {
+        print('[hdr2sdr] Isolate 内部: 打不开视频, 错误码=$openResult');
         sendPort.send({
           'type': 'complete',
           'success': false,
@@ -30,14 +34,12 @@ void _runConversionInIsolate(List<dynamic> args) {
         return;
       }
 
+      print('[hdr2sdr] Isolate 内部: 视频已打开，设置参数并开始转换...');
       bridge.setParams(handle, params);
 
-      // 监听来自主 isolate 的取消消息（非阻塞轮询不适用，改用 ReceivePort.close 作取消信号）
-      // 此处的根本限制：converter_start 是阻塞调用，Isolate 无法在调用期间响应消息。
-      // 实际取消通过 kill Isolate 实现。此处仅做架构预留。
-
       final startResult = bridge.start(
-        handle, outputPath, nullptr, nullptr, nullptr);
+          handle, outputPath, nullptr, nullptr, nullptr);
+      print('[hdr2sdr] Isolate 内部: 转换结束, 结果=$startResult');
       bridge.close(handle);
       bridge.destroy(handle);
 
@@ -47,6 +49,7 @@ void _runConversionInIsolate(List<dynamic> args) {
         'error': startResult == 0 ? null : '转换失败（错误码: $startResult）',
       });
     } catch (e) {
+      print('[hdr2sdr] Isolate 内部异常: $e');
       try {
         bridge.close(handle);
       } catch (_) {}
@@ -60,6 +63,7 @@ void _runConversionInIsolate(List<dynamic> args) {
       });
     }
   } catch (e) {
+    print('[hdr2sdr] Isolate 内部: 无法加载原生库: $e');
     sendPort.send({
       'type': 'complete',
       'success': false,
@@ -174,15 +178,25 @@ class ConvertProvider extends ChangeNotifier {
     final outputPath = _buildOutputPath();
     final params = _params;
 
+    debugPrint('[hdr2sdr] 正在启动后台转换 Isolate...');
+    debugPrint('[hdr2sdr] 输入: $filePath');
+    debugPrint('[hdr2sdr] 输出: $outputPath');
+
     final receivePort = ReceivePort();
     Isolate.spawn(
       _runConversionInIsolate,
       [filePath, outputPath, params, receivePort.sendPort],
     ).then((iso) {
+      debugPrint('[hdr2sdr] Isolate 已启动');
       _conversionIsolate = iso;
+    }, onError: (e) {
+      debugPrint('[hdr2sdr] Isolate 启动失败: $e');
+      receivePort.close();
+      onConversionComplete(false, '无法创建后台转换线程: $e');
     });
 
     receivePort.listen((message) {
+      debugPrint('[hdr2sdr] 收到 Isolate 消息: $message');
       if (message is Map) {
         final type = message['type'] as String?;
         if (type == 'complete') {
