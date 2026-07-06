@@ -1,7 +1,7 @@
 #include "encoder.h"
 #include <iostream>
-extern "C" {
 #include <libavutil/pixdesc.h>
+#include <libavutil/opt.h>
 }
 
 Encoder::Encoder()
