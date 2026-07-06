@@ -67,9 +67,10 @@ jobs:
             Write-Error "vcpkg not found at $vcpkg"
             exit 1
           }
-          & $vcpkg install ffmpeg:x64-windows --recurse --clean-after-build
+          & $vcpkg install ffmpeg:x64-windows pkgconf:x64-windows --recurse --clean-after-build
           $pkgCfgDir = "C:\vcpkg\installed\x64-windows\lib\pkgconfig"
           "PKG_CONFIG_PATH=$pkgCfgDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "PATH=$env:PATH;C:\vcpkg\installed\x64-windows\tools\pkgconf" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Configure CMake
         run: cmake -B build -S native

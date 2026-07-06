@@ -6,15 +6,11 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/mastering_display_metadata.h>
-#if __has_include(<libavutil/content_light_metadata.h>)
+#include <libavutil/frame.h>
+// FFmpeg 7.0+ (libavutil >= 59) 已通过 frame.h 提供 AVContentLightMetadata
+// 旧版本需要显式包含
+#if !defined(LIBAVUTIL_VERSION_INT) || LIBAVUTIL_VERSION_INT < AV_VERSION_INT(59, 0, 0)
 #include <libavutil/content_light_metadata.h>
-#else
-// FFmpeg 7.0+ 移除了此头文件，Ubuntu 6.1 的包也不包含它
-// 此处直接定义所需的结构体
-typedef struct AVContentLightMetadata {
-    uint16_t MaxCLL;
-    uint16_t MaxFALL;
-} AVContentLightMetadata;
 #endif
 }
 
