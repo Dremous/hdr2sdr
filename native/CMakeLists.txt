@@ -33,6 +33,14 @@ target_include_directories(hdr_converter
     ${SWSCALE_INCLUDE_DIRS}
 )
 
+target_link_directories(hdr_converter PRIVATE
+    ${AVCODEC_LIBRARY_DIRS}
+    ${AVFORMAT_LIBRARY_DIRS}
+    ${AVUTIL_LIBRARY_DIRS}
+    ${SWRESAMPLE_LIBRARY_DIRS}
+    ${SWSCALE_LIBRARY_DIRS}
+)
+
 target_link_libraries(hdr_converter
     ${AVCODEC_LIBRARIES}
     ${AVFORMAT_LIBRARIES}

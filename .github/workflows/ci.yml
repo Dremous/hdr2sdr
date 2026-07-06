@@ -184,6 +184,10 @@ jobs:
           restore-keys: |
             pub-${{ runner.os }}-
       - run: flutter pub get
+      - name: CocoaPods install
+        run: |
+          cd ios
+          pod install --repo-update
       - name: Build IPA
         run: flutter build ios --no-codesign --release
         continue-on-error: true

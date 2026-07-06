@@ -23,7 +23,9 @@ void HDRMetadataInjector::injectSideData(AVCodecContext* codec_ctx,
             sizeof(AVMasteringDisplayMetadata));
         if (!sd) return;
 
-        auto* mastering = (AVMasteringDisplayMetadata*)sd->data;
+        // FFmpeg 6.x: av_stream_new_side_data 返回 uint8_t*（直接缓冲区指针）
+        // 不是 AVFrameSideData*，不能使用 sd->data，直接转换 sd 即可
+        auto* mastering = (AVMasteringDisplayMetadata*)sd;
         // BT.2020 基色
         mastering->display_primaries[0][0] = av_d2q(0.708, 100000);
         mastering->display_primaries[0][1] = av_d2q(0.292, 100000);

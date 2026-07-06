@@ -43,3 +43,13 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// 强制所有 library 子模块使用 compileSdk 36
+// 此时子模块已评估完毕，plugins.withId 立即执行，不会再被覆盖
+rootProject.subprojects {
+    plugins.withId("com.android.library") {
+        extensions.configure<com.android.build.gradle.LibraryExtension> {
+            compileSdk = 36
+        }
+    }
+}

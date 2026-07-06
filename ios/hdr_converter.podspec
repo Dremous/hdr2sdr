@@ -10,5 +10,4 @@ Pod::Spec.new do |s|
   s.source       = { :path => "." }
   s.vendored_libraries = "libhdr_converter.a"
   s.static_framework = true
-  s.dependency "ffmpeg-kit-ios-full", "~> 6.0"
 end
