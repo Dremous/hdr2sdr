@@ -107,6 +107,7 @@ for ABI in "${ABIS[@]}"; do
     --extra-cflags="-I$PREFIX/include -fPIC" \
     --extra-ldflags="-L$PREFIX/lib" \
     --enable-shared \
+    --enable-gpl \
     --disable-static \
     --disable-programs \
     --disable-doc \
