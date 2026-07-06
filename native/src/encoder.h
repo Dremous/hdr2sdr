@@ -4,10 +4,13 @@
 #include <string>
 #include <atomic>
 #include <functional>
+
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/frame.h>
+#include <libavutil/pixdesc.h>
+#include <libavutil/opt.h>
 }
 
 using ProgressCb = std::function<void(int percent, int64_t current, int64_t total)>;

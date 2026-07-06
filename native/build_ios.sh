@@ -18,7 +18,25 @@ done
 
 CMAKE_EXTRA_ARGS=""
 if $COMPILE_ONLY; then
-  CMAKE_EXTRA_ARGS="-DCOMPILE_ONLY=ON"
+  # ── 交叉编译模式：隔离 FFmpeg 头文件 ──
+  # macOS 宿主 include 路径可能包含与 iOS SDK 冲突的系统头文件
+  FFMPEG_TEMP_INC=$(mktemp -d)
+  trap "rm -rf $FFMPEG_TEMP_INC" EXIT
+  
+  # 从 pkg-config 获取宿主 FFmpeg 的 include 路径
+  FFMPEG_HOST_INC=$(pkg-config --cflags-only-I libavcodec | sed 's/-I//g' | tr ' ' '\n' | head -1)
+  echo "宿主 FFmpeg 头文件路径: $FFMPEG_HOST_INC"
+  
+  # 只复制 FFmpeg 相关的子目录
+  for subdir in libavcodec libavformat libavutil libswresample libswscale; do
+    if [ -d "$FFMPEG_HOST_INC/$subdir" ]; then
+      cp -r "$FFMPEG_HOST_INC/$subdir" "$FFMPEG_TEMP_INC/"
+    fi
+  done
+  echo "隔离头文件目录: $FFMPEG_TEMP_INC"
+  ls "$FFMPEG_TEMP_INC"/ 2>/dev/null || echo "(空)"
+  
+  CMAKE_EXTRA_ARGS="-DCOMPILE_ONLY=ON -DFFMPEG_INCLUDE_DIR=$FFMPEG_TEMP_INC"
 fi
 
 echo "编译 iOS arm64..."

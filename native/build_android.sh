@@ -25,7 +25,26 @@ fi
 
 CMAKE_EXTRA_ARGS=""
 if $COMPILE_ONLY; then
-  CMAKE_EXTRA_ARGS="-DCOMPILE_ONLY=ON"
+  # ── 交叉编译模式：隔离 FFmpeg 头文件 ──
+  # 宿主 pkg-config 的 include 路径包含系统头文件（/usr/include），会与 NDK 的 bionic 冲突
+  # 因此单独提取 FFmpeg 子目录头文件到临时位置
+  FFMPEG_TEMP_INC=$(mktemp -d)
+  trap "rm -rf $FFMPEG_TEMP_INC" EXIT
+  
+  # 从 pkg-config 获取宿主 FFmpeg 的 include 路径
+  FFMPEG_HOST_INC=$(pkg-config --cflags-only-I libavcodec libavformat libavutil libswresample libswscale | sed 's/-I//g' | tr ' ' '\n' | head -1)
+  echo "宿主 FFmpeg 头文件路径: $FFMPEG_HOST_INC"
+  
+  # 只复制 FFmpeg 相关的子目录（不复制系统头文件如 sys/ cdefs.h）
+  for subdir in libavcodec libavformat libavutil libswresample libswscale; do
+    if [ -d "$FFMPEG_HOST_INC/$subdir" ]; then
+      cp -r "$FFMPEG_HOST_INC/$subdir" "$FFMPEG_TEMP_INC/"
+    fi
+  done
+  echo "隔离头文件目录: $FFMPEG_TEMP_INC"
+  ls "$FFMPEG_TEMP_INC"/ 2>/dev/null || echo "(空)"
+  
+  CMAKE_EXTRA_ARGS="-DCOMPILE_ONLY=ON -DFFMPEG_INCLUDE_DIR=$FFMPEG_TEMP_INC"
 fi
 
 ABIS=("arm64-v8a" "x86_64")

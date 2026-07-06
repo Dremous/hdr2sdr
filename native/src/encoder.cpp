@@ -1,7 +1,5 @@
 #include "encoder.h"
 #include <iostream>
-#include <libavutil/pixdesc.h>
-#include <libavutil/opt.h>
 
 Encoder::Encoder()
     : fmt_ctx_(nullptr), enc_ctx_(nullptr), stream_(nullptr),
@@ -47,18 +45,25 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     enc_ctx_->colorspace = dec_ctx->colorspace;
     enc_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-    // 提醒：编码器固定输出 YUV420P，输入帧需要确保格式一致
+    // 像素格式转换提醒（FFmpeg 7+ 用 av_pix_fmt_desc_get 替代废弃的 av_get_pix_fmt_name）
     if (dec_ctx->pix_fmt != AV_PIX_FMT_YUV420P) {
-        std::cerr << "警告: 输入像素格式 " << av_get_pix_fmt_name(dec_ctx->pix_fmt)
+        const char* fmt_name = "未知";
+        const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(dec_ctx->pix_fmt);
+        if (desc && desc->name) fmt_name = desc->name;
+        std::cerr << "警告: 输入像素格式 " << fmt_name
                   << " 将转换为 YUV420P 编码" << std::endl;
     }
 
+    // 编码器参数（使用 AVDictionary 替代 av_opt_set，避免 FFmpeg 8.x API 废弃问题）
     if (codec->id == AV_CODEC_ID_H264 || codec->id == AV_CODEC_ID_H265) {
-        av_opt_set(enc_ctx_->priv_data, "crf", std::to_string(crf).c_str(), 0);
-        av_opt_set(enc_ctx_->priv_data, "preset", "medium", 0);
+        AVDictionary* opts = nullptr;
+        av_dict_set(&opts, "crf", std::to_string(crf).c_str(), 0);
+        av_dict_set(&opts, "preset", "medium", 0);
+        ret = avcodec_open2(enc_ctx_, codec, &opts);
+        av_dict_free(&opts);
+    } else {
+        ret = avcodec_open2(enc_ctx_, codec, nullptr);
     }
-
-    ret = avcodec_open2(enc_ctx_, codec, nullptr);
     if (ret < 0) return ret;
 
     stream_ = avformat_new_stream(fmt_ctx_, codec);
