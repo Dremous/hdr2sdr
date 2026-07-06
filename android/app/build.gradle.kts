@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.hdr2sdr"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34  // desktop_drop 等插件需要 compileSdk 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
