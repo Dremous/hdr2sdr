@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
   }
 
   Future<void> _pickFiles(BuildContext context) async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['mp4', 'mkv', 'mov', 'avi', 'mxf', 'webm'],
       allowMultiple: true,
@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
   }
 
   Future<void> _pickOutputDir(BuildContext context) async {
-    final dir = await FilePicker.platform.getDirectoryPath();
+    final dir = await FilePicker.getDirectoryPath();
     if (dir != null && context.mounted) {
       context.read<ConvertProvider>().setOutputDirectory(dir);
     }
