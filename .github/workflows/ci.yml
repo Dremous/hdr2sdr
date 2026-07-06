@@ -128,9 +128,15 @@ jobs:
         with:
           name: libhdr_converter-${{ runner.os }}
           path: |
-            build/*.dll build/*.so build/*.dylib build/*.lib
-            build/Release/*.dll build/Release/*.pdb
-            *.dll *.so *.dylib
+            build/*.dll
+            build/*.so
+            build/*.dylib
+            build/*.lib
+            build/Release/*.dll
+            build/Release/*.pdb
+            *.dll
+            *.so
+            *.dylib
 
       - name: Upload desktop app
         if: success()
