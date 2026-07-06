@@ -110,9 +110,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Setup Android SDK
+        run: |
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:
@@ -124,6 +129,11 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
         continue-on-error: true
+      - name: List APK output
+        if: always()
+        run: |
+          find build -name "*.apk" -type f 2>/dev/null || true
+          ls -la build/app/outputs/ 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -131,6 +141,7 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/*.apk
             build/app/outputs/**/*.apk
+            build/**/*.apk
 
   # ──────────────────────────────────────────────
   # iOS IPA 构建
