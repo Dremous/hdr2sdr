@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../models/video_file.dart';
 import '../models/convert_params.dart';
@@ -15,6 +17,7 @@ class ConvertProvider extends ChangeNotifier {
   int _totalFrames = 0;
   bool _isConverting = false;
   String? _outputDirectory;
+  final bool _nativeAvailable = false; // 待原生库就绪后改为 true
 
   ConvertProvider() {
     _initOutputDirectory();
@@ -24,9 +27,7 @@ class ConvertProvider extends ChangeNotifier {
     try {
       _outputDirectory = await PathService.getOutputDirectory();
       notifyListeners();
-    } catch (_) {
-      // 静默失败，用户可手动设置
-    }
+    } catch (_) {}
   }
   String? _errorMessage;
   Uint8List? _previewFrame;
@@ -79,22 +80,56 @@ class ConvertProvider extends ChangeNotifier {
     _errorMessage = null;
     _progress = 0.0;
     _currentFrame = 0;
-    _currentFile = _queue.firstWhere((f) => f.status == FileStatus.pending);
+    final pending = _queue.where((f) => f.status == FileStatus.pending).toList();
+    if (pending.isEmpty) {
+      _isConverting = false;
+      return;
+    }
+    _currentFile = pending.first;
     _currentFile!.status = FileStatus.converting;
     notifyListeners();
 
+    if (!_nativeAvailable) {
+      onConversionComplete(false, _nativeMissingMessage());
+      return;
+    }
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      _startMobileConversion();
+    } else {
+      _startDesktopConversion();
+    }
+  }
+
+  String _nativeMissingMessage() {
+    if (Platform.isWindows) {
+      return '缺少 hdr_converter.dll — 请用 MSYS2 编译原生库（cmake -B build -S native && cmake --build build）';
+    } else if (Platform.isLinux) {
+      return '缺少 libhdr_converter.so — 请编译原生库后放入可执行文件同目录';
+    } else if (Platform.isMacOS) {
+      return '缺少 libhdr_converter.dylib — 请编译原生库后放入 .app 包内';
+    } else {
+      return '缺少原生转换库 — 请先编译 C++ 核心';
+    }
+  }
+
+  void _startMobileConversion() {
     BackgroundService.onProgress = (p, current, total) {
       updateProgress(p, current, total);
     };
     BackgroundService.onComplete = (success, error) {
       onConversionComplete(success, error);
     };
-
     BackgroundService.startConversion(
       filePath: _currentFile!.filePath,
       outputPath: _outputDirectory ?? '',
       params: _params,
     );
+  }
+
+  void _startDesktopConversion() {
+    // TODO: 接入 NativeBridge FFI
+    onConversionComplete(false, '桌面端转换待实现（NativeBridge 尚未接入）');
   }
 
   void updateProgress(double p, int current, int total) {

@@ -5,10 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# ── 编译验证模式：仅编译源文件不链接 ──
-# 由 build_android.sh / build_ios.sh --compile-only 触发
-# 构建脚本负责隔离 FFmpeg 头文件并传入 FFMPEG_INCLUDE_DIR，避免宿主系统头文件与交叉编译器冲突
-option(COMPILE_ONLY "Only compile source files, skip linking (for CI cross-platform verification)" OFF)
+# ── 编译模式 ──
+# COMPILE_ONLY: 仅编译不链接（iOS CI 交叉编译验证用）
+# FFMPEG_ROOT:  Android 交叉编译链接模式，指向预编译的 FFmpeg 目录（含 include/ 和 lib/）
+option(COMPILE_ONLY "Only compile, skip linking" OFF)
 
 set(HDR_CONVERTER_SOURCES
     src/decoder.cpp
@@ -21,11 +21,25 @@ set(HDR_CONVERTER_SOURCES
     src/pipeline.cpp
 )
 
-if(COMPILE_ONLY)
-    # ── 交叉编译验证：仅编译 .o，不链接 ──
-    # 使用构建脚本传入的隔离 FFmpeg 头文件目录，避免宿主系统头文件冲突
+# ── FFMPEG_ROOT 模式（Android 交叉编译完整链接） ──
+if(DEFINED FFMPEG_ROOT)
+    add_library(hdr_converter SHARED ${HDR_CONVERTER_SOURCES})
+
+    target_include_directories(hdr_converter
+        PUBLIC include
+        PRIVATE src "${FFMPEG_ROOT}/include"
+    )
+
+    target_link_directories(hdr_converter PRIVATE "${FFMPEG_ROOT}/lib")
+
+    target_link_libraries(hdr_converter
+        avcodec avformat avutil swresample swscale
+    )
+
+# ── COMPILE_ONLY 模式（iOS 交叉编译验证） ──
+elseif(COMPILE_ONLY)
     if(NOT DEFINED FFMPEG_INCLUDE_DIR)
-        message(FATAL_ERROR "COMPILE_ONLY 模式需要 FFMPEG_INCLUDE_DIR 参数（由 build_android.sh/build_ios.sh 传入）")
+        message(FATAL_ERROR "COMPILE_ONLY 模式需要 FFMPEG_INCLUDE_DIR 参数")
     endif()
 
     add_library(hdr_converter OBJECT ${HDR_CONVERTER_SOURCES})
@@ -33,8 +47,9 @@ if(COMPILE_ONLY)
         PUBLIC include
         PRIVATE src ${FFMPEG_INCLUDE_DIR}
     )
+
+# ── 本机构建（桌面：Linux/macOS/Windows） ──
 else()
-    # ── 本机构建：完整链接 ──
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
     pkg_check_modules(AVFORMAT REQUIRED IMPORTED_TARGET libavformat)

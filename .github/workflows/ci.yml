@@ -167,17 +167,24 @@ jobs:
         run: |
           echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
           yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
-      # ── 原生 C++ 交叉编译（仅编译验证，使用宿主 FFmpeg 头文件 + NDK 编译器） ──
-      - name: Install FFmpeg dev for headers
+      # ── 原生 C++ 交叉编译（编译 FFmpeg + 完整链接） ──
+      - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev cmake pkg-config
+          sudo apt-get install -y nasm make cmake pkg-config git wget
       - name: Install Android NDK
         run: |
           ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
           echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/27.0.12077973" >> $GITHUB_ENV
-      - name: Native compile for Android
-        run: bash native/build_android.sh --compile-only
+      # ── 缓存 FFmpeg + x264 交叉编译产物（命中后跳过编译直接链接） ──
+      - name: Cache FFmpeg Android libs
+        uses: actions/cache@v4
+        with:
+          path: native/build/ffmpeg-android
+          key: ffmpeg-android-${{ hashFiles('native/build_ffmpeg_android.sh') }}-v1
+      - name: Native compile for Android (含 FFmpeg)
+        run: |
+          bash native/build_android.sh
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:

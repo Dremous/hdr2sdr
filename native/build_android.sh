@@ -1,69 +1,54 @@
 #!/bin/bash
-# Android NDK 交叉编译脚本
-# 用法: ./build_android.sh [--compile-only]
+# Android 原生库完整编译脚本
+# 1. 交叉编译 FFmpeg + x264（调用 build_ffmpeg_android.sh）
+# 2. 编译 libhdr_converter.so 链接 FFmpeg
+# 3. 复制所有 .so 到 jniLibs
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR"
 JNILIBS_DIR="$PROJECT_DIR/../android/app/src/main/jniLibs"
+FFMPEG_BUILD_DIR="$PROJECT_DIR/build/ffmpeg-android"
 
-# ── 解析参数 ──
-COMPILE_ONLY=false
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --compile-only) COMPILE_ONLY=true; shift ;;
-        *) echo "未知参数: $1"; exit 1 ;;
-    esac
-done
+NDK="${ANDROID_NDK_HOME:?请设置 ANDROID_NDK_HOME}"
 
-# 需要 Android NDK 环境变量
-NDK_PATH="${ANDROID_NDK_HOME:-$ANDROID_NDK}"
-if [ -z "$NDK_PATH" ]; then
-  echo "错误: 请设置 ANDROID_NDK_HOME 环境变量"
-  exit 1
-fi
+# ── 第 1 步：编译 FFmpeg ──
+echo "=== 第 1 步：编译 FFmpeg for Android ==="
+bash "$PROJECT_DIR/build_ffmpeg_android.sh"
 
-CMAKE_EXTRA_ARGS=""
-if $COMPILE_ONLY; then
-  # ── 交叉编译模式：隔离 FFmpeg 头文件 ──
-  # 宿主 pkg-config 的 include 路径包含系统头文件（/usr/include），会与 NDK 的 bionic 冲突
-  # 因此单独提取 FFmpeg 子目录头文件到临时位置
-  FFMPEG_TEMP_INC=$(mktemp -d)
-  trap "rm -rf $FFMPEG_TEMP_INC" EXIT
-  
-  # 从 pkg-config 获取宿主 FFmpeg 的 include 路径
-  FFMPEG_HOST_INC=$(pkg-config --cflags-only-I libavcodec libavformat libavutil libswresample libswscale | sed 's/-I//g' | tr ' ' '\n' | head -1)
-  echo "宿主 FFmpeg 头文件路径: $FFMPEG_HOST_INC"
-  
-  # 只复制 FFmpeg 相关的子目录（不复制系统头文件如 sys/ cdefs.h）
-  for subdir in libavcodec libavformat libavutil libswresample libswscale; do
-    if [ -d "$FFMPEG_HOST_INC/$subdir" ]; then
-      cp -r "$FFMPEG_HOST_INC/$subdir" "$FFMPEG_TEMP_INC/"
-    fi
-  done
-  echo "隔离头文件目录: $FFMPEG_TEMP_INC"
-  ls "$FFMPEG_TEMP_INC"/ 2>/dev/null || echo "(空)"
-  
-  CMAKE_EXTRA_ARGS="-DCOMPILE_ONLY=ON -DFFMPEG_INCLUDE_DIR=$FFMPEG_TEMP_INC"
-fi
+# ── 第 2 步：编译 libhdr_converter.so ──
+echo "=== 第 2 步：编译 libhdr_converter.so ==="
 
 ABIS=("arm64-v8a" "x86_64")
 for ABI in "${ABIS[@]}"; do
-  echo "编译 $ABI..."
+  echo "--- 编译 $ABI ---"
+  FFMPEG_ROOT="$FFMPEG_BUILD_DIR/$ABI"
+
+  # 配置 CMake（用 FFMPEG_ROOT 替代 pkg-config）
   cmake -B "build/android/$ABI" \
     -S "$PROJECT_DIR" \
     -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/toolchain-android.cmake" \
     -DANDROID_ABI="$ABI" \
     -DCMAKE_BUILD_TYPE=Release \
-    $CMAKE_EXTRA_ARGS
+    -DFFMPEG_ROOT="$FFMPEG_ROOT"
 
   cmake --build "build/android/$ABI" --config Release
 
-  if ! $COMPILE_ONLY; then
-    # 复制 .so 到 jniLibs
-    mkdir -p "$JNILIBS_DIR/$ABI"
-    cp "build/android/$ABI/libhdr_converter.so" "$JNILIBS_DIR/$ABI/"
-  fi
+  # ── 第 3 步：复制所有 .so 到 jniLibs ──
+  mkdir -p "$JNILIBS_DIR/$ABI"
+
+  # 复制我们的 .so
+  cp "build/android/$ABI/libhdr_converter.so" "$JNILIBS_DIR/$ABI/"
+
+  # 复制 FFmpeg .so 依赖
+  for lib in libavcodec libavformat libavutil libswresample libswscale libx264; do
+    if [ -f "$FFMPEG_ROOT/lib/${lib}.so" ]; then
+      cp "$FFMPEG_ROOT/lib/${lib}.so" "$JNILIBS_DIR/$ABI/"
+    fi
+  done
+
+  echo "$ABI jniLibs:"
+  ls -la "$JNILIBS_DIR/$ABI/"
 done
 
-echo "Android 编译完成"
+echo "=== Android 原生编译完成 ==="
