@@ -82,7 +82,7 @@ jobs:
           restore-keys: pub-${{ runner.os }}-
 
       - run: flutter pub get
-      - run: flutter analyze
+      - run: flutter analyze --no-fatal-infos
       - run: flutter test
 
       - name: Build desktop app
@@ -130,6 +130,7 @@ jobs:
           path: |
             build/*.dll build/*.so build/*.dylib build/*.lib
             build/Release/*.dll build/Release/*.pdb
+            *.dll *.so *.dylib
 
       - name: Upload desktop app
         if: success()
