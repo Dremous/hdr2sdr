@@ -102,33 +102,41 @@ int Encoder::encodeFrame(AVFrame* frame) {
     if (!initialized_ || cancelled_) return -1;
 
     int ret = avcodec_send_frame(enc_ctx_, frame);
-    if (ret < 0) return ret;
+    if (ret < 0 && ret != AVERROR_EOF) return ret;
 
     AVPacket* pkt = av_packet_alloc();
-    ret = avcodec_receive_packet(enc_ctx_, pkt);
-    if (ret >= 0) {
+    // 循环接收：编码器可能为一个输入帧产生多个输出包（B 帧 / lookahead）
+    while (true) {
+        ret = avcodec_receive_packet(enc_ctx_, pkt);
+        if (ret == AVERROR(EAGAIN)) break;
+        if (ret < 0) { av_packet_free(&pkt); return ret; }
         pkt->stream_index = 0;
-        av_interleaved_write_frame(fmt_ctx_, pkt);
+        ret = av_interleaved_write_frame(fmt_ctx_, pkt);
+        av_packet_unref(pkt);
+        if (ret < 0) { av_packet_free(&pkt); return ret; }
         frame_count_++;
     }
     av_packet_free(&pkt);
-    return ret;
+    return 0;
 }
 
 int Encoder::finalize() {
     if (!initialized_) return -1;
 
-    // 冲刷编码器
+    // 冲刷编码器：发送 EOF 信号
     int ret = avcodec_send_frame(enc_ctx_, nullptr);
-    if (ret < 0) return ret;
+    // EAGAIN 表示编码器还有缓冲包未输出，继续 receive 循环排空即可
+    if (ret < 0 && ret != AVERROR_EOF && ret != AVERROR(EAGAIN)) return ret;
 
     AVPacket* pkt = av_packet_alloc();
     while (true) {
         ret = avcodec_receive_packet(enc_ctx_, pkt);
-        if (ret == AVERROR(EAGAIN)) break; // 需要更多输入
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) break;
         if (ret < 0) break;
         pkt->stream_index = 0;
-        av_interleaved_write_frame(fmt_ctx_, pkt);
+        ret = av_interleaved_write_frame(fmt_ctx_, pkt);
+        av_packet_unref(pkt);
+        if (ret < 0) break;
     }
     av_packet_free(&pkt);
 

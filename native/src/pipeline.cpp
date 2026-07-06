@@ -34,7 +34,7 @@ int Pipeline::open(const std::string& input_path) {
 }
 
 void Pipeline::close() {
-    cancel();
+    // 不再调用 cancel()——取消由 converter_cancel 显式触发
     if (worker_thread_.joinable()) worker_thread_.join();
     decoder_.close();
     initialized_ = false;
@@ -173,8 +173,9 @@ void Pipeline::conversionThread(const std::string& output_path,
     int total_frames = getFrameCount();
     int frame_idx = 0;
 
-    //  seek 到开头
-    decoder_.seekAndDecode(0);
+    // seek 到开头（丢弃解码出的第一帧，它已在 open() 时被解码过）
+    AVFrame* firstFrame = decoder_.seekAndDecode(0);
+    if (firstFrame) av_frame_free(&firstFrame);
 
     while (!cancelled_) {
         AVFrame* frame = decoder_.decodeNextFrame();
