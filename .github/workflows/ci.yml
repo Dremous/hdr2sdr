@@ -9,10 +9,10 @@ on:
 
 jobs:
   # ──────────────────────────────────────────────
-  # Flutter 前端：依赖安装 → 静态分析 → 测试
+  # 桌面全平台构建：Native C++ → Flutter analyze/test → 打包可执行文件
   # ──────────────────────────────────────────────
-  flutter:
-    name: Flutter (${{ matrix.os }})
+  desktop-build:
+    name: Desktop (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -23,36 +23,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - name: Cache pub dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.pub-cache
-          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
-          restore-keys: |
-            pub-${{ runner.os }}-
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
 
-  # ──────────────────────────────────────────────
-  # C++ 原生库 + 桌面 Flutter 可执行文件
-  # ──────────────────────────────────────────────
-  native:
-    name: Native (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@v4
-
-      # ── Flutter SDK（桌面构建用） ──
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      # ── Linux：FFmpeg + GTK（桌面构建依赖） ──
+      # ── FFmpeg 依赖（按平台） ──
       - name: Install FFmpeg dev (Ubuntu)
         if: runner.os == 'Linux'
         run: |
@@ -62,14 +34,12 @@ jobs:
             libswresample-dev libswscale-dev \
             cmake pkg-config libgtk-3-dev liblzma-dev
 
-      # ── macOS：Homebrew（pkg-config 自动搜索 /usr/local 路径） ──
       - name: Install FFmpeg dev (macOS)
         if: runner.os == 'macOS'
         env:
           HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
         run: brew install ffmpeg cmake pkgconf
 
-      # ── Windows：vcpkg + Flutter 桌面依赖 ──
       - name: Install FFmpeg via vcpkg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -86,15 +56,13 @@ jobs:
           "PKG_CONFIG_PATH=$pkgCfgDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "PATH=$env:PATH;C:\vcpkg\installed\x64-windows\tools\pkgconf" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      # ── CMake 构建原生 C++ 库 ──
-      - name: Configure CMake
-        run: cmake -B build -S native
-
+      # ── 原生 C++ 编译（先于 Flutter） ──
       - name: Build native library
-        run: cmake --build build --config Release
+        run: |
+          cmake -B build -S native
+          cmake --build build --config Release
 
-      # ── 将原生库复制到项目根目录（供 Flutter FFI Desktop 加载） ──
-      - name: Deploy native library to project root
+      - name: Deploy native lib to project root
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
@@ -105,11 +73,19 @@ jobs:
             cp build/libhdr_converter.dylib .
           fi
 
-      # ── Flutter 桌面构建 ──
-      - name: Flutter pub get
-        run: flutter pub get
+      # ── Flutter（在 native 之后） ──
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
 
-      - name: Build desktop executable
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+      - name: Build desktop app
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
@@ -124,24 +100,15 @@ jobs:
             cp libhdr_converter.dylib build/macos/Build/Products/Release/hdr2sdr.app/Contents/MacOS/
           fi
 
-      # ── 上传原生库 ──
       - name: Upload native library
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: libhdr_converter-${{ runner.os }}
           path: |
-            build/*.dll
-            build/*.pdb
-            build/*.so
-            build/*.dylib
-            build/*.lib
-            build/lib/**
-            build/bin/**
-            build/Release/*.dll
-            build/Release/*.pdb
+            build/*.dll build/*.so build/*.dylib build/*.lib
+            build/Release/*.dll build/Release/*.pdb
 
-      # ── 上传桌面可执行文件 ──
       - name: Upload desktop app
         if: success()
         uses: actions/upload-artifact@v4
