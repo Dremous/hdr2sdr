@@ -92,8 +92,8 @@ jobs:
             flutter build linux --release
             mkdir -p build/linux/x64/release/bundle/lib
             cp libhdr_converter.so build/linux/x64/release/bundle/lib/
-            # 打包 FFmpeg 依赖 .so
-            ldd build/linux/x64/release/bundle/hdr2sdr 2>/dev/null | grep -E 'libav|libsw|libx26|libxvid|libvpx|libvorbis|libopus|libmp3|libtheora' | awk '{print $3}' | while read dep; do
+            # 打包 FFmpeg 依赖 .so（检查 libhdr_converter.so 而不是 Flutter 主程序）
+            ldd build/linux/x64/release/bundle/lib/libhdr_converter.so 2>/dev/null | grep -E 'libav|libsw|libx26|libvpx' | awk '{print $3}' | while read dep; do
               if [ -n "$dep" ] && [ -f "$dep" ]; then cp "$dep" build/linux/x64/release/bundle/lib/; fi
             done || true
           elif [ "$RUNNER_OS" = "Windows" ]; then
