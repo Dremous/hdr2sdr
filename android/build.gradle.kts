@@ -21,10 +21,10 @@ subprojects {
 
 // file_picker 8.3.7 编译于 android-34，但其依赖 flutter_plugin_android_lifecycle
 // 需要 minCompileSdk=36。子模块无法通过 root project 覆盖编译 SDK，
-// 因此跳过各 library 模块的 AAR metadata 校验（app 模块仍正常编译于 SDK 36）
-subprojects {
-    tasks.configureEach {
-        if (name.startsWith("checkAarMetadata")) {
+// 因此在所有项目评估完成后跳过各 library 模块的 AAR metadata 校验
+gradle.projectsEvaluated {
+    allprojects {
+        tasks.matching { it.name.startsWith("checkAarMetadata") }.configureEach {
             enabled = false
         }
     }
