@@ -23,9 +23,6 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")  // HDR↔SDR: 只构建 64 位架构
-        }
     }
 
     buildTypes {
