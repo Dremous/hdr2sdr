@@ -41,7 +41,7 @@ for ABI in "${ABIS[@]}"; do
   cp "build/android/$ABI/libhdr_converter.so" "$JNILIBS_DIR/$ABI/"
 
   # 复制 FFmpeg .so 依赖
-  for lib in libavcodec libavformat libavutil libswresample libswscale libx264; do
+  for lib in libavcodec libavformat libavutil libswresample libswscale; do
     if [ -f "$FFMPEG_ROOT/lib/${lib}.so" ]; then
       cp "$FFMPEG_ROOT/lib/${lib}.so" "$JNILIBS_DIR/$ABI/"
     fi
