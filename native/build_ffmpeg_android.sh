@@ -51,28 +51,29 @@ for ABI in "${ABIS[@]}"; do
   CXX="$TOOLCHAIN/bin/${ARCH_NAME}-linux-android${API_LEVEL}-clang++"
   SYSROOT="$TOOLCHAIN/sysroot"
 
-  # ── 创建 gcc/g++ 符号链接（x264/FFmpeg configure 用 gcc 名字查找编译器） ──
+  # ── 创建 NDK 工具链符号链接（ar/ranlib/strip/nm 供 FFmpeg configure 使用） ──
   WRAPPER_DIR="$BUILD_DIR/wrappers-$ABI"
   mkdir -p "$WRAPPER_DIR"
-  ln -sf "$CC" "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-gcc"
-  ln -sf "$CXX" "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-g++"
-  ln -sf "$TOOLCHAIN/bin/llvm-ar" "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-ar"
-  export PATH="$WRAPPER_DIR:$TOOLCHAIN/bin:$PATH"
+  ln -sf "$TOOLCHAIN/bin/llvm-ar"     "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-ar"
+  ln -sf "$TOOLCHAIN/bin/llvm-ranlib" "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-ranlib"
+  ln -sf "$TOOLCHAIN/bin/llvm-strip"  "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-strip"
+  ln -sf "$TOOLCHAIN/bin/llvm-nm"     "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-nm"
+  export PATH="$WRAPPER_DIR:$PATH"
 
   # ── 编译 x264 ──
   if [ ! -f "$PREFIX/lib/libx264.so" ]; then
     echo "  编译 x264..."
     mkdir -p "$BUILD_DIR/build-x264-$ABI"
     cd "$BUILD_DIR/build-x264-$ABI"
+    CC="$CC" AR="$TOOLCHAIN/bin/llvm-ar" RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
     "$X264_DIR/configure" \
       --prefix="$PREFIX" \
-      --enable-shared \
-      --enable-static \
-      --disable-cli \
       --host="${ARCH_NAME}-linux-android" \
-      --cross-prefix="${ARCH_NAME}-linux-android${API_LEVEL}-" \
       --sysroot="$SYSROOT" \
-      --extra-cflags="-fPIC"
+      --extra-cflags="-fPIC" \
+      --disable-cli \
+      --enable-shared \
+      --enable-static
     make -j$(nproc)
     make install
     cd "$SCRIPT_DIR"
