@@ -126,6 +126,17 @@ jobs:
           restore-keys: |
             pub-${{ runner.os }}-
       - run: flutter pub get
+      - name: Patch file_picker compileSdk
+        run: |
+          # file_picker 8.3.7 编译于 android-34，但其依赖
+          # flutter_plugin_android_lifecycle 2.0.35 要求 minCompileSdk=36
+          # 直接修改 pub cache 中的 build.gradle 强制 compileSdk=36
+          FILE_PICKER_BUILD=$(find ~/.pub-cache -path "*/file_picker-*/android/build.gradle" 2>/dev/null | head -1)
+          if [ -n "$FILE_PICKER_BUILD" ]; then
+            echo "Patching $FILE_PICKER_BUILD"
+            sed -i 's/compileSdkVersion = 34/compileSdkVersion = 36/g' "$FILE_PICKER_BUILD"
+            sed -i 's/compileSdk = 34/compileSdk = 36/g' "$FILE_PICKER_BUILD"
+          fi
       - name: Build APK
         run: flutter build apk --release
         continue-on-error: true
