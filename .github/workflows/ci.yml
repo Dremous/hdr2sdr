@@ -95,7 +95,7 @@ jobs:
             # 打包 FFmpeg 依赖 .so
             ldd build/linux/x64/release/bundle/hdr2sdr 2>/dev/null | grep -E 'libav|libsw|libx26|libxvid|libvpx|libvorbis|libopus|libmp3|libtheora' | awk '{print $3}' | while read dep; do
               if [ -n "$dep" ] && [ -f "$dep" ]; then cp "$dep" build/linux/x64/release/bundle/lib/; fi
-            done
+            done || true
           elif [ "$RUNNER_OS" = "Windows" ]; then
             flutter build windows --release
             cp hdr_converter.dll build/windows/x64/runner/Release/
@@ -110,17 +110,16 @@ jobs:
             MACOS_BIN="build/macos/Build/Products/Release/hdr2sdr.app/Contents/MacOS"
             cp libhdr_converter.dylib "$MACOS_BIN/"
             # 打包 FFmpeg 依赖 .dylib 并修正 install_name
-            otool -L build/macos/Build/Products/Release/hdr2sdr.app/Contents/MacOS/hdr2sdr 2>/dev/null | grep -E 'libav|libsw|freetype' | awk '{print $1}' | while read dep; do
+            otool -L build/macos/Build/Products/Release/hdr2sdr.app/Contents/MacOS/hdr2sdr 2>/dev/null | grep -E 'libav|libsw' | awk '{print $1}' | while read dep; do
               if [ -f "$dep" ]; then
                 base=$(basename "$dep")
                 cp "$dep" "$MACOS_BIN/"
                 install_name_tool -change "$dep" "@executable_path/$base" "$MACOS_BIN/hdr2sdr" 2>/dev/null || true
-                # 递归修正 dylib 内部的引用路径
                 for lib in "$MACOS_BIN"/lib*.dylib; do
                   install_name_tool -change "$dep" "@executable_path/$base" "$lib" 2>/dev/null || true
                 done
               fi
-            done
+            done || true
           fi
 
       - name: Upload native library
