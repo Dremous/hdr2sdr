@@ -113,6 +113,7 @@ jobs:
           name: hdr2sdr-apk
           path: |
             build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/**/*.apk
 
   # ──────────────────────────────────────────────
   # iOS IPA 构建
@@ -132,4 +133,7 @@ jobs:
         if: always()
         with:
           name: hdr2sdr-ipa
-          path: build/ios/iphoneos/Runner.app
+          path: |
+            build/ios/iphoneos/Runner.app
+            build/ios/Release-iphoneos/Runner.app
+            build/ios/*.app
