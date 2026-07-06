@@ -12,6 +12,7 @@ option(COMPILE_ONLY "Only compile, skip linking" OFF)
 
 set(HDR_CONVERTER_SOURCES
     src/decoder.cpp
+    src/converter.cpp
     src/hdr_analyzer.cpp
     src/tone_mapper.cpp
     src/inverse_tone_mapper.cpp
