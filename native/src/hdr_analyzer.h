@@ -8,16 +8,10 @@ extern "C" {
 #include <libavutil/mastering_display_metadata.h>
 #include <libavutil/frame.h>
 // AVContentLightMetadata 在 libavutil >= 59（FFmpeg 7.0+）中通过 frame.h 提供
-// 旧版本需要显式包含头文件；某些发行版（如 Ubuntu 24.04）的包中不包含该头文件，则本地定义
-#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(59, 0, 0)
+// 旧版本需要显式包含头文件；某些发行版的包中该头文件不存在时，不再回退定义
+// （frame.h 或 mastering_display_metadata.h 已提供该结构体，重复定义会冲突）
 #if __has_include(<libavutil/content_light_metadata.h>)
 #include <libavutil/content_light_metadata.h>
-#else
-typedef struct AVContentLightMetadata {
-    uint16_t MaxCLL;
-    uint16_t MaxFALL;
-} AVContentLightMetadata;
-#endif
 #endif
 }
 

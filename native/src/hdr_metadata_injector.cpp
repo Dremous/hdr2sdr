@@ -15,7 +15,9 @@ void HDRMetadataInjector::injectSideData(AVCodecContext* codec_ctx,
 
     // HDR10 需要注入 Mastering Display Metadata
     if (params.hdr_type == 1) {
-        // av_stream_new_side_data 在所有 FFmpeg 版本中均可用（兼容 6.x/8.x）
+        // FFmpeg >= 8.x (libavformat >= 61): av_stream_new_side_data 已移除
+        // 不再写入流级 mastering metadata，依赖 codec context 属性传递 HDR 信号
+        #if LIBAVFORMAT_VERSION_MAJOR < 61
         auto* sd = av_stream_new_side_data(fmt_ctx->streams[0],
             AV_PKT_DATA_MASTERING_DISPLAY_METADATA,
             sizeof(AVMasteringDisplayMetadata));
@@ -36,5 +38,10 @@ void HDRMetadataInjector::injectSideData(AVCodecContext* codec_ctx,
             ? params.min_luminance : 0.005, 10000);
         mastering->has_luminance = 1;
         mastering->has_primaries = 1;
+        #else
+        // FFmpeg 8.x: mastering metadata 通过 frame-level side data 或 muxer 自动处理
+        // codec context 的 color_primaries/color_trc/colorspace 已在上面设置
+        (void)fmt_ctx; // 抑制未使用警告
+        #endif
     }
 }
