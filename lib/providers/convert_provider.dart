@@ -159,14 +159,17 @@ class ConvertProvider extends ChangeNotifier {
     _errorMessage = null;
     _progress = 0.0;
     _currentFrame = 0;
-    final pending =
-        _queue.where((f) => f.status == FileStatus.pending).toList();
-    if (pending.isEmpty) {
+    // 取出第一个可转换的文件（pending/completed/failed 均可）
+    final files = _queue
+        .where((f) => f.status != FileStatus.converting)
+        .toList();
+    if (files.isEmpty) {
       _isConverting = false;
       return;
     }
-    _currentFile = pending.first;
+    _currentFile = files.first;
     _currentFile!.status = FileStatus.converting;
+    _currentFile!.errorMessage = null;
     notifyListeners();
 
     _spawnConversionIsolate();
