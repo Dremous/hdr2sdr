@@ -2,7 +2,6 @@
 #include <iostream>
 #include <libavutil/pixdesc.h>
 #include <libavutil/opt.h>
-}
 
 Encoder::Encoder()
     : fmt_ctx_(nullptr), enc_ctx_(nullptr), stream_(nullptr),
