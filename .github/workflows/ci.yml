@@ -110,7 +110,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -118,6 +117,17 @@ jobs:
         run: |
           echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
           yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+      # ── 原生 C++ 交叉编译（仅编译验证，使用宿主 FFmpeg 头文件 + NDK 编译器） ──
+      - name: Install FFmpeg dev for headers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev cmake pkg-config
+      - name: Install Android NDK
+        run: |
+          ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
+          echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/27.0.12077973" >> $GITHUB_ENV
+      - name: Native compile for Android
+        run: bash native/build_android.sh --compile-only
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:
@@ -184,6 +194,11 @@ jobs:
           restore-keys: |
             pub-${{ runner.os }}-
       - run: flutter pub get
+      # ── 原生 C++ 交叉编译（仅编译验证，使用 macOS 宿主 FFmpeg 头文件 + iOS SDK） ──
+      - name: Install FFmpeg dev for headers
+        run: brew install ffmpeg pkgconf cmake
+      - name: Native compile for iOS
+        run: bash native/build_ios.sh --compile-only
       - name: CocoaPods install
         run: |
           cd ios
