@@ -128,15 +128,26 @@ jobs:
       - run: flutter pub get
       - name: Patch file_picker compileSdk
         run: |
-          # file_picker 8.3.7 编译于 android-34，但其依赖
-          # flutter_plugin_android_lifecycle 2.0.35 要求 minCompileSdk=36
-          # 直接修改 pub cache 中的 build.gradle 强制 compileSdk=36
-          FILE_PICKER_BUILD=$(find ~/.pub-cache -path "*/file_picker-*/android/build.gradle" 2>/dev/null | head -1)
-          if [ -n "$FILE_PICKER_BUILD" ]; then
-            echo "Patching $FILE_PICKER_BUILD"
-            sed -i 's/compileSdkVersion = 34/compileSdkVersion = 36/g' "$FILE_PICKER_BUILD"
-            sed -i 's/compileSdk = 34/compileSdk = 36/g' "$FILE_PICKER_BUILD"
+          set -ex
+          # 查找 file_picker 的 build 脚本（Groovy .gradle 或 Kotlin .gradle.kts）
+          FILE_PICKER_DIR=$(find ~/.pub-cache -maxdepth 4 -type d -name "file_picker-*" 2>/dev/null | head -1)
+          echo "file_picker dir: ${FILE_PICKER_DIR:-NOT FOUND}"
+          if [ -n "$FILE_PICKER_DIR" ]; then
+            # 列出目录内容以便调试
+            find "$FILE_PICKER_DIR" -name "build.gradle*" -exec echo "Found: {}" \;
+            # 修改 Groovy DSL 版本的 compileSdk
+            find "$FILE_PICKER_DIR" -name "build.gradle" | while read f; do
+              sed -i 's/\(compileSdkVersion\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
+              sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
+            done
+            # 修改 Kotlin DSL 版本的 compileSdk
+            find "$FILE_PICKER_DIR" -name "build.gradle.kts" | while read f; do
+              sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
+            done
           fi
+          # 同样修改 flutter_plugin_android_lifecycle
+          LIFECYCLE_DIR=$(find ~/.pub-cache -maxdepth 4 -type d -name "flutter_plugin_android_lifecycle-*" 2>/dev/null | head -1)
+          echo "lifecycle dir: ${LIFECYCLE_DIR:-NOT FOUND}"
       - name: Build APK
         run: flutter build apk --release
         continue-on-error: true
