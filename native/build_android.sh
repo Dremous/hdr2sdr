@@ -47,6 +47,26 @@ for ABI in "${ABIS[@]}"; do
     fi
   done
 
+  # 复制 libc++_shared.so（NDK c++_shared 运行时库）
+  # ABI → NDK 架构三元组映射
+  declare -A CPP_TRIPLE=(
+    ["arm64-v8a"]="aarch64-linux-android"
+    ["x86_64"]="x86_64-linux-android"
+  )
+  LIB_CPP=""
+  TRIPLE="${CPP_TRIPLE[$ABI]}"
+  if [ -n "$TRIPLE" ]; then
+    LIB_CPP=$(find "$NDK/toolchains/llvm/prebuilt" \
+      -name "libc++_shared.so" \
+      -path "*/${TRIPLE}/*" 2>/dev/null | head -1)
+  fi
+  if [ -n "$LIB_CPP" ] && [ -f "$LIB_CPP" ]; then
+    cp "$LIB_CPP" "$JNILIBS_DIR/$ABI/"
+    echo "  -> 已复制 libc++_shared.so (from ${TRIPLE})"
+  else
+    echo "  [警告] 未找到 libc++_shared.so for $ABI (triple=$TRIPLE)"
+  fi
+
   echo "$ABI jniLibs:"
   ls -la "$JNILIBS_DIR/$ABI/"
 done
