@@ -34,10 +34,10 @@ int Pipeline::open(const std::string& input_path) {
         decoder_.getCodecContext(),
         decoder_.getVideoStreamIndex());
 
-    HDR_LOG("Pipeline::open: 成功, %dx%d fps=%.2f frames=%d duration=%.1fs is_hdr=%d",
+    HDR_LOG("Pipeline::open: 成功, %dx%d fps=%.2f frames=%d duration=%.1fs hdr_type=%d",
             decoder_.getWidth(), decoder_.getHeight(),
             decoder_.getFps(), decoder_.getFrameCount(),
-            decoder_.getDurationSec(), hdr_meta_.is_hdr);
+            decoder_.getDurationSec(), hdr_meta_.hdr_type);
 
     initialized_ = true;
     return 0;
