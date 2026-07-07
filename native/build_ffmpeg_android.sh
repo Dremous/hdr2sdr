@@ -62,6 +62,9 @@ for ABI in "${ABIS[@]}"; do
   ln -sf "$TOOLCHAIN/bin/llvm-ranlib" "$WRAPPER_DIR/${CROSS_PREFIX}ranlib"
   ln -sf "$TOOLCHAIN/bin/llvm-strip"  "$WRAPPER_DIR/${CROSS_PREFIX}strip"
   ln -sf "$TOOLCHAIN/bin/llvm-nm"     "$WRAPPER_DIR/${CROSS_PREFIX}nm"
+  # x264 的 configure 找 gcc，建符号链接指向 clang
+  ln -sf "$TOOLCHAIN/bin/${CROSS_PREFIX}clang" "$WRAPPER_DIR/${CROSS_PREFIX}gcc"
+  ln -sf "$TOOLCHAIN/bin/${CROSS_PREFIX}clang++" "$WRAPPER_DIR/${CROSS_PREFIX}g++"
   export PATH="$WRAPPER_DIR:$PATH"
 
   # ── 第 1 步：编译 x264 ──
