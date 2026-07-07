@@ -1,6 +1,6 @@
 #!/bin/bash
-# FFmpeg + x265 Android 交叉编译脚本
-# 产出: build/ffmpeg-android/{abi}/lib/*.so（含 libx265）
+# FFmpeg Android 交叉编译脚本（HEVC 硬件编码器，无外部库依赖）
+# 产出: build/ffmpeg-android/{abi}/lib/*.so
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -8,7 +8,6 @@ BUILD_DIR="$SCRIPT_DIR/build/ffmpeg-android"
 
 NDK="${ANDROID_NDK_HOME:?请设置 ANDROID_NDK_HOME}"
 FFMPEG_VERSION="6.1.2"
-X265_VERSION="4.1"
 HOST_PLATFORM="linux-x86_64"
 
 ABIS=("arm64-v8a" "x86_64")
@@ -25,41 +24,6 @@ if [ ! -d "$FFMPEG_DIR" ]; then
   mkdir -p "$BUILD_DIR"
   wget -q "https://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2" -O "$BUILD_DIR/ffmpeg.tar.bz2"
   tar -xjf "$BUILD_DIR/ffmpeg.tar.bz2" -C "$BUILD_DIR"
-fi
-
-# ── 下载并编译 x265（静态库） ──
-X265_DIR="$BUILD_DIR/x265_${X265_VERSION}"
-X265_PREFIX="$BUILD_DIR/x265-install"
-
-if [ ! -f "$X265_PREFIX/lib/libx265.a" ]; then
-  echo "下载并编译 x265 $X265_VERSION..."
-  rm -rf "$X265_DIR" "$X265_PREFIX"
-  if [ ! -f "$BUILD_DIR/x265.tar.gz" ]; then
-    wget -q "https://bitbucket.org/multicoreware/x265_git/downloads/x265_${X265_VERSION}.tar.gz" \
-      -O "$BUILD_DIR/x265.tar.gz"
-  fi
-  tar -xzf "$BUILD_DIR/x265.tar.gz" -C "$BUILD_DIR"
-
-  for ABI in "${ABIS[@]}"; do
-    ARCH_NAME="${ARCH[$ABI]}"
-    API_LEVEL="${API[$ABI]}"
-    CROSS_PREFIX="${ARCH_NAME}-linux-android${API_LEVEL}-"
-
-    mkdir -p "$X265_PREFIX/$ABI/lib" "$X265_PREFIX/$ABI/include"
-
-    cmake -B "$X265_DIR/build/$ABI" -S "$X265_DIR/source" \
-      -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
-      -DANDROID_ABI="$ABI" \
-      -DANDROID_PLATFORM="android-${API_LEVEL}" \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DENABLE_SHARED=OFF \
-      -DENABLE_CLI=OFF \
-      -DCMAKE_INSTALL_PREFIX="$X265_PREFIX/$ABI"
-
-    cmake --build "$X265_DIR/build/$ABI" --config Release -j$(nproc)
-    cmake --install "$X265_DIR/build/$ABI"
-    echo "  x265 $ABI 完成"
-  done
 fi
 
 # ── 循环编译每个 ABI ──
@@ -92,14 +56,9 @@ for ABI in "${ABIS[@]}"; do
   ln -sf "$TOOLCHAIN/bin/llvm-nm"     "$WRAPPER_DIR/${CROSS_PREFIX}nm"
   export PATH="$WRAPPER_DIR:$PATH"
 
-  echo "  配置 FFmpeg（含 libx265）..."
+  echo "  配置 FFmpeg（Android 硬件 HEVC 编码器）..."
   cd "$FFMPEG_DIR"
   make clean > /dev/null 2>&1 || true
-
-  X265_LIB_DIR="$X265_PREFIX/$ABI/lib"
-  X265_INC_DIR="$X265_PREFIX/$ABI/include"
-
-  export PKG_CONFIG_PATH="$X265_LIB_DIR/pkgconfig:$PKG_CONFIG_PATH"
 
   ./configure \
     --prefix="$PREFIX" \
@@ -124,17 +83,16 @@ for ABI in "${ABIS[@]}"; do
     --enable-avutil \
     --enable-swresample \
     --enable-swscale \
-    --enable-gpl \
-    --enable-libx265 \
-    --enable-encoder=libx265 \
+    --enable-jni \
+    --enable-mediacodec \
+    --enable-encoder=hevc_mediacodec,h264_mediacodec \
+    --enable-hwaccel=h264_mediacodec,hevc_mediacodec \
     --enable-decoder=h264,hevc,vp8,vp9 \
     --enable-parser=h264,hevc,vp8,vp9 \
     --enable-demuxer=mov,matroska,mp4,mpegts,avi \
     --enable-muxer=mp4,matroska \
     --enable-protocol=file \
-    --enable-filter=scale,format \
-    --extra-cflags="-I$X265_INC_DIR" \
-    --extra-ldflags="-L$X265_LIB_DIR"
+    --enable-filter=scale,format
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
   make -j$(nproc)
