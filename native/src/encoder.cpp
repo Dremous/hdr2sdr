@@ -38,12 +38,9 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
 
     codec = avcodec_find_encoder_by_name("libx265");
     if (!codec) {
-        // Android 硬件 HEVC 编码器（MediaCodec）
         codec = avcodec_find_encoder_by_name("hevc_mediacodec");
         if (codec) {
             HDR_LOG("Encoder::open: 使用 Android 硬件 HEVC 编码器");
-            // 硬件编码器不支持 HDR PQ 元数据，回退到 SDR gamma
-            is_hdr_output = false;
         }
     }
     if (!codec) {
