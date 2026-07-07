@@ -35,6 +35,7 @@ if(DEFINED FFMPEG_ROOT)
 
     target_link_libraries(hdr_converter
         avcodec avformat avutil swresample swscale
+        log  # Android NDK 日志库（__android_log_print）
     )
 
 # ── COMPILE_ONLY 模式（iOS 交叉编译验证） ──
