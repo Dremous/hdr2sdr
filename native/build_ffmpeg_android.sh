@@ -48,6 +48,7 @@ for ABI in "${ABIS[@]}"; do
   fi
 
   echo "  编译 x265 for $ABI..."
+  rm -rf "$X265_DIR/build/$ABI"
   mkdir -p "$X265_DIR/build/$ABI"
   cd "$X265_DIR/build/$ABI"
 
@@ -56,6 +57,7 @@ for ABI in "${ABIS[@]}"; do
     -DANDROID_ABI="$ABI" \
     -DANDROID_PLATFORM="android-${API_LEVEL}" \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_ASM_COMPILER="$TOOLCHAIN/bin/${CROSS_PREFIX}clang" \
     -DENABLE_SHARED=OFF \
     -DENABLE_CLI=OFF \
     -DENABLE_ASSEMBLY=OFF \
