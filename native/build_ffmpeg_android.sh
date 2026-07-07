@@ -37,12 +37,9 @@ fi
 # 编译 x265 静态库到每个 ABI 的 FFmpeg prefix 中
 for ABI in "${ABIS[@]}"; do
   PREFIX="$BUILD_DIR/$ABI"
-  if [ -f "$PREFIX/lib/libavcodec.so" ]; then
-    continue # FFmpeg 已有，x265 也已链接完毕
-  fi
-
   ARCH_NAME="${ARCH[$ABI]}"
   API_LEVEL="${API[$ABI]}"
+  CROSS_PREFIX="${ARCH_NAME}-linux-android${API_LEVEL}-"
 
   # 只编一次 x265（不重复编，用 git 判断）
   if [ -f "$PREFIX/lib/libx265.a" ]; then
