@@ -1,4 +1,5 @@
 #include "pipeline.h"
+#include "debug_log.h"
 #include <cstring>
 #include <iostream>
 extern "C" {
@@ -21,13 +22,22 @@ Pipeline::~Pipeline() {
 }
 
 int Pipeline::open(const std::string& input_path) {
+    HDR_LOG("Pipeline::open: %s", input_path.c_str());
     int ret = decoder_.open(input_path);
-    if (ret < 0) return ret;
+    if (ret < 0) {
+        HDR_LOG("Pipeline::open: 解码器打开失败 ret=%d", ret);
+        return ret;
+    }
 
     hdr_meta_ = HDRAnalyzer::analyze(
         decoder_.getFormatContext(),
         decoder_.getCodecContext(),
         decoder_.getVideoStreamIndex());
+
+    HDR_LOG("Pipeline::open: 成功, %dx%d fps=%.2f frames=%d duration=%.1fs is_hdr=%d",
+            decoder_.getWidth(), decoder_.getHeight(),
+            decoder_.getFps(), decoder_.getFrameCount(),
+            decoder_.getDurationSec(), hdr_meta_.is_hdr);
 
     initialized_ = true;
     return 0;
@@ -159,6 +169,7 @@ void Pipeline::conversionThread(const std::string& output_path,
                                  ProgressCallback progress_cb,
                                  CompletionCallback complete_cb,
                                  void* user_data) {
+    HDR_LOG("转换线程: 开始, 打开编码器...");
     int ret = encoder_.open(output_path,
         decoder_.getCodecContext(),
         params_.encoder, params_.crf,
@@ -166,12 +177,15 @@ void Pipeline::conversionThread(const std::string& output_path,
         params_.crop_left, params_.crop_right,
         params_.crop_top, params_.crop_bottom);
     if (ret < 0) {
+        HDR_LOG("转换线程: 编码器初始化失败 ret=%d", ret);
         if (complete_cb) complete_cb(0, "编码器初始化失败", user_data);
         return;
     }
+    HDR_LOG("转换线程: 编码器已打开, 开始解码...");
 
     int total_frames = getFrameCount();
     int frame_idx = 0;
+    HDR_LOG("转换线程: 总帧数=%d, 方向=%d", total_frames, params_.direction);
 
     // seek 到开头（丢弃解码出的第一帧，它已在 open() 时被解码过）
     AVFrame* firstFrame = decoder_.seekAndDecode(0);
@@ -193,7 +207,10 @@ void Pipeline::conversionThread(const std::string& output_path,
 
         av_frame_free(&frame);
 
-        if (ret < 0 && ret != AVERROR(EAGAIN)) break;
+        if (ret < 0 && ret != AVERROR(EAGAIN)) {
+            HDR_LOG("转换线程: 帧%d处理失败 ret=%d", frame_idx, ret);
+            break;
+        }
 
         frame_idx++;
         if (progress_cb && total_frames > 0) {
@@ -202,11 +219,14 @@ void Pipeline::conversionThread(const std::string& output_path,
         }
     }
 
+    HDR_LOG("转换线程: 帧循环结束, 已处理%d帧, 冲刷编码器...", frame_idx);
     encoder_.finalize();
 
     if (cancelled_) {
+        HDR_LOG("转换线程: 已被取消");
         if (complete_cb) complete_cb(0, "用户取消", user_data);
     } else {
+        HDR_LOG("转换线程: 转换完成! 共%d帧", frame_idx);
         if (complete_cb) complete_cb(1, nullptr, user_data);
     }
 }
@@ -217,13 +237,19 @@ int Pipeline::start(const std::string& output_path,
                      void* user_data) {
     if (!initialized_) return -1;
 
+    HDR_LOG("Pipeline::start: 输出=%s, encoder=%d, crf=%d, %dx%d",
+            output_path.c_str(), params_.encoder, params_.crf,
+            decoder_.getWidth(), decoder_.getHeight());
+
     cancelled_ = false;
     try {
         worker_thread_ = std::thread(&Pipeline::conversionThread, this,
                                       output_path, progress_cb, complete_cb, user_data);
     } catch (...) {
+        HDR_LOG("Pipeline::start: 创建线程失败");
         return -1;
     }
+    HDR_LOG("Pipeline::start: 工作线程已创建");
     return 0;
 }
 

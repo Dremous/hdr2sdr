@@ -1,10 +1,30 @@
 #include "hdr_converter.h"
 #include "pipeline.h"
+#include "debug_log.h"
 #include <cstring>
+
+// FFmpeg 日志回调：将 FFmpeg 内部日志重定向到 HDR_LOG
+static void ffmpegLogCallback(void* /*avcl*/, int level, const char* fmt, va_list vl) {
+    // 只输出 warning 及以上级别
+    if (level > AV_LOG_WARNING) return;
+    char buf[1024];
+    vsnprintf(buf, sizeof(buf), fmt, vl);
+    // 去掉末尾换行
+    size_t len = strlen(buf);
+    if (len > 0 && buf[len - 1] == '\n') buf[len - 1] = '\0';
+    HDR_LOG("[ffmpeg] %s", buf);
+}
 
 extern "C" {
 
 EXPORT void* converter_create() {
+    // 设置 FFmpeg 日志回调（全局只设一次）
+    static bool logCallbackSet = false;
+    if (!logCallbackSet) {
+        av_log_set_level(AV_LOG_WARNING);
+        av_log_set_callback(ffmpegLogCallback);
+        logCallbackSet = true;
+    }
     return new Pipeline();
 }
 
