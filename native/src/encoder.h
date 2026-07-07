@@ -29,6 +29,7 @@ public:
     int encodeFrame(AVFrame* frame);
     int finalize();
     void cancel();
+    AVFormatContext* getFormatContext() const { return fmt_ctx_; }
 
 private:
     AVFormatContext* fmt_ctx_;

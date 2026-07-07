@@ -244,7 +244,45 @@ void Pipeline::conversionThread(const std::string& output_path,
         }
     }
 
-    HDR_LOG("转换线程: 帧循环结束, 已处理%d帧, 冲刷编码器...", frame_idx);
+    HDR_LOG("转换线程: 帧循环结束, 已处理%d帧, 拷贝音频流...", frame_idx);
+
+    // 从输入拷贝音频流到输出（不重新编码）
+    AVFormatContext* input_ctx = decoder_.getFormatContext();
+    AVFormatContext* output_ctx = encoder_.getFormatContext();
+    int src_audio_idx = -1;
+    for (unsigned i = 0; i < input_ctx->nb_streams; i++) {
+        if (input_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            src_audio_idx = i;
+            break;
+        }
+    }
+    if (src_audio_idx >= 0) {
+        AVStream* audio_out = avformat_new_stream(output_ctx, nullptr);
+        avcodec_parameters_copy(audio_out->codecpar,
+            input_ctx->streams[src_audio_idx]->codecpar);
+        audio_out->time_base = input_ctx->streams[src_audio_idx]->time_base;
+        int dst_audio_idx = audio_out->index;
+
+        // seek 回文件开头只读音频包
+        avformat_flush(input_ctx);
+        avformat_seek_file(input_ctx, src_audio_idx, 0, 0,
+            input_ctx->streams[src_audio_idx]->duration, 0);
+
+        AVPacket* apkt = av_packet_alloc();
+        while (av_read_frame(input_ctx, apkt) >= 0) {
+            if (apkt->stream_index == src_audio_idx) {
+                apkt->stream_index = dst_audio_idx;
+                av_interleaved_write_frame(output_ctx, apkt);
+            }
+            av_packet_unref(apkt);
+        }
+        av_packet_free(&apkt);
+        HDR_LOG("转换线程: 音频拷贝完成, stream=%d→%d", src_audio_idx, dst_audio_idx);
+    } else {
+        HDR_LOG("转换线程: 无音频流, 跳过");
+    }
+
+    HDR_LOG("转换线程: 冲刷编码器...");
     encoder_.finalize();
 
     if (cancelled_) {
