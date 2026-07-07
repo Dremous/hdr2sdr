@@ -164,18 +164,10 @@ class ConvertProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 构造输出文件路径，修复 _outputDirectory 为 null/空时生成根目录路径的 bug
   String _buildOutputPath() {
     final dir = _outputDirectory;
     final baseName = '${_currentFile!.fileName}_sdr.mp4';
-
-    if (dir == null || dir.isEmpty) {
-      final lastSep =
-          _currentFile!.filePath.lastIndexOf(RegExp(r'[/\\]'));
-      if (lastSep < 0) return baseName;
-      return '${_currentFile!.filePath.substring(0, lastSep + 1)}$baseName';
-    }
-
+    if (dir == null || dir.isEmpty) return baseName;
     final separator = dir.endsWith('/') || dir.endsWith('\\') ? '' : '/';
     return '$dir$separator$baseName';
   }
@@ -283,10 +275,21 @@ class ConvertProvider extends ChangeNotifier {
     });
   }
 
-  void updateProgress(double p, int current, int total) {
-    _progress = p;
-    _currentFrame = current;
-    _totalFrames = total;
+  @override
+  void dispose() {
+    _stopFakeProgress();
+    _conversionIsolate?.kill(priority: Isolate.immediate);
+    _conversionIsolate = null;
+    super.dispose();
+  }
+
+  /// 关闭完成/失败状态面板，将当前文件重置为待处理
+  void dismissCurrentFile() {
+    if (_currentFile != null) {
+      _currentFile!.status = FileStatus.pending;
+      _currentFile!.errorMessage = null;
+    }
+    _errorMessage = null;
     notifyListeners();
   }
 
@@ -298,8 +301,6 @@ class ConvertProvider extends ChangeNotifier {
       _currentFile!.errorMessage = error;
     }
     if (!success) _errorMessage = error;
-    _currentInfo = null;
-    // 保留 _currentFile 以便 UI 显示完成状态，startConversion 会重新赋值
     notifyListeners();
   }
 
