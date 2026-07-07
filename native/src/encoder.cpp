@@ -15,9 +15,20 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
                    int target_width, int target_height,
                    int crop_left, int crop_right, int crop_top, int crop_bottom) {
     int ret;
+    HDR_LOG("Encoder::open: 开始, 输出=%s", filename.c_str());
 
+    if (!dec_ctx) {
+        HDR_LOG("Encoder::open: dec_ctx 为空!");
+        return AVERROR(EINVAL);
+    }
+
+    HDR_LOG("Encoder::open: step1 avformat_alloc_output_context2...");
     ret = avformat_alloc_output_context2(&fmt_ctx_, nullptr, nullptr, filename.c_str());
-    if (ret < 0) return ret;
+    if (ret < 0) {
+        HDR_LOG("Encoder::open: avformat_alloc_output_context2 失败 ret=%d", ret);
+        return ret;
+    }
+    HDR_LOG("Encoder::open: step1 OK, fmt=%s", fmt_ctx_->oformat->name);
 
     // 选择编码器（若目标编码器不可用则回退到 mpeg4）
     const AVCodec* codec = nullptr;
@@ -28,15 +39,26 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
         case 2: codec_name = "libaom-av1"; break;
         default: codec_name = "libx265";
     }
+    HDR_LOG("Encoder::open: step2 查找编码器 %s...", codec_name);
     codec = avcodec_find_encoder_by_name(codec_name);
     if (!codec) {
         // 回退：使用 mpeg4 编码器（始终可用，无需外部库）
         codec = avcodec_find_encoder_by_name("mpeg4");
-        if (!codec) return AVERROR_ENCODER_NOT_FOUND;
+        if (!codec) {
+            HDR_LOG("Encoder::open: 未找到任何编码器");
+            return AVERROR_ENCODER_NOT_FOUND;
+        }
+        HDR_LOG("Encoder::open: 回退到 mpeg4");
     }
+    HDR_LOG("Encoder::open: step2 OK, codec=%s", codec->name);
 
+    HDR_LOG("Encoder::open: step3 avcodec_alloc_context3...");
     enc_ctx_ = avcodec_alloc_context3(codec);
-    if (!enc_ctx_) return AVERROR(ENOMEM);
+    if (!enc_ctx_) {
+        HDR_LOG("Encoder::open: avcodec_alloc_context3 失败");
+        return AVERROR(ENOMEM);
+    }
+    HDR_LOG("Encoder::open: step3 OK");
 
     int out_w = target_width > 0 ? target_width : (dec_ctx->width - crop_left - crop_right);
     int out_h = target_height > 0 ? target_height : (dec_ctx->height - crop_top - crop_bottom);
@@ -45,13 +67,17 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     enc_ctx_->height = out_h;
     enc_ctx_->pix_fmt = AV_PIX_FMT_YUV420P;
     // 帧率：优先用解码器帧率，无效则回退 30fps
+    HDR_LOG("Encoder::open: step4 设置参数...");
     AVRational fr = dec_ctx->framerate;
+    HDR_LOG("Encoder::open: 解码器帧率=%d/%d", fr.num, fr.den);
     if (fr.num <= 0 || fr.den <= 0) {
         // 尝试从码流时间基推断
         if (dec_ctx->time_base.num > 0 && dec_ctx->time_base.den > 0) {
             fr = av_inv_q(dec_ctx->time_base);
+            HDR_LOG("Encoder::open: 从 time_base 推断帧率=%d/%d", fr.num, fr.den);
         } else {
             fr = {30, 1};
+            HDR_LOG("Encoder::open: 使用默认 30fps");
         }
     }
     enc_ctx_->framerate = fr;
@@ -60,17 +86,18 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     enc_ctx_->color_trc = dec_ctx->color_trc;
     enc_ctx_->colorspace = dec_ctx->colorspace;
     enc_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    HDR_LOG("Encoder::open: step4 OK, timebase=%d/%d", enc_ctx_->time_base.num, enc_ctx_->time_base.den);
 
-    // 像素格式转换提醒（FFmpeg 7+ 用 av_pix_fmt_desc_get 替代废弃的 av_get_pix_fmt_name）
+    // 像素格式转换提醒
     if (dec_ctx->pix_fmt != AV_PIX_FMT_YUV420P) {
         const char* fmt_name = "未知";
         const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(dec_ctx->pix_fmt);
         if (desc && desc->name) fmt_name = desc->name;
-        std::cerr << "警告: 输入像素格式 " << fmt_name
-                  << " 将转换为 YUV420P 编码" << std::endl;
+        HDR_LOG("Encoder::open: 输入像素格式 %s 将转换为 YUV420P", fmt_name);
     }
 
-    // 编码器参数（使用 AVDictionary 替代 av_opt_set，避免 FFmpeg 8.x API 废弃问题）
+    // 编码器参数
+    HDR_LOG("Encoder::open: step5 avcodec_open2...");
     if (codec->id == AV_CODEC_ID_H264 || codec->id == AV_CODEC_ID_H265) {
         AVDictionary* opts = nullptr;
         av_dict_set(&opts, "crf", std::to_string(crf).c_str(), 0);
@@ -80,23 +107,41 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     } else {
         ret = avcodec_open2(enc_ctx_, codec, nullptr);
     }
-    if (ret < 0) return ret;
+    if (ret < 0) {
+        HDR_LOG("Encoder::open: avcodec_open2 失败 ret=%d", ret);
+        return ret;
+    }
+    HDR_LOG("Encoder::open: step5 OK");
 
+    HDR_LOG("Encoder::open: step6 avformat_new_stream...");
     stream_ = avformat_new_stream(fmt_ctx_, codec);
-    if (!stream_) return AVERROR(ENOMEM);
-
-    ret = avcodec_parameters_from_context(stream_->codecpar, enc_ctx_);
-    if (ret < 0) return ret;
-    stream_->time_base = enc_ctx_->time_base;
-
-    if (!(fmt_ctx_->oformat->flags & AVFMT_NOFILE)) {
-        ret = avio_open(&fmt_ctx_->pb, filename.c_str(), AVIO_FLAG_WRITE);
-        if (ret < 0) return ret;
+    if (!stream_) {
+        HDR_LOG("Encoder::open: avformat_new_stream 失败");
+        return AVERROR(ENOMEM);
     }
 
+    ret = avcodec_parameters_from_context(stream_->codecpar, enc_ctx_);
+    if (ret < 0) {
+        HDR_LOG("Encoder::open: avcodec_parameters_from_context 失败 ret=%d", ret);
+        return ret;
+    }
+    stream_->time_base = enc_ctx_->time_base;
+    HDR_LOG("Encoder::open: step6 OK");
+
+    HDR_LOG("Encoder::open: step7 avio_open...");
+    if (!(fmt_ctx_->oformat->flags & AVFMT_NOFILE)) {
+        ret = avio_open(&fmt_ctx_->pb, filename.c_str(), AVIO_FLAG_WRITE);
+        if (ret < 0) {
+            HDR_LOG("Encoder::open: avio_open 失败 ret=%d", ret);
+            return ret;
+        }
+    }
+    HDR_LOG("Encoder::open: step7 OK");
+
+    HDR_LOG("Encoder::open: step8 avformat_write_header...");
     ret = avformat_write_header(fmt_ctx_, nullptr);
     if (ret < 0) {
-        HDR_LOG("Encoder: avformat_write_header 失败 ret=%d", ret);
+        HDR_LOG("Encoder::open: avformat_write_header 失败 ret=%d", ret);
         return ret;
     }
 
