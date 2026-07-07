@@ -58,7 +58,6 @@ for ABI in "${ABIS[@]}"; do
     -DCMAKE_BUILD_TYPE=Release \
     -DENABLE_SHARED=OFF \
     -DENABLE_CLI=OFF \
-    -DCMAKE_ASM_COMPILER="$TOOLCHAIN/bin/${CROSS_PREFIX}clang" \
     -DCMAKE_INSTALL_PREFIX="$PREFIX"
 
   cmake --build . --config Release -- -j$(nproc)
