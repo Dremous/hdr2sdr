@@ -15,6 +15,14 @@ native/build/
 *.dylib
 *.so
 
+# Media files
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.webm
+*.mxf
+
 # Misc
 .DS_Store
 Thumbs.db
