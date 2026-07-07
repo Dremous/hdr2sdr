@@ -32,23 +32,20 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     }
     HDR_LOG("Encoder::open: step1 OK, fmt=%s", fmt_ctx_->oformat->name);
 
-    // 选择编码器（强制 HEVC）
+    // 选择编码器（仅 libx265 / libsvtav1）
     const AVCodec* codec = nullptr;
     bool is_hdr_output = (target_color_space == 1);
 
     codec = avcodec_find_encoder_by_name("libx265");
     if (!codec) {
-        codec = avcodec_find_encoder_by_name("hevc_mediacodec");
-        if (codec) {
-            HDR_LOG("Encoder::open: 使用 Android 硬件 HEVC 编码器");
-        }
+        codec = avcodec_find_encoder_by_name("libsvtav1");
     }
     if (!codec) {
-        HDR_LOG("Encoder::open: 未找到 HEVC 编码器");
+        HDR_LOG("Encoder::open: 未找到 libx265 或 libsvtav1 编码器");
         return AVERROR_ENCODER_NOT_FOUND;
     }
     HDR_LOG("Encoder::open: step2 OK, codec=%s%s", codec->name,
-            is_hdr_output ? " (HDR/PQ)" : "");
+            is_hdr_output ? " (HDR)" : "");
 
     HDR_LOG("Encoder::open: step3 avcodec_alloc_context3...");
     enc_ctx_ = avcodec_alloc_context3(codec);

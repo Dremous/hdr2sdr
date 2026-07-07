@@ -1,5 +1,5 @@
 #!/bin/bash
-# FFmpeg Android 交叉编译脚本（HEVC 硬件编码器，无外部库依赖）
+# FFmpeg Android 交叉编译脚本（含 libx265）
 # 产出: build/ffmpeg-android/{abi}/lib/*.so
 set -euo pipefail
 
@@ -26,6 +26,50 @@ if [ ! -d "$FFMPEG_DIR" ]; then
   tar -xjf "$BUILD_DIR/ffmpeg.tar.bz2" -C "$BUILD_DIR"
 fi
 
+# ── 下载并编译 x265（静态库，每个 ABI）──
+X265_DIR="$BUILD_DIR/x265"
+if [ ! -d "$X265_DIR/.git" ]; then
+  echo "下载 x265..."
+  rm -rf "$X265_DIR"
+  git clone --depth 1 https://bitbucket.org/multicoreware/x265_git.git "$X265_DIR"
+fi
+
+# 编译 x265 静态库到每个 ABI 的 FFmpeg prefix 中
+for ABI in "${ABIS[@]}"; do
+  PREFIX="$BUILD_DIR/$ABI"
+  if [ -f "$PREFIX/lib/libavcodec.so" ]; then
+    continue # FFmpeg 已有，x265 也已链接完毕
+  fi
+
+  ARCH_NAME="${ARCH[$ABI]}"
+  API_LEVEL="${API[$ABI]}"
+
+  # 只编一次 x265（不重复编，用 git 判断）
+  if [ -f "$PREFIX/lib/libx265.a" ]; then
+    echo "  x265 $ABI 已存在，跳过"
+    continue
+  fi
+
+  echo "  编译 x265 for $ABI..."
+  mkdir -p "$X265_DIR/build/$ABI"
+  cd "$X265_DIR/build/$ABI"
+
+  cmake "$X265_DIR/source" \
+    -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+    -DANDROID_ABI="$ABI" \
+    -DANDROID_PLATFORM="android-${API_LEVEL}" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DENABLE_SHARED=OFF \
+    -DENABLE_CLI=OFF \
+    -DCMAKE_INSTALL_PREFIX="$PREFIX"
+
+  cmake --build . --config Release -- -j$(nproc)
+  cmake --install .
+
+  echo "  x265 $ABI 完成"
+  cd "$SCRIPT_DIR"
+done
+
 # ── 循环编译每个 ABI ──
 for ABI in "${ABIS[@]}"; do
   echo "========================================"
@@ -47,7 +91,6 @@ for ABI in "${ABIS[@]}"; do
   CC="$TOOLCHAIN/bin/${CROSS_PREFIX}clang"
   CXX="$TOOLCHAIN/bin/${CROSS_PREFIX}clang++"
 
-  # 工具链包装
   WRAPPER_DIR="$BUILD_DIR/wrappers-$ABI"
   mkdir -p "$WRAPPER_DIR"
   ln -sf "$TOOLCHAIN/bin/llvm-ar"     "$WRAPPER_DIR/${CROSS_PREFIX}ar"
@@ -56,9 +99,11 @@ for ABI in "${ABIS[@]}"; do
   ln -sf "$TOOLCHAIN/bin/llvm-nm"     "$WRAPPER_DIR/${CROSS_PREFIX}nm"
   export PATH="$WRAPPER_DIR:$PATH"
 
-  echo "  配置 FFmpeg（Android 硬件 HEVC 编码器）..."
+  echo "  配置 FFmpeg（含 libx265）..."
   cd "$FFMPEG_DIR"
   make clean > /dev/null 2>&1 || true
+
+  export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
 
   ./configure \
     --prefix="$PREFIX" \
@@ -83,16 +128,17 @@ for ABI in "${ABIS[@]}"; do
     --enable-avutil \
     --enable-swresample \
     --enable-swscale \
-    --enable-jni \
-    --enable-mediacodec \
-    --enable-encoder=hevc_mediacodec,h264_mediacodec \
-    --enable-hwaccel=h264_mediacodec,hevc_mediacodec \
+    --enable-gpl \
+    --enable-libx265 \
+    --enable-encoder=libx265 \
     --enable-decoder=h264,hevc,vp8,vp9 \
     --enable-parser=h264,hevc,vp8,vp9 \
     --enable-demuxer=mov,matroska,mp4,mpegts,avi \
     --enable-muxer=mp4,matroska \
     --enable-protocol=file \
-    --enable-filter=scale,format
+    --enable-filter=scale,format \
+    --extra-cflags="-I$PREFIX/include" \
+    --extra-ldflags="-L$PREFIX/lib"
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
   make -j$(nproc)
