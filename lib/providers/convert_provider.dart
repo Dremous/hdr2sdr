@@ -39,6 +39,26 @@ void _runConversionInIsolate(List<dynamic> args) {
       print('[hdr2sdr] Isolate 内部: 视频已打开，设置参数并开始转换...');
       bridge.setParams(handle, params);
 
+      // 发回视频信息给 UI 显示
+      final info = bridge.getInfo(handle);
+      if (info != null) {
+        sendPort.send({
+          'type': 'info',
+          'width': info.width,
+          'height': info.height,
+          'fps': info.fps,
+          'frames': info.frameCount,
+          'duration': info.durationSec,
+          'isHdr': info.isHdr,
+        });
+      } else {
+        sendPort.send({
+          'type': 'info',
+          'width': 0, 'height': 0, 'fps': 0.0,
+          'frames': 0, 'duration': 0.0, 'isHdr': false,
+        });
+      }
+
       // 传 nullptr 回调 → C 端同步执行转换（进度由 Dart Timer 模拟）
       // TODO: NativeCallable / Pointer.fromFunction 均有 Void/void 类型不兼容，
       // 等待 Dart SDK 修复或改用 polling 方式
@@ -236,7 +256,19 @@ class ConvertProvider extends ChangeNotifier {
       debugPrint('[hdr2sdr] 收到 Isolate 消息: $message');
       if (message is Map) {
         final type = message['type'] as String?;
-        if (type == 'complete') {
+        if (type == 'info') {
+          _currentInfo = VideoInfo(
+            width: (message['width'] as num?)?.toInt() ?? 0,
+            height: (message['height'] as num?)?.toInt() ?? 0,
+            fps: (message['fps'] as num?)?.toDouble() ?? 0.0,
+            frameCount: (message['frames'] as num?)?.toInt() ?? 0,
+            durationSec: (message['duration'] as num?)?.toDouble() ?? 0.0,
+            isHdr: message['isHdr'] as bool? ?? false,
+            hdrType: 0,
+          );
+          _totalFrames = _currentInfo!.frameCount;
+          notifyListeners();
+        } else if (type == 'complete') {
           receivePort.close();
           _conversionIsolate = null;
           _stopFakeProgress();
