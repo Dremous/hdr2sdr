@@ -19,7 +19,6 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(engine: FlutterEngine) {
         super.configureFlutterEngine(engine)
-        PathPlugin.register(this, engine)
 
         MethodChannel(engine.dartExecutor.binaryMessenger, "hdr2sdr/background")
             .setMethodCallHandler { call, result ->

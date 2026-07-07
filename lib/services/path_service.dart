@@ -1,11 +1,14 @@
-import 'package:flutter/services.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class PathService {
-  static const _channel = MethodChannel('hdr2sdr/path');
-
-  /// 获取平台默认输出目录（Android Downloads / iOS Documents）
+  /// 获取平台默认输出目录
   static Future<String> getOutputDirectory() async {
-    final path = await _channel.invokeMethod<String>('getOutputDirectory');
-    return path ?? '';
+    final dir = await getApplicationDocumentsDirectory();
+    final outDir = Directory('${dir.path}${Platform.pathSeparator}HDR2SDR_Output');
+    if (!await outDir.exists()) {
+      await outDir.create(recursive: true);
+    }
+    return outDir.path;
   }
 }
