@@ -36,6 +36,7 @@ private:
     bool initialized_;
     std::atomic<bool> cancelled_;
     int frame_count_;
+    int64_t frame_duration_;
 };
 
 #endif

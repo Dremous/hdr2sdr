@@ -4,7 +4,8 @@
 
 Encoder::Encoder()
     : fmt_ctx_(nullptr), enc_ctx_(nullptr), stream_(nullptr),
-      initialized_(false), cancelled_(false), frame_count_(0) {}
+      initialized_(false), cancelled_(false), frame_count_(0),
+      frame_duration_(3000) {}
 
 Encoder::~Encoder() {
     close();
@@ -81,7 +82,11 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
         }
     }
     enc_ctx_->framerate = fr;
-    enc_ctx_->time_base = av_inv_q(fr);
+    // 使用标准 MP4 时间基 1/90000（相比 av_inv_q(fr) 更兼容 mp4 muxer）
+    enc_ctx_->time_base = AVRational{1, 90000};
+    // 每帧时长 = 90000 / fps（时间基单位）
+    frame_duration_ = av_rescale_q(1, av_inv_q(fr), enc_ctx_->time_base);
+    if (frame_duration_ <= 0) frame_duration_ = 3000; // 默认 30fps → 3000
     enc_ctx_->color_primaries = dec_ctx->color_primaries;
     enc_ctx_->color_trc = dec_ctx->color_trc;
     enc_ctx_->colorspace = dec_ctx->colorspace;
@@ -171,7 +176,7 @@ void Encoder::close() {
 int Encoder::encodeFrame(AVFrame* frame) {
     if (!initialized_ || cancelled_) return -1;
 
-    if (frame) frame->pts = frame_count_;
+    if (frame) frame->pts = frame_count_ * frame_duration_;
 
     int ret = avcodec_send_frame(enc_ctx_, frame);
     if (ret < 0 && ret != AVERROR_EOF) return ret;
@@ -183,9 +188,9 @@ int Encoder::encodeFrame(AVFrame* frame) {
         if (ret == AVERROR(EAGAIN)) break;
         if (ret < 0) { av_packet_free(&pkt); return ret; }
         pkt->stream_index = 0;
-        // mpeg4 编码器不自动设 duration，手动设置每帧时长
+        // mpeg4 编码器不自动设 duration
         if (pkt->duration <= 0) {
-            pkt->duration = 1; // 时间基 = av_inv_q(framerate)，每帧1单位
+            pkt->duration = frame_duration_;
         }
         ret = av_interleaved_write_frame(fmt_ctx_, pkt);
         av_packet_unref(pkt);
