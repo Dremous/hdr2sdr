@@ -44,9 +44,18 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     enc_ctx_->width = out_w;
     enc_ctx_->height = out_h;
     enc_ctx_->pix_fmt = AV_PIX_FMT_YUV420P;
-    // mpeg4 编码器需要显式设置 framerate 和 time_base
-    enc_ctx_->framerate = dec_ctx->framerate;
-    enc_ctx_->time_base = av_inv_q(dec_ctx->framerate);
+    // 帧率：优先用解码器帧率，无效则回退 30fps
+    AVRational fr = dec_ctx->framerate;
+    if (fr.num <= 0 || fr.den <= 0) {
+        // 尝试从码流时间基推断
+        if (dec_ctx->time_base.num > 0 && dec_ctx->time_base.den > 0) {
+            fr = av_inv_q(dec_ctx->time_base);
+        } else {
+            fr = {30, 1};
+        }
+    }
+    enc_ctx_->framerate = fr;
+    enc_ctx_->time_base = av_inv_q(fr);
     enc_ctx_->color_primaries = dec_ctx->color_primaries;
     enc_ctx_->color_trc = dec_ctx->color_trc;
     enc_ctx_->colorspace = dec_ctx->colorspace;
