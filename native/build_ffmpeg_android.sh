@@ -103,7 +103,7 @@ for ABI in "${ABIS[@]}"; do
   cd "$FFMPEG_DIR"
   make clean > /dev/null 2>&1 || true
 
-  export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+  export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
 
   ./configure \
     --prefix="$PREFIX" \
