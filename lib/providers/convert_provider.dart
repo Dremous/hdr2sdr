@@ -172,6 +172,30 @@ class ConvertProvider extends ChangeNotifier {
     _currentFile!.errorMessage = null;
     notifyListeners();
 
+    _ensureOutputDirThenConvert();
+  }
+
+  /// 确保输出目录已初始化，再启动转换
+  Future<void> _ensureOutputDirThenConvert() async {
+    if (_outputDirectory == null || _outputDirectory!.isEmpty) {
+      try {
+        _outputDirectory = await PathService.getOutputDirectory();
+      } catch (_) {
+        _outputDirectory = null;
+      }
+    }
+    // 如果还是为空，用视频所在目录兜底
+    if (_outputDirectory == null || _outputDirectory!.isEmpty) {
+      final p = _currentFile!.filePath;
+      final idx = p.lastIndexOf('/');
+      if (idx < 0) {
+        _outputDirectory = p.lastIndexOf('\\') >= 0
+            ? p.substring(0, p.lastIndexOf('\\') + 1)
+            : '.';
+      } else {
+        _outputDirectory = p.substring(0, idx + 1);
+      }
+    }
     _spawnConversionIsolate();
   }
 
