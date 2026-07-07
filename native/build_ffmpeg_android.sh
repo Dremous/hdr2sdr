@@ -66,6 +66,21 @@ for ABI in "${ABIS[@]}"; do
   cmake --build . --config Release -- -j$(nproc)
   cmake --install .
 
+  # 保险：x265 cmake --depth 1 无 tag 时不生成 .pc
+  mkdir -p "$PREFIX/lib/pkgconfig"
+  cat > "$PREFIX/lib/pkgconfig/x265.pc" <<EOF
+prefix=$PREFIX
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: x265
+Description: H.265/HEVC video encoder
+Version: 3.6
+Libs: -L\${libdir} -lx265
+Cflags: -I\${includedir}
+EOF
+
   echo "  x265 $ABI 完成"
   cd "$SCRIPT_DIR"
 done
@@ -104,6 +119,14 @@ for ABI in "${ABIS[@]}"; do
   make clean > /dev/null 2>&1 || true
 
   export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+
+  # 诊断：检查 x265.pc 是否可被 pkg-config 找到
+  echo "  [DEBUG] PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+  echo "  [DEBUG] x265.pc exists: $(test -f "$PREFIX/lib/pkgconfig/x265.pc" && echo YES || echo NO)"
+  if [ -f "$PREFIX/lib/pkgconfig/x265.pc" ]; then
+    echo "  [DEBUG] cmd: pkg-config --exists x265"
+    pkg-config --exists x265 && echo "  [DEBUG] => OK" || echo "  [DEBUG] => FAIL"
+  fi
 
   ./configure \
     --prefix="$PREFIX" \
