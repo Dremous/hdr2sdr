@@ -136,7 +136,7 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);
 
-    color_converter_.convert(frame, dst, 1, 0);
+    color_converter_.convert(frame, dst, 1, params_.target_color_space);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);
@@ -173,7 +173,7 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
     av_frame_get_buffer(dst, 32);
 
     // 转回 YUV420P，目标 BT.2020（HDR 输出色彩空间）
-    color_converter_.convert(flt, dst, 0, 1);
+    color_converter_.convert(flt, dst, 0, params_.target_color_space);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);
@@ -192,7 +192,8 @@ void Pipeline::conversionThread(const std::string& output_path,
         params_.encoder, params_.crf,
         params_.target_width, params_.target_height,
         params_.crop_left, params_.crop_right,
-        params_.crop_top, params_.crop_bottom);
+        params_.crop_top, params_.crop_bottom,
+        params_.target_color_space);
     if (ret < 0) {
         HDR_LOG("转换线程: 编码器初始化失败 ret=%d", ret);
         if (complete_cb) complete_cb(0, "编码器初始化失败", user_data);

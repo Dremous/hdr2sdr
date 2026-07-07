@@ -14,7 +14,8 @@ Encoder::~Encoder() {
 int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
                    int encoder_type, int crf,
                    int target_width, int target_height,
-                   int crop_left, int crop_right, int crop_top, int crop_bottom) {
+                   int crop_left, int crop_right, int crop_top, int crop_bottom,
+                   int target_color_space) {
     int ret;
     HDR_LOG("Encoder::open: 开始, 输出=%s", filename.c_str());
 
@@ -87,9 +88,19 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     // 每帧时长 = 30000 / fps（时间基单位）
     frame_duration_ = av_rescale_q(1, av_inv_q(fr), enc_ctx_->time_base);
     if (frame_duration_ <= 0) frame_duration_ = 1000; // 默认 30fps → 1000
-    enc_ctx_->color_primaries = dec_ctx->color_primaries;
-    enc_ctx_->color_trc = dec_ctx->color_trc;
-    enc_ctx_->colorspace = dec_ctx->colorspace;
+    // 根据目标色彩空间设置编码器颜色元数据
+    switch (target_color_space) {
+        case 1: // BT.2020（宽色域，SDR gamma 保持兼容）
+            enc_ctx_->color_primaries = AVCOL_PRI_BT2020;
+            enc_ctx_->color_trc = AVCOL_TRC_BT709;
+            enc_ctx_->colorspace = AVCOL_SPC_BT2020_NCL;
+            break;
+        default: // BT.709
+            enc_ctx_->color_primaries = AVCOL_PRI_BT709;
+            enc_ctx_->color_trc = AVCOL_TRC_BT709;
+            enc_ctx_->colorspace = AVCOL_SPC_BT709;
+            break;
+    }
     enc_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     HDR_LOG("Encoder::open: step4 OK, timebase=%d/%d", enc_ctx_->time_base.num, enc_ctx_->time_base.den);
 

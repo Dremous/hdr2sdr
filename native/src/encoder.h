@@ -23,7 +23,8 @@ public:
     int open(const std::string& filename, AVCodecContext* dec_ctx,
              int encoder_type, int crf,
              int target_width, int target_height,
-             int crop_left, int crop_right, int crop_top, int crop_bottom);
+             int crop_left, int crop_right, int crop_top, int crop_bottom,
+             int target_color_space);
     void close();
     int encodeFrame(AVFrame* frame);
     int finalize();

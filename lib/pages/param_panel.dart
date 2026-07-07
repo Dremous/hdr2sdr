@@ -126,18 +126,13 @@ class ParamPanel extends StatelessWidget {
               const Divider(),
               const Text('色彩空间',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              const Text('仅 BT.709 可用，其他待实现',
-                  style: TextStyle(fontSize: 11, color: Colors.orange)),
               const SizedBox(height: 8),
               SegmentedButton<ColorSpace>(
                 segments: const [
                   ButtonSegment(
                       value: ColorSpace.bt709, label: Text('BT.709')),
                   ButtonSegment(
-                      value: ColorSpace.bt2020,
-                      label: Text('BT.2020'),
-                      enabled: false),
+                      value: ColorSpace.bt2020, label: Text('BT.2020')),
                   ButtonSegment(
                       value: ColorSpace.dciP3,
                       label: Text('DCI-P3'),
