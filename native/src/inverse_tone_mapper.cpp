@@ -36,9 +36,18 @@ void InverseToneMapper::applyExpansion(AVFrame* frame, const InvToneMapParams& p
 
             // 简单的线性扩展 + roll-off
             float max_rgb = fmaxf(rv, fmaxf(gv, bv));
-            if (max_rgb > 0.0f) {
+            // 暗部噪点门限：低于阈值的像素不扩展，避免帧间闪烁
+            const float noiseFloor = 0.03f;
+            if (max_rgb < noiseFloor) {
+                *r = rv;
+                *g = gv;
+                *b = bv;
+            } else if (max_rgb > 0.0f) {
                 float expanded = max_rgb * (target_peak / 203.0f);
-                float scale = expanded / max_rgb;
+                // 平滑过渡：在门限附近做线性混合
+                float t = (max_rgb - noiseFloor) / (0.02f);
+                t = t < 0.0f ? 0.0f : (t > 1.0f ? 1.0f : t);
+                float scale = (1.0f - t) + t * (expanded / max_rgb);
                 *r = rv * scale;
                 *g = gv * scale;
                 *b = bv * scale;
