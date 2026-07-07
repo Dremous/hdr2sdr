@@ -119,6 +119,8 @@ for ABI in "${ABIS[@]}"; do
   make clean > /dev/null 2>&1 || true
 
   export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+  # FFmpeg 的 --cross-prefix 会让它使用 ${CROSS_PREFIX}pkg-config（不存在），强制使用系统 pkg-config
+  export PKG_CONFIG=pkg-config
 
   # 诊断：检查 x265.pc 是否可被 pkg-config 找到
   echo "  [DEBUG] PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
