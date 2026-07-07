@@ -71,91 +71,88 @@ class ParamPanel extends StatelessWidget {
                 },
               ),
               const Divider(),
-              if (!params.autoMode) ...[
-                const Text('预设风格',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                PresetSelector(
-                  current: params.presetStyle,
-                  onChanged: (style) {
-                    final preset = style.toParams();
-                    provider.updateParams(params.copyWith(
-                      presetStyle: style,
-                      peakLuminance: preset.peakLuminance,
-                      exposure: preset.exposure,
-                      saturation: preset.saturation,
-                    ));
-                  },
-                ),
-                const Divider(),
-              ],
-              if (!params.autoMode) ...[
-                SliderRow(
-                  label: '峰值亮度',
-                  value: params.peakLuminance,
-                  min: 100,
-                  max: 10000,
-                  divisions: 99,
-                  formatValue: (v) => '${v.toInt()} nit',
-                  enabled: params.presetStyle == PresetStyle.custom,
-                  onChanged: (v) {
-                    provider.updateParams(params.copyWith(peakLuminance: v));
-                  },
-                ),
-                SliderRow(
-                  label: '曝光补偿',
-                  value: params.exposure,
-                  min: -2.0,
-                  max: 2.0,
-                  divisions: 40,
-                  formatValue: (v) => '${v.toStringAsFixed(1)} EV',
-                  enabled: params.presetStyle == PresetStyle.custom,
-                  onChanged: (v) {
-                    provider.updateParams(params.copyWith(exposure: v));
-                  },
-                ),
-                SliderRow(
-                  label: '饱和度',
-                  value: params.saturation,
-                  min: 0,
-                  max: 2.0,
-                  divisions: 200,
-                  formatValue: (v) => '${(v * 100).toInt()}%',
-                  enabled: params.presetStyle == PresetStyle.custom,
-                  onChanged: (v) {
-                    provider.updateParams(params.copyWith(saturation: v));
-                  },
-                ),
-                const Divider(),
-                const Text('色彩空间',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                const Text('仅 BT.709 可用，其他待实现',
-                    style: TextStyle(fontSize: 11, color: Colors.orange)),
-                const SizedBox(height: 8),
-                SegmentedButton<ColorSpace>(
-                  segments: const [
-                    ButtonSegment(
-                        value: ColorSpace.bt709, label: Text('BT.709')),
-                    ButtonSegment(
-                        value: ColorSpace.bt2020,
-                        label: Text('BT.2020'),
-                        enabled: false),
-                    ButtonSegment(
-                        value: ColorSpace.dciP3,
-                        label: Text('DCI-P3'),
-                        enabled: false),
-                  ],
-                  selected: {params.targetColorSpace},
-                  onSelectionChanged: (set) {
-                    provider.updateParams(
-                        params.copyWith(targetColorSpace: set.first));
-                  },
-                ),
-                const Divider(),
-                const Text('编码设置',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
+              const Text('预设风格',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              PresetSelector(
+                current: params.presetStyle,
+                onChanged: (style) {
+                  final preset = style.toParams();
+                  provider.updateParams(params.copyWith(
+                    presetStyle: style,
+                    peakLuminance: preset.peakLuminance,
+                    exposure: preset.exposure,
+                    saturation: preset.saturation,
+                  ));
+                },
+              ),
+              const Divider(),
+              SliderRow(
+                label: '峰值亮度',
+                value: params.peakLuminance,
+                min: 100,
+                max: 10000,
+                divisions: 99,
+                formatValue: (v) => '${v.toInt()} nit',
+                enabled: params.presetStyle == PresetStyle.custom,
+                onChanged: (v) {
+                  provider.updateParams(params.copyWith(peakLuminance: v));
+                },
+              ),
+              SliderRow(
+                label: '曝光补偿',
+                value: params.exposure,
+                min: -2.0,
+                max: 2.0,
+                divisions: 40,
+                formatValue: (v) => '${v.toStringAsFixed(1)} EV',
+                enabled: params.presetStyle == PresetStyle.custom,
+                onChanged: (v) {
+                  provider.updateParams(params.copyWith(exposure: v));
+                },
+              ),
+              SliderRow(
+                label: '饱和度',
+                value: params.saturation,
+                min: 0,
+                max: 2.0,
+                divisions: 200,
+                formatValue: (v) => '${(v * 100).toInt()}%',
+                enabled: params.presetStyle == PresetStyle.custom,
+                onChanged: (v) {
+                  provider.updateParams(params.copyWith(saturation: v));
+                },
+              ),
+              const Divider(),
+              const Text('色彩空间',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              const Text('仅 BT.709 可用，其他待实现',
+                  style: TextStyle(fontSize: 11, color: Colors.orange)),
+              const SizedBox(height: 8),
+              SegmentedButton<ColorSpace>(
+                segments: const [
+                  ButtonSegment(
+                      value: ColorSpace.bt709, label: Text('BT.709')),
+                  ButtonSegment(
+                      value: ColorSpace.bt2020,
+                      label: Text('BT.2020'),
+                      enabled: false),
+                  ButtonSegment(
+                      value: ColorSpace.dciP3,
+                      label: Text('DCI-P3'),
+                      enabled: false),
+                ],
+                selected: {params.targetColorSpace},
+                onSelectionChanged: (set) {
+                  provider.updateParams(
+                      params.copyWith(targetColorSpace: set.first));
+                },
+              ),
+              const Divider(),
+              const Text('编码设置',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
                 if (isMobile)
                   DropdownButton<EncoderType>(
                     value: params.encoder,
@@ -199,7 +196,6 @@ class ParamPanel extends StatelessWidget {
                     provider.updateParams(params.copyWith(crf: v.toInt()));
                   },
                 ),
-              ],
             ],
           ),
         );
