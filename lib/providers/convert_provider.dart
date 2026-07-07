@@ -39,6 +39,9 @@ void _runConversionInIsolate(List<dynamic> args) {
       print('[hdr2sdr] Isolate 内部: 视频已打开，设置参数并开始转换...');
       bridge.setParams(handle, params);
 
+      // 传 nullptr 回调 → C 端同步执行转换（进度由 Dart Timer 模拟）
+      // TODO: NativeCallable / Pointer.fromFunction 均有 Void/void 类型不兼容，
+      // 等待 Dart SDK 修复或改用 polling 方式
       final startResult = bridge.start(
           handle, outputPath, nullptr, nullptr, nullptr);
       print('[hdr2sdr] Isolate 内部: 转换结束, 结果=$startResult');
