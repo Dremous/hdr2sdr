@@ -177,7 +177,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: native/build/ffmpeg-android
-          key: ffmpeg-android-${{ hashFiles('native/build_ffmpeg_android.sh') }}-v1
+          key: ffmpeg-android-${{ hashFiles('native/build_ffmpeg_android.sh') }}-v2
       - name: Native compile for Android (含 FFmpeg)
         run: |
           bash native/build_android.sh

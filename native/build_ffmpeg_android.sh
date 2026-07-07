@@ -82,6 +82,7 @@ for ABI in "${ABIS[@]}"; do
     --enable-swscale \
     --enable-decoder=h264,hevc,vp8,vp9 \
     --enable-parser=h264,hevc,vp8,vp9 \
+    --enable-encoder=mpeg4 \
     --enable-demuxer=mov,matroska,mp4,mpegts,avi \
     --enable-muxer=mp4,matroska \
     --enable-protocol=file \

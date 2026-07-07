@@ -18,7 +18,7 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     ret = avformat_alloc_output_context2(&fmt_ctx_, nullptr, nullptr, filename.c_str());
     if (ret < 0) return ret;
 
-    // 选择编码器
+    // 选择编码器（若目标编码器不可用则回退到 mpeg4）
     const AVCodec* codec = nullptr;
     const char* codec_name = nullptr;
     switch (encoder_type) {
@@ -28,7 +28,11 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
         default: codec_name = "libx265";
     }
     codec = avcodec_find_encoder_by_name(codec_name);
-    if (!codec) return AVERROR_ENCODER_NOT_FOUND;
+    if (!codec) {
+        // 回退：使用 mpeg4 编码器（始终可用，无需外部库）
+        codec = avcodec_find_encoder_by_name("mpeg4");
+        if (!codec) return AVERROR_ENCODER_NOT_FOUND;
+    }
 
     enc_ctx_ = avcodec_alloc_context3(codec);
     if (!enc_ctx_) return AVERROR(ENOMEM);
