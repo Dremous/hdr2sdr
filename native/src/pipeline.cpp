@@ -172,8 +172,8 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);
 
-    // 转回 YUV420P，SDR 输出保持 BT.709
-    color_converter_.convert(flt, dst, 0, 0);
+    // 转回 YUV420P，目标 BT.2020（HDR 输出色彩空间）
+    color_converter_.convert(flt, dst, 0, 1);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);
