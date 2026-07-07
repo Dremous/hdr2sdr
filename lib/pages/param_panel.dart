@@ -36,28 +36,30 @@ class ParamPanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  const Text('转换方向'),
-                  const SizedBox(width: 12),
-                  SegmentedButton<ConvertDirection>(
-                    segments: const [
-                      ButtonSegment(
-                          value: ConvertDirection.hdrToSdr,
-                          label: Text('HDR→SDR')),
-                      ButtonSegment(
-                          value: ConvertDirection.sdrToHdr,
-                          label: Text('SDR→HDR')),
-                    ],
-                    selected: {params.direction},
-                    onSelectionChanged: (set) {
-                      provider
-                          .updateParams(params.copyWith(direction: set.first));
-                    },
-                  ),
-                ],
-              ),
-              const Divider(),
+              if (!params.autoMode) ...[
+                Row(
+                  children: [
+                    const Text('转换方向'),
+                    const SizedBox(width: 12),
+                    SegmentedButton<ConvertDirection>(
+                      segments: const [
+                        ButtonSegment(
+                            value: ConvertDirection.hdrToSdr,
+                            label: Text('HDR→SDR')),
+                        ButtonSegment(
+                            value: ConvertDirection.sdrToHdr,
+                            label: Text('SDR→HDR')),
+                      ],
+                      selected: {params.direction},
+                      onSelectionChanged: (set) {
+                        provider
+                            .updateParams(params.copyWith(direction: set.first));
+                      },
+                    ),
+                  ],
+                ),
+                const Divider(),
+              ],
               SwitchListTile(
                 title: const Text('自动模式'),
                 subtitle: const Text('自动检测 HDR 类型并设置最佳参数'),
@@ -67,16 +69,18 @@ class ParamPanel extends StatelessWidget {
                 },
               ),
               const Divider(),
-              const Text('预设风格',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              PresetSelector(
-                current: params.presetStyle,
-                onChanged: (style) {
-                  provider.updateParams(params.copyWith(presetStyle: style));
-                },
-              ),
-              const Divider(),
+              if (!params.autoMode) ...[
+                const Text('预设风格',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                PresetSelector(
+                  current: params.presetStyle,
+                  onChanged: (style) {
+                    provider.updateParams(params.copyWith(presetStyle: style));
+                  },
+                ),
+                const Divider(),
+              ],
               if (!params.autoMode) ...[
                 SliderRow(
                   label: '峰值亮度',

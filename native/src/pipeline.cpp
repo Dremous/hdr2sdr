@@ -202,6 +202,13 @@ void Pipeline::conversionThread(const std::string& output_path,
 
     int total_frames = getFrameCount();
     int frame_idx = 0;
+
+    // 自动模式：根据输入视频的 HDR 类型决定转换方向
+    //   SDR 输入（hdr_type=0）→ SDR→HDR
+    //   HDR 输入（hdr_type>0）→ HDR→SDR
+    if (params_.auto_mode) {
+        params_.direction = (hdr_meta_.hdr_type > 0) ? 0 : 1;
+    }
     HDR_LOG("转换线程: 总帧数=%d, 方向=%d", total_frames, params_.direction);
 
     // seek 到开头（丢弃解码出的第一帧，它已在 open() 时被解码过）
