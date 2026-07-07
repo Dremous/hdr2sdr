@@ -80,7 +80,9 @@ class FileListTile extends StatelessWidget {
                 ),
               ),
             ),
-            if (file.status == FileStatus.pending)
+            if (file.status == FileStatus.pending ||
+                file.status == FileStatus.completed ||
+                file.status == FileStatus.failed)
               IconButton(
                 icon: const Icon(Icons.close, size: 18),
                 onPressed: onRemove,

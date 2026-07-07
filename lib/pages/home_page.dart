@@ -124,7 +124,9 @@ class HomePage extends StatelessWidget {
             onFilesDropped: (paths) => provider.addFiles(paths),
             onPickFiles: () => _pickFiles(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          _buildVideoInfo(context, provider),
+          const SizedBox(height: 8),
           if (provider.queue.isNotEmpty) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -232,13 +234,23 @@ class HomePage extends StatelessWidget {
             onFilesDropped: (paths) => provider.addFiles(paths),
             onPickFiles: () => _pickFiles(context),
           ),
-          const SizedBox(height: 12),
-          _buildFileSection(context, provider, theme),
-          const SizedBox(height: 16),
-          const PreviewPanel(),
-          const SizedBox(height: 16),
-          const ParamPanel(),
-          const ProgressPanel(),
+          const SizedBox(height: 8),
+          _buildVideoInfo(context, provider),
+          if (provider.queue.isEmpty) ...[
+            const SizedBox(height: 16),
+            Text('添加视频文件以开始转换',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                )),
+          ] else ...[
+            const SizedBox(height: 12),
+            _buildFileSection(context, provider, theme),
+            const SizedBox(height: 16),
+            const PreviewPanel(),
+            const SizedBox(height: 16),
+            const ParamPanel(),
+            const ProgressPanel(),
+          ],
           const SizedBox(height: 16),
           _buildActionBar(context, provider),
         ],
@@ -253,6 +265,7 @@ class HomePage extends StatelessWidget {
   ) {
     return Column(
       children: [
+        _buildVideoInfo(context, provider),
         if (provider.queue.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -297,14 +310,63 @@ class HomePage extends StatelessWidget {
   Widget _buildActionBar(BuildContext context, ConvertProvider provider) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: provider.isConverting || provider.queue.isEmpty
-              ? null
-              : () => provider.startConversion(),
-          icon: const Icon(Icons.swap_horiz),
-          label: Text(provider.isConverting ? '转换中...' : '开始转换'),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: provider.isConverting || provider.queue.isEmpty
+                  ? null
+                  : () => provider.startConversion(),
+              icon: const Icon(Icons.swap_horiz),
+              label: Text(provider.isConverting ? '转换中...' : '开始转换'),
+            ),
+          ),
+          if (provider.outputDirectory != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                '输出: ${provider.outputDirectory}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// 视频信息展示组件
+  Widget _buildVideoInfo(BuildContext context, ConvertProvider provider) {
+    final info = provider.currentInfo;
+    if (info == null || provider.queue.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final labels = <String, String>{
+      '分辨率': '${info.width}×${info.height}',
+      '帧率': '${info.fps.toStringAsFixed(1)} fps',
+      '帧数': '${info.frameCount} 帧',
+      '时长': '${info.durationSec.toStringAsFixed(1)} 秒',
+      '类型': info.isHdr ? 'HDR' : 'SDR',
+    };
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Wrap(
+          spacing: 16,
+          runSpacing: 4,
+          children: labels.entries.map((e) {
+            return Text(
+              '${e.key}: ${e.value}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
