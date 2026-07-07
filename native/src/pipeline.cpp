@@ -149,8 +149,17 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
         ? params_.peak_luminance : 1000.0;
     itmp.exposure = params_.exposure;
     itmp.saturation = params_.saturation;
+    // 步骤1：逆色调映射（SDR→HDR扩展，此时帧在 gbrpf32le float 空间）
     inv_tone_mapper_.apply(frame, itmp);
 
+    // 步骤2：正向 BT.2390 色调映射，将 HDR 值压回 0-1 SDR 范围
+    ToneMapParams tmp = {};
+    tmp.peak_luminance = itmp.target_peak;
+    tmp.exposure = 0.0;   // 已在逆映射中处理
+    tmp.saturation = 1.0; // 已在逆映射中处理
+    tone_mapper_.applyBt2390(frame, tmp);
+
+    // 步骤3：转回 YUV420P 编码
     AVFrame* dst = av_frame_alloc();
     dst->format = AV_PIX_FMT_YUV420P;
     dst->width = frame->width;
