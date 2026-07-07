@@ -82,11 +82,11 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
         }
     }
     enc_ctx_->framerate = fr;
-    // 使用标准 MP4 时间基 1/90000（相比 av_inv_q(fr) 更兼容 mp4 muxer）
-    enc_ctx_->time_base = AVRational{1, 90000};
-    // 每帧时长 = 90000 / fps（时间基单位）
+    // mpeg4 标准限制 timebase 分母 ≤ 65535，用 {1, 30000}
+    enc_ctx_->time_base = AVRational{1, 30000};
+    // 每帧时长 = 30000 / fps（时间基单位）
     frame_duration_ = av_rescale_q(1, av_inv_q(fr), enc_ctx_->time_base);
-    if (frame_duration_ <= 0) frame_duration_ = 3000; // 默认 30fps → 3000
+    if (frame_duration_ <= 0) frame_duration_ = 1000; // 默认 30fps → 1000
     enc_ctx_->color_primaries = dec_ctx->color_primaries;
     enc_ctx_->color_trc = dec_ctx->color_trc;
     enc_ctx_->colorspace = dec_ctx->colorspace;
