@@ -1,6 +1,6 @@
 #!/bin/bash
-# FFmpeg + x264 Android 交叉编译脚本
-# 产出: build/ffmpeg-android/{abi}/lib/*.so（含 libx264）
+# FFmpeg Android 交叉编译脚本（内置 mpeg4 编码器，无需外部库）
+# 产出: build/ffmpeg-android/{abi}/lib/*.so
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -8,7 +8,6 @@ BUILD_DIR="$SCRIPT_DIR/build/ffmpeg-android"
 
 NDK="${ANDROID_NDK_HOME:?请设置 ANDROID_NDK_HOME}"
 FFMPEG_VERSION="6.1.2"
-X264_VERSION="stable"
 HOST_PLATFORM="linux-x86_64"
 
 ABIS=("arm64-v8a" "x86_64")
@@ -25,13 +24,6 @@ if [ ! -d "$FFMPEG_DIR" ]; then
   mkdir -p "$BUILD_DIR"
   wget -q "https://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2" -O "$BUILD_DIR/ffmpeg.tar.bz2"
   tar -xjf "$BUILD_DIR/ffmpeg.tar.bz2" -C "$BUILD_DIR"
-fi
-
-# ── 下载 x264 源码 ──
-X264_DIR="$BUILD_DIR/x264"
-if [ ! -d "$X264_DIR" ]; then
-  echo "下载 x264..."
-  git clone --depth 1 --branch "$X264_VERSION" https://code.videolan.org/videolan/x264.git "$X264_DIR"
 fi
 
 # ── 循环编译每个 ABI ──
@@ -52,8 +44,6 @@ for ABI in "${ABIS[@]}"; do
   fi
 
   SYSROOT="$TOOLCHAIN/sysroot"
-  CC="$TOOLCHAIN/bin/${CROSS_PREFIX}clang"
-  CXX="$TOOLCHAIN/bin/${CROSS_PREFIX}clang++"
 
   # 创建 NDK 工具链包装
   WRAPPER_DIR="$BUILD_DIR/wrappers-$ABI"
@@ -62,42 +52,11 @@ for ABI in "${ABIS[@]}"; do
   ln -sf "$TOOLCHAIN/bin/llvm-ranlib" "$WRAPPER_DIR/${CROSS_PREFIX}ranlib"
   ln -sf "$TOOLCHAIN/bin/llvm-strip"  "$WRAPPER_DIR/${CROSS_PREFIX}strip"
   ln -sf "$TOOLCHAIN/bin/llvm-nm"     "$WRAPPER_DIR/${CROSS_PREFIX}nm"
-  # x264 的 configure 找 gcc，建符号链接指向 clang
-  ln -sf "$TOOLCHAIN/bin/${CROSS_PREFIX}clang" "$WRAPPER_DIR/${CROSS_PREFIX}gcc"
-  ln -sf "$TOOLCHAIN/bin/${CROSS_PREFIX}clang++" "$WRAPPER_DIR/${CROSS_PREFIX}g++"
   export PATH="$WRAPPER_DIR:$PATH"
 
-  # ── 第 1 步：编译 x264 ──
-  echo "  --- 编译 x264 ---"
-  cd "$X264_DIR"
-  make clean > /dev/null 2>&1 || true
-
-  # 创建一个临时目录放 pkg-config .pc 文件
-  PKG_DIR="$BUILD_DIR/pkgconfig-$ABI"
-  mkdir -p "$PKG_DIR"
-
-  ./configure \
-    --prefix="$PREFIX" \
-    --cross-prefix="$CROSS_PREFIX" \
-    --sysroot="$SYSROOT" \
-    --host="${ARCH_NAME}-linux-android" \
-    --enable-pic \
-    --enable-static \
-    --disable-cli \
-    --extra-cflags="-fPIC" 2>&1 | tail -3
-
-  make -j$(nproc)
-  make install
-
-  echo "  x264 编译完成"
-
-  # ── 第 2 步：编译 FFmpeg（链接 x264） ──
-  echo "  --- 配置 FFmpeg（含 libx264） ---"
+  echo "  配置 FFmpeg..."
   cd "$FFMPEG_DIR"
   make clean > /dev/null 2>&1 || true
-
-  PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
-  export PKG_CONFIG_PATH
 
   ./configure \
     --prefix="$PREFIX" \
@@ -105,8 +64,8 @@ for ABI in "${ABIS[@]}"; do
     --target-os=android \
     --arch="$ARCH_NAME" \
     --cpu="$CPU_NAME" \
-    --cc="$CC" \
-    --cxx="$CXX" \
+    --cc="$TOOLCHAIN/bin/${CROSS_PREFIX}clang" \
+    --cxx="$TOOLCHAIN/bin/${CROSS_PREFIX}clang++" \
     --cross-prefix="$CROSS_PREFIX" \
     --sysroot="$SYSROOT" \
     --enable-shared \
@@ -122,17 +81,13 @@ for ABI in "${ABIS[@]}"; do
     --enable-avutil \
     --enable-swresample \
     --enable-swscale \
-    --enable-gpl \
-    --enable-libx264 \
-    --enable-encoder=libx264,mpeg4 \
-    --enable-decoder=h264,hevc,vp8,vp9 \
-    --enable-parser=h264,hevc,vp8,vp9 \
+    --enable-encoder=mpeg4 \
+    --enable-decoder=h264,hevc,vp8,vp9,mpeg4 \
+    --enable-parser=h264,hevc,vp8,vp9,mpeg4video \
     --enable-demuxer=mov,matroska,mp4,mpegts,avi \
     --enable-muxer=mp4,matroska \
     --enable-protocol=file \
-    --enable-filter=scale,format \
-    --extra-cflags="-I$PREFIX/include" \
-    --extra-ldflags="-L$PREFIX/lib"
+    --enable-filter=scale,format
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
   make -j$(nproc)
