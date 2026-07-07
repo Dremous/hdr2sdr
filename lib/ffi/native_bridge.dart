@@ -15,7 +15,7 @@ class NativeBridge {
   late final void Function(Pointer<Void>) _close;
   late final int Function(Pointer<Void>) _getFrameCount;
   late final void Function(Pointer<Void>, Pointer<VideoInfoNative>) _getInfo;
-  late final void Function(Pointer<Void>, Pointer<ConvertParamsNative>)
+  late final void Function(Pointer<Void>, ConvertParamsNative)
       _setParams;
   late final int Function(
     Pointer<Void>,
@@ -64,9 +64,9 @@ class NativeBridge {
         void Function(
             Pointer<Void>, Pointer<VideoInfoNative>)>('converter_get_info');
     _setParams = _lib.lookupFunction<
-        Void Function(Pointer<Void>, Pointer<ConvertParamsNative>),
+        Void Function(Pointer<Void>, ConvertParamsNative),
         void Function(Pointer<Void>,
-            Pointer<ConvertParamsNative>)>('converter_set_params');
+            ConvertParamsNative)>('converter_set_params');
     _getFrame = _lib.lookupFunction<
         Int32 Function(Pointer<Void>, Pointer<Uint8>, Int64, Pointer<Int32>,
             Pointer<Int32>),
@@ -152,7 +152,7 @@ class NativeBridge {
     nativeParams.ref.cropRight = params.cropRight;
     nativeParams.ref.cropTop = params.cropTop;
     nativeParams.ref.cropBottom = params.cropBottom;
-    _setParams(handle, nativeParams);
+    _setParams(handle, nativeParams.ref);  // 按值传递结构体
     calloc.free(nativeParams);
   }
 
