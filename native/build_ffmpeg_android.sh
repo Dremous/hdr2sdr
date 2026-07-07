@@ -126,11 +126,15 @@ for ABI in "${ABIS[@]}"; do
   echo "  [DEBUG] PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
   echo "  [DEBUG] x265.pc exists: $(test -f "$PREFIX/lib/pkgconfig/x265.pc" && echo YES || echo NO)"
   if [ -f "$PREFIX/lib/pkgconfig/x265.pc" ]; then
-    echo "  [DEBUG] cmd: pkg-config --exists x265"
+    echo "  [DEBUG] === x265.pc 内容 ==="
+    cat "$PREFIX/lib/pkgconfig/x265.pc" 2>/dev/null || echo "(读取失败)"
+    echo "  [DEBUG] pkg-config --exists x265"
     pkg-config --exists x265 && echo "  [DEBUG] => OK" || echo "  [DEBUG] => FAIL"
+    echo "  [DEBUG] pkg-config --cflags --libs x265:"
+    pkg-config --cflags --libs x265 2>&1 || echo "(查询失败)"
   fi
 
-  ./configure \
+  if ! ./configure \
     --prefix="$PREFIX" \
     --enable-cross-compile \
     --target-os=android \
@@ -164,7 +168,13 @@ for ABI in "${ABIS[@]}"; do
     --enable-protocol=file \
     --enable-filter=scale,format \
     --extra-cflags="-I$PREFIX/include" \
-    --extra-ldflags="-L$PREFIX/lib"
+    --extra-ldflags="-L$PREFIX/lib"; then
+    echo "  [ERROR] FFmpeg configure 失败，输出 config.log 尾部 (last 150 lines):"
+    echo "  ========================================"
+    tail -150 ffbuild/config.log 2>/dev/null || echo "(config.log 不存在)"
+    echo "  ========================================"
+    exit 1
+  fi
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
   make -j$(nproc)
