@@ -171,6 +171,8 @@ void Encoder::close() {
 int Encoder::encodeFrame(AVFrame* frame) {
     if (!initialized_ || cancelled_) return -1;
 
+    if (frame) frame->pts = frame_count_;
+
     int ret = avcodec_send_frame(enc_ctx_, frame);
     if (ret < 0 && ret != AVERROR_EOF) return ret;
 
@@ -181,6 +183,10 @@ int Encoder::encodeFrame(AVFrame* frame) {
         if (ret == AVERROR(EAGAIN)) break;
         if (ret < 0) { av_packet_free(&pkt); return ret; }
         pkt->stream_index = 0;
+        // mpeg4 编码器不自动设 duration，手动设置每帧时长
+        if (pkt->duration <= 0) {
+            pkt->duration = 1; // 时间基 = av_inv_q(framerate)，每帧1单位
+        }
         ret = av_interleaved_write_frame(fmt_ctx_, pkt);
         av_packet_unref(pkt);
         if (ret < 0) { av_packet_free(&pkt); return ret; }
