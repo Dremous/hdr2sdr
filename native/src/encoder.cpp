@@ -32,30 +32,16 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     }
     HDR_LOG("Encoder::open: step1 OK, fmt=%s", fmt_ctx_->oformat->name);
 
-    // 选择编码器（强制 H.26x，拒绝 mpeg4）
+    // 选择编码器（强制 HEVC/libx265）
     const AVCodec* codec = nullptr;
     bool is_hdr_output = (target_color_space == 1); // BT.2020 = HDR 输出
 
-    if (is_hdr_output) {
-        // HDR 需 HEVC（libx265）
-        codec = avcodec_find_encoder_by_name("libx265");
-        if (!codec) {
-            HDR_LOG("Encoder::open: libx265 不可用，HDR 输出需要 HEVC 编码器");
-            return AVERROR_ENCODER_NOT_FOUND;
-        }
-        HDR_LOG("Encoder::open: step2 OK, codec=libx265 (HDR)");
-    } else {
-        // SDR：优先 libx265，其次 libx264
-        codec = avcodec_find_encoder_by_name("libx265");
-        if (!codec) {
-            codec = avcodec_find_encoder_by_name("libx264");
-            if (!codec) {
-                HDR_LOG("Encoder::open: 未找到 libx264/libx265 编码器");
-                return AVERROR_ENCODER_NOT_FOUND;
-            }
-        }
-        HDR_LOG("Encoder::open: step2 OK, codec=%s (SDR)", codec->name);
+    codec = avcodec_find_encoder_by_name("libx265");
+    if (!codec) {
+        HDR_LOG("Encoder::open: 未找到 libx265 编码器，请安装 HEVC 编码器");
+        return AVERROR_ENCODER_NOT_FOUND;
     }
+    HDR_LOG("Encoder::open: step2 OK, codec=libx265%s", is_hdr_output ? " (HDR)" : "");
 
     HDR_LOG("Encoder::open: step3 avcodec_alloc_context3...");
     enc_ctx_ = avcodec_alloc_context3(codec);
