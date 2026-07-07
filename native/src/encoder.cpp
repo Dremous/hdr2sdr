@@ -1,4 +1,5 @@
 #include "encoder.h"
+#include "debug_log.h"
 #include <iostream>
 
 Encoder::Encoder()
@@ -85,8 +86,15 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     }
 
     ret = avformat_write_header(fmt_ctx_, nullptr);
-    if (ret < 0) return ret;
+    if (ret < 0) {
+        HDR_LOG("Encoder: avformat_write_header 失败 ret=%d", ret);
+        return ret;
+    }
 
+    HDR_LOG("Encoder: 已打开 %s, codec=%s, %dx%d, timebase=%d/%d, framerate=%d/%d",
+            codec->name, out_w, out_h,
+            enc_ctx_->time_base.num, enc_ctx_->time_base.den,
+            enc_ctx_->framerate.num, enc_ctx_->framerate.den);
     initialized_ = true;
     return 0;
 }
@@ -147,6 +155,7 @@ int Encoder::finalize() {
     av_packet_free(&pkt);
 
     av_write_trailer(fmt_ctx_);
+    HDR_LOG("Encoder: finalize 完成, 共写入%d帧", frame_count_);
     return 0;
 }
 
