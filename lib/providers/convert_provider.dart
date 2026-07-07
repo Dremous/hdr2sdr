@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:isolate';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import '../models/video_file.dart';
 import '../models/convert_params.dart';
@@ -85,6 +87,8 @@ class ConvertProvider extends ChangeNotifier {
 
   /// 后台转换 Isolate（取消时 kill 之）
   Isolate? _conversionIsolate;
+  /// 模拟进度定时器（原生未接入进度回调时的 UI 反馈）
+  Timer? _progressTimer;
 
   ConvertProvider() {
     _initOutputDirectory();
@@ -209,6 +213,9 @@ class ConvertProvider extends ChangeNotifier {
     debugPrint('[hdr2sdr] 输入: $filePath');
     debugPrint('[hdr2sdr] 输出: $outputPath');
 
+    // 启动模拟进度定时器（origin 原生回调之前占位用）
+    _startFakeProgress();
+
     final receivePort = ReceivePort();
     Isolate.spawn(
       _runConversionInIsolate,
@@ -229,6 +236,9 @@ class ConvertProvider extends ChangeNotifier {
         if (type == 'complete') {
           receivePort.close();
           _conversionIsolate = null;
+          _stopFakeProgress();
+          _progress = 1.0;
+          notifyListeners();
           onConversionComplete(
             message['success'] as bool? ?? false,
             message['error'] as String?,
@@ -254,18 +264,38 @@ class ConvertProvider extends ChangeNotifier {
     }
     if (!success) _errorMessage = error;
     _currentInfo = null;
-    _currentFile = null;
+    // 保留 _currentFile 以便 UI 显示完成状态，startConversion 会重新赋值
     notifyListeners();
   }
 
   /// 取消转换：立即杀死后台 Isolate（由 OS 回收 native 资源）
   void cancelConversion() {
     if (!_isConverting) return;
+    _stopFakeProgress();
     final isolate = _conversionIsolate;
     if (isolate != null) {
       isolate.kill(priority: Isolate.immediate);
       _conversionIsolate = null;
     }
     onConversionComplete(false, '已取消转换');
+  }
+
+  /// 模拟进度：每秒涨一点直到 90%，完成后跳到 100%
+  void _startFakeProgress() {
+    _progress = 0.0;
+    _progressTimer?.cancel();
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 300), (t) {
+      if (!_isConverting) {
+        t.cancel();
+        return;
+      }
+      _progress = min(_progress + 0.02, 0.90);
+      notifyListeners();
+    });
+  }
+
+  void _stopFakeProgress() {
+    _progressTimer?.cancel();
+    _progressTimer = null;
   }
 }
