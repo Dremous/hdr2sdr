@@ -139,6 +139,7 @@ for ABI in "${ABIS[@]}"; do
     --cc="$CC" \
     --cxx="$CXX" \
     --cross-prefix="$CROSS_PREFIX" \
+    --pkg-config=pkg-config \
     --sysroot="$SYSROOT" \
     --enable-shared \
     --disable-static \
