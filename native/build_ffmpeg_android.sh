@@ -1,6 +1,6 @@
 #!/bin/bash
-# FFmpeg Android 交叉编译脚本（精简版：仅核心库，不含 x264）
-# 产出: build/ffmpeg-android/{abi}/lib/*.so
+# FFmpeg + x264 Android 交叉编译脚本
+# 产出: build/ffmpeg-android/{abi}/lib/*.so（含 libx264）
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -8,6 +8,7 @@ BUILD_DIR="$SCRIPT_DIR/build/ffmpeg-android"
 
 NDK="${ANDROID_NDK_HOME:?请设置 ANDROID_NDK_HOME}"
 FFMPEG_VERSION="6.1.2"
+X264_VERSION="stable"
 HOST_PLATFORM="linux-x86_64"
 
 ABIS=("arm64-v8a" "x86_64")
@@ -26,6 +27,13 @@ if [ ! -d "$FFMPEG_DIR" ]; then
   tar -xjf "$BUILD_DIR/ffmpeg.tar.bz2" -C "$BUILD_DIR"
 fi
 
+# ── 下载 x264 源码 ──
+X264_DIR="$BUILD_DIR/x264"
+if [ ! -d "$X264_DIR" ]; then
+  echo "下载 x264..."
+  git clone --depth 1 --branch "$X264_VERSION" https://code.videolan.org/videolan/x264.git "$X264_DIR"
+fi
+
 # ── 循环编译每个 ABI ──
 for ABI in "${ABIS[@]}"; do
   echo "========================================"
@@ -36,6 +44,7 @@ for ABI in "${ABIS[@]}"; do
   ARCH_NAME="${ARCH[$ABI]}"
   CPU_NAME="${CPU[$ABI]}"
   API_LEVEL="${API[$ABI]}"
+  CROSS_PREFIX="${ARCH_NAME}-linux-android${API_LEVEL}-"
 
   if [ -f "$PREFIX/lib/libavcodec.so" ]; then
     echo "  FFmpeg 已存在，跳过"
@@ -43,19 +52,49 @@ for ABI in "${ABIS[@]}"; do
   fi
 
   SYSROOT="$TOOLCHAIN/sysroot"
+  CC="$TOOLCHAIN/bin/${CROSS_PREFIX}clang"
+  CXX="$TOOLCHAIN/bin/${CROSS_PREFIX}clang++"
 
-  # 创建 NDK 工具链包装（ar/ranlib/strip/nm）
+  # 创建 NDK 工具链包装
   WRAPPER_DIR="$BUILD_DIR/wrappers-$ABI"
   mkdir -p "$WRAPPER_DIR"
-  ln -sf "$TOOLCHAIN/bin/llvm-ar"     "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-ar"
-  ln -sf "$TOOLCHAIN/bin/llvm-ranlib" "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-ranlib"
-  ln -sf "$TOOLCHAIN/bin/llvm-strip"  "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-strip"
-  ln -sf "$TOOLCHAIN/bin/llvm-nm"     "$WRAPPER_DIR/${ARCH_NAME}-linux-android${API_LEVEL}-nm"
+  ln -sf "$TOOLCHAIN/bin/llvm-ar"     "$WRAPPER_DIR/${CROSS_PREFIX}ar"
+  ln -sf "$TOOLCHAIN/bin/llvm-ranlib" "$WRAPPER_DIR/${CROSS_PREFIX}ranlib"
+  ln -sf "$TOOLCHAIN/bin/llvm-strip"  "$WRAPPER_DIR/${CROSS_PREFIX}strip"
+  ln -sf "$TOOLCHAIN/bin/llvm-nm"     "$WRAPPER_DIR/${CROSS_PREFIX}nm"
   export PATH="$WRAPPER_DIR:$PATH"
 
-  echo "  配置 FFmpeg..."
+  # ── 第 1 步：编译 x264 ──
+  echo "  --- 编译 x264 ---"
+  cd "$X264_DIR"
+  make clean > /dev/null 2>&1 || true
+
+  # 创建一个临时目录放 pkg-config .pc 文件
+  PKG_DIR="$BUILD_DIR/pkgconfig-$ABI"
+  mkdir -p "$PKG_DIR"
+
+  ./configure \
+    --prefix="$PREFIX" \
+    --cross-prefix="$CROSS_PREFIX" \
+    --sysroot="$SYSROOT" \
+    --host="${ARCH_NAME}-linux-android" \
+    --enable-pic \
+    --enable-static \
+    --disable-cli \
+    --extra-cflags="-fPIC" 2>&1 | tail -3
+
+  make -j$(nproc)
+  make install
+
+  echo "  x264 编译完成"
+
+  # ── 第 2 步：编译 FFmpeg（链接 x264） ──
+  echo "  --- 配置 FFmpeg（含 libx264） ---"
   cd "$FFMPEG_DIR"
   make clean > /dev/null 2>&1 || true
+
+  PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+  export PKG_CONFIG_PATH
 
   ./configure \
     --prefix="$PREFIX" \
@@ -63,9 +102,9 @@ for ABI in "${ABIS[@]}"; do
     --target-os=android \
     --arch="$ARCH_NAME" \
     --cpu="$CPU_NAME" \
-    --cc="$TOOLCHAIN/bin/${ARCH_NAME}-linux-android${API_LEVEL}-clang" \
-    --cxx="$TOOLCHAIN/bin/${ARCH_NAME}-linux-android${API_LEVEL}-clang++" \
-    --cross-prefix="${ARCH_NAME}-linux-android${API_LEVEL}-" \
+    --cc="$CC" \
+    --cxx="$CXX" \
+    --cross-prefix="$CROSS_PREFIX" \
     --sysroot="$SYSROOT" \
     --enable-shared \
     --disable-static \
@@ -80,13 +119,17 @@ for ABI in "${ABIS[@]}"; do
     --enable-avutil \
     --enable-swresample \
     --enable-swscale \
+    --enable-gpl \
+    --enable-libx264 \
+    --enable-encoder=libx264,mpeg4 \
     --enable-decoder=h264,hevc,vp8,vp9 \
     --enable-parser=h264,hevc,vp8,vp9 \
-    --enable-encoder=mpeg4 \
     --enable-demuxer=mov,matroska,mp4,mpegts,avi \
     --enable-muxer=mp4,matroska \
     --enable-protocol=file \
-    --enable-filter=scale,format
+    --enable-filter=scale,format \
+    --extra-cflags="-I$PREFIX/include" \
+    --extra-ldflags="-L$PREFIX/lib"
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
   make -j$(nproc)
