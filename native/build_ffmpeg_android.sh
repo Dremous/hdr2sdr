@@ -31,7 +31,7 @@ X265_DIR="$BUILD_DIR/x265"
 if [ ! -d "$X265_DIR/.git" ]; then
   echo "下载 x265..."
   rm -rf "$X265_DIR"
-  git clone --depth 1 https://bitbucket.org/multicoreware/x265_git.git "$X265_DIR"
+  git clone https://bitbucket.org/multicoreware/x265_git.git "$X265_DIR"
 fi
 
 # 编译 x265 静态库到每个 ABI 的 FFmpeg prefix 中
@@ -65,21 +65,6 @@ for ABI in "${ABIS[@]}"; do
 
   cmake --build . --config Release -- -j$(nproc)
   cmake --install .
-
-  # --depth 1 克隆无 git tag，x265 不生成 .pc 文件，手动创建供 FFmpeg pkg-config 使用
-  mkdir -p "$PREFIX/lib/pkgconfig"
-  cat > "$PREFIX/lib/pkgconfig/x265.pc" <<EOF
-prefix=$PREFIX
-exec_prefix=\${prefix}
-libdir=\${exec_prefix}/lib
-includedir=\${prefix}/include
-
-Name: x265
-Description: H.265/HEVC video encoder
-Version: 3.6
-Libs: -L\${libdir} -lx265
-Cflags: -I\${includedir}
-EOF
 
   echo "  x265 $ABI 完成"
   cd "$SCRIPT_DIR"
