@@ -76,7 +76,13 @@ class ParamPanel extends StatelessWidget {
                 PresetSelector(
                   current: params.presetStyle,
                   onChanged: (style) {
-                    provider.updateParams(params.copyWith(presetStyle: style));
+                    final preset = style.toParams();
+                    provider.updateParams(params.copyWith(
+                      presetStyle: style,
+                      peakLuminance: preset.peakLuminance,
+                      exposure: preset.exposure,
+                      saturation: preset.saturation,
+                    ));
                   },
                 ),
                 const Divider(),
@@ -89,6 +95,7 @@ class ParamPanel extends StatelessWidget {
                   max: 10000,
                   divisions: 99,
                   formatValue: (v) => '${v.toInt()} nit',
+                  enabled: params.presetStyle == PresetStyle.custom,
                   onChanged: (v) {
                     provider.updateParams(params.copyWith(peakLuminance: v));
                   },
@@ -100,6 +107,7 @@ class ParamPanel extends StatelessWidget {
                   max: 2.0,
                   divisions: 40,
                   formatValue: (v) => '${v.toStringAsFixed(1)} EV',
+                  enabled: params.presetStyle == PresetStyle.custom,
                   onChanged: (v) {
                     provider.updateParams(params.copyWith(exposure: v));
                   },
@@ -111,6 +119,7 @@ class ParamPanel extends StatelessWidget {
                   max: 2.0,
                   divisions: 200,
                   formatValue: (v) => '${(v * 100).toInt()}%',
+                  enabled: params.presetStyle == PresetStyle.custom,
                   onChanged: (v) {
                     provider.updateParams(params.copyWith(saturation: v));
                   },

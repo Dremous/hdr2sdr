@@ -23,6 +23,9 @@ class SliderRow extends StatelessWidget {
   /// 值变更回调
   final ValueChanged<double> onChanged;
 
+  /// 是否可交互（非自定义预设时只读）
+  final bool enabled;
+
   const SliderRow({
     super.key,
     required this.label,
@@ -32,6 +35,7 @@ class SliderRow extends StatelessWidget {
     required this.divisions,
     required this.formatValue,
     required this.onChanged,
+    this.enabled = true,
   });
 
   @override
@@ -45,14 +49,14 @@ class SliderRow extends StatelessWidget {
             child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
           ),
           Expanded(
-            child: Slider(
-              value: value,
-              min: min,
-              max: max,
-              divisions: divisions,
-              label: formatValue(value),
-              onChanged: onChanged,
-            ),
+              child: Slider(
+                value: value,
+                min: min,
+                max: max,
+                divisions: divisions,
+                label: formatValue(value),
+                onChanged: enabled ? onChanged : null,
+              ),
           ),
           SizedBox(
             width: 60,

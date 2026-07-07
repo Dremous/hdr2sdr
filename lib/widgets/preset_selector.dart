@@ -1,31 +1,47 @@
 import 'package:flutter/material.dart';
 import '../models/convert_params.dart';
 
-/// 预设风格选择器组件，使用分段按钮切换预设风格
+/// 预设风格选择器组件，使用分段按钮切换预设风格，并显示各预设的具体参数
 class PresetSelector extends StatelessWidget {
-  /// 当前选中的预设风格
   final PresetStyle current;
-
-  /// 预设风格变更回调
   final ValueChanged<PresetStyle> onChanged;
+  final bool showParamsDetail; // 是否显示参数详情
 
   const PresetSelector({
     super.key,
     required this.current,
     required this.onChanged,
+    this.showParamsDetail = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton<PresetStyle>(
-      segments: const [
-        ButtonSegment(value: PresetStyle.standard, label: Text('标准')),
-        ButtonSegment(value: PresetStyle.vivid, label: Text('鲜艳')),
-        ButtonSegment(value: PresetStyle.cinematic, label: Text('电影感')),
-        ButtonSegment(value: PresetStyle.custom, label: Text('自定义')),
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SegmentedButton<PresetStyle>(
+          segments: PresetStyle.values.map((s) {
+            return ButtonSegment(
+              value: s,
+              label: Text(s.label),
+            );
+          }).toList(),
+          selected: {current},
+          onSelectionChanged: (set) {
+            onChanged(set.first);
+          },
+        ),
+        if (showParamsDetail) ...[
+          const SizedBox(height: 8),
+          Text(
+            current.summary,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ],
-      selected: {current},
-      onSelectionChanged: (set) => onChanged(set.first),
     );
   }
 }

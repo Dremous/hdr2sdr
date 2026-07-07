@@ -1,7 +1,53 @@
 import 'video_file.dart';
 
 /// 预设风格枚举
-enum PresetStyle { standard, vivid, cinematic, custom }
+enum PresetStyle {
+  standard,
+  vivid,
+  cinematic,
+  custom;
+
+  /// 预设名称
+  String get label {
+    switch (this) {
+      case PresetStyle.standard: return '标准';
+      case PresetStyle.vivid: return '鲜艳';
+      case PresetStyle.cinematic: return '电影感';
+      case PresetStyle.custom: return '自定义';
+    }
+  }
+
+  /// 预设参数摘要（供 UI 显示）
+  String get summary {
+    switch (this) {
+      case PresetStyle.standard:
+        return '峰值1000nit  曝光0EV  饱和度100%';
+      case PresetStyle.vivid:
+        return '峰值2000nit  曝光+0.5EV  饱和度120%';
+      case PresetStyle.cinematic:
+        return '峰值4000nit  曝光-0.3EV  饱和度90%';
+      case PresetStyle.custom:
+        return '手动调节';
+    }
+  }
+
+  /// 预设对应的 ConvertParams 基础值
+  ConvertParams toParams() {
+    switch (this) {
+      case PresetStyle.standard:
+        return const ConvertParams(
+          peakLuminance: 1000, exposure: 0.0, saturation: 1.0);
+      case PresetStyle.vivid:
+        return const ConvertParams(
+          peakLuminance: 2000, exposure: 0.5, saturation: 1.2);
+      case PresetStyle.cinematic:
+        return const ConvertParams(
+          peakLuminance: 4000, exposure: -0.3, saturation: 0.9);
+      case PresetStyle.custom:
+        return const ConvertParams();
+    }
+  }
+}
 
 /// 色彩空间枚举
 enum ColorSpace { bt709, bt2020, dciP3 }
