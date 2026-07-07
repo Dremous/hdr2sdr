@@ -10,7 +10,8 @@ class ColorConverter {
 public:
     ColorConverter();
     ~ColorConverter() = default;
-    int convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp);
+    int convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp,
+                bool is_hdr_output = false);
 };
 
 #endif

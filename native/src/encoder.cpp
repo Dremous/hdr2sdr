@@ -32,27 +32,30 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     }
     HDR_LOG("Encoder::open: step1 OK, fmt=%s", fmt_ctx_->oformat->name);
 
-    // 选择编码器（若目标编码器不可用则回退到 mpeg4）
+    // 选择编码器（强制 H.26x，拒绝 mpeg4）
     const AVCodec* codec = nullptr;
-    const char* codec_name = nullptr;
-    switch (encoder_type) {
-        case 0: codec_name = "libx264"; break;
-        case 1: codec_name = "libx265"; break;
-        case 2: codec_name = "libaom-av1"; break;
-        default: codec_name = "libx265";
-    }
-    HDR_LOG("Encoder::open: step2 查找编码器 %s...", codec_name);
-    codec = avcodec_find_encoder_by_name(codec_name);
-    if (!codec) {
-        // 回退：使用 mpeg4 编码器（始终可用，无需外部库）
-        codec = avcodec_find_encoder_by_name("mpeg4");
+    bool is_hdr_output = (target_color_space == 1); // BT.2020 = HDR 输出
+
+    if (is_hdr_output) {
+        // HDR 需 HEVC（libx265）
+        codec = avcodec_find_encoder_by_name("libx265");
         if (!codec) {
-            HDR_LOG("Encoder::open: 未找到任何编码器");
+            HDR_LOG("Encoder::open: libx265 不可用，HDR 输出需要 HEVC 编码器");
             return AVERROR_ENCODER_NOT_FOUND;
         }
-        HDR_LOG("Encoder::open: 回退到 mpeg4");
+        HDR_LOG("Encoder::open: step2 OK, codec=libx265 (HDR)");
+    } else {
+        // SDR：优先 libx265，其次 libx264
+        codec = avcodec_find_encoder_by_name("libx265");
+        if (!codec) {
+            codec = avcodec_find_encoder_by_name("libx264");
+            if (!codec) {
+                HDR_LOG("Encoder::open: 未找到 libx264/libx265 编码器");
+                return AVERROR_ENCODER_NOT_FOUND;
+            }
+        }
+        HDR_LOG("Encoder::open: step2 OK, codec=%s (SDR)", codec->name);
     }
-    HDR_LOG("Encoder::open: step2 OK, codec=%s", codec->name);
 
     HDR_LOG("Encoder::open: step3 avcodec_alloc_context3...");
     enc_ctx_ = avcodec_alloc_context3(codec);
@@ -89,17 +92,15 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     frame_duration_ = av_rescale_q(1, av_inv_q(fr), enc_ctx_->time_base);
     if (frame_duration_ <= 0) frame_duration_ = 1000; // 默认 30fps → 1000
     // 根据目标色彩空间设置编码器颜色元数据
-    switch (target_color_space) {
-        case 1: // BT.2020（宽色域，SDR gamma 保持兼容）
-            enc_ctx_->color_primaries = AVCOL_PRI_BT2020;
-            enc_ctx_->color_trc = AVCOL_TRC_BT709;
-            enc_ctx_->colorspace = AVCOL_SPC_BT2020_NCL;
-            break;
-        default: // BT.709
-            enc_ctx_->color_primaries = AVCOL_PRI_BT709;
-            enc_ctx_->color_trc = AVCOL_TRC_BT709;
-            enc_ctx_->colorspace = AVCOL_SPC_BT709;
-            break;
+    if (is_hdr_output) {
+        enc_ctx_->color_primaries = AVCOL_PRI_BT2020;
+        enc_ctx_->color_trc = AVCOL_TRC_SMPTE2084;
+        enc_ctx_->colorspace = AVCOL_SPC_BT2020_NCL;
+        HDR_LOG("Encoder::open: HDR metadata (BT.2020 + PQ)");
+    } else {
+        enc_ctx_->color_primaries = AVCOL_PRI_BT709;
+        enc_ctx_->color_trc = AVCOL_TRC_BT709;
+        enc_ctx_->colorspace = AVCOL_SPC_BT709;
     }
     enc_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     HDR_LOG("Encoder::open: step4 OK, timebase=%d/%d", enc_ctx_->time_base.num, enc_ctx_->time_base.den);

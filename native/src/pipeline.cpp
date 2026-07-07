@@ -122,14 +122,18 @@ int Pipeline::getFrame(uint8_t* out_buffer, int64_t timestamp_us,
 }
 
 int Pipeline::processHdrToSdr(AVFrame* frame) {
-    ToneMapParams tmp = {};
-    tmp.peak_luminance = params_.peak_luminance > 0
-        ? params_.peak_luminance : hdr_meta_.max_luminance;
-    tmp.exposure = params_.exposure;
-    tmp.saturation = params_.saturation;
-    tone_mapper_.apply(frame, tmp);
+    // BT.2020 输出时跳过亮度压缩，只做色域转换
+    bool needs_tone_compress = (params_.target_color_space == 0); // BT.709
 
-    // 转换到 BT.709
+    if (needs_tone_compress) {
+        ToneMapParams tmp = {};
+        tmp.peak_luminance = params_.peak_luminance > 0
+            ? params_.peak_luminance : hdr_meta_.max_luminance;
+        tmp.exposure = params_.exposure;
+        tmp.saturation = params_.saturation;
+        tone_mapper_.apply(frame, tmp);
+    }
+
     AVFrame* dst = av_frame_alloc();
     dst->format = AV_PIX_FMT_YUV420P;
     dst->width = frame->width;
@@ -158,12 +162,15 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
     // 逆色调映射扩展（SDR→HDR，值可超过 1.0）
     inv_tone_mapper_.applyOnFloat(flt, itmp);
 
-    // BT.2390 正向色调映射（HDR→SDR，压缩回 0-1）
-    ToneMapParams tmp = {};
-    tmp.peak_luminance = itmp.target_peak;
-    tmp.exposure = 0.0;
-    tmp.saturation = 1.0;
-    tone_mapper_.applyOnFloat(flt, tmp);
+    // BT.2390 正向色调映射（仅 BT.709/SDR 输出时需要压缩回 0-1）
+    bool needs_tone_compress = (params_.target_color_space == 0); // BT.709
+    if (needs_tone_compress) {
+        ToneMapParams tmp = {};
+        tmp.peak_luminance = itmp.target_peak;
+        tmp.exposure = 0.0;
+        tmp.saturation = 1.0;
+        tone_mapper_.applyOnFloat(flt, tmp);
+    }
 
     // 转回 YUV420P 并做色彩空间转换
     AVFrame* dst = av_frame_alloc();

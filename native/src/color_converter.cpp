@@ -3,7 +3,8 @@
 
 ColorConverter::ColorConverter() {}
 
-int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp) {
+int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp,
+                            bool is_hdr_output) {
     if (!src || !dst) return -1;
 
     int src_colorspace = AVCOL_SPC_BT2020_NCL;
