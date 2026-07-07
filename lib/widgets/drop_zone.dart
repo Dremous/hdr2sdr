@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class DropZone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isMobile = Platform.isAndroid || Platform.isIOS;
+    final isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
     final content = InkWell(
       onTap: onPickFiles,

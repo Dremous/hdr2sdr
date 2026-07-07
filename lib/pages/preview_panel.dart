@@ -28,7 +28,7 @@ class PreviewPanel extends StatelessWidget {
                       Icon(Icons.movie_outlined,
                           size: 64, color: Colors.grey[600]),
                       const SizedBox(height: 12),
-                      Text('选择文件后显示预览',
+                      Text('预览功能待实现',
                           style: TextStyle(color: Colors.grey[500])),
                     ],
                   ),

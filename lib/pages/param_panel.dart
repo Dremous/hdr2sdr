@@ -62,7 +62,9 @@ class ParamPanel extends StatelessWidget {
               ],
               SwitchListTile(
                 title: const Text('自动模式'),
-                subtitle: const Text('自动检测 HDR 类型并设置最佳参数'),
+                subtitle: Text(params.autoMode
+                    ? 'C++ 根据视频 HDR 类型自动选方向'
+                    : '自动检测 HDR 类型并设置最佳参数'),
                 value: params.autoMode,
                 onChanged: (v) {
                   provider.updateParams(params.copyWith(autoMode: v));
@@ -127,15 +129,22 @@ class ParamPanel extends StatelessWidget {
                 const Divider(),
                 const Text('色彩空间',
                     style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                const Text('仅 BT.709 可用，其他待实现',
+                    style: TextStyle(fontSize: 11, color: Colors.orange)),
                 const SizedBox(height: 8),
                 SegmentedButton<ColorSpace>(
                   segments: const [
                     ButtonSegment(
                         value: ColorSpace.bt709, label: Text('BT.709')),
                     ButtonSegment(
-                        value: ColorSpace.bt2020, label: Text('BT.2020')),
+                        value: ColorSpace.bt2020,
+                        label: Text('BT.2020'),
+                        enabled: false),
                     ButtonSegment(
-                        value: ColorSpace.dciP3, label: Text('DCI-P3')),
+                        value: ColorSpace.dciP3,
+                        label: Text('DCI-P3'),
+                        enabled: false),
                   ],
                   selected: {params.targetColorSpace},
                   onSelectionChanged: (set) {
