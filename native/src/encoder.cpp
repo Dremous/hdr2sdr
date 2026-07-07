@@ -42,8 +42,10 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
 
     enc_ctx_->width = out_w;
     enc_ctx_->height = out_h;
-    enc_ctx_->time_base = dec_ctx->time_base;
     enc_ctx_->pix_fmt = AV_PIX_FMT_YUV420P;
+    // mpeg4 编码器需要显式设置 framerate 和 time_base
+    enc_ctx_->framerate = dec_ctx->framerate;
+    enc_ctx_->time_base = av_inv_q(dec_ctx->framerate);
     enc_ctx_->color_primaries = dec_ctx->color_primaries;
     enc_ctx_->color_trc = dec_ctx->color_trc;
     enc_ctx_->colorspace = dec_ctx->colorspace;
