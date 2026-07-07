@@ -1,5 +1,6 @@
 #include "pipeline.h"
 #include "debug_log.h"
+#include "pixel_utils.h"
 #include <cstring>
 #include <iostream>
 extern "C" {
@@ -149,29 +150,34 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
         ? params_.peak_luminance : 1000.0;
     itmp.exposure = params_.exposure;
     itmp.saturation = params_.saturation;
-    // 步骤1：逆色调映射扩展（内部 YUV→float→expand→YUV）
-    inv_tone_mapper_.apply(frame, itmp);
 
-    // 步骤2：正向 BT.2390 色调映射压回 0-1（内部 YUV→float→BT.2390→YUV）
-    // 注意：apply() 而非 applyBt2390()，因为上一步已转回 YUV420P
+    // 一次转换到 float，全程在 float 域处理，避免中间 YUV 截断
+    AVFrame* flt = convertToFloatPlanar(frame);
+    if (!flt) return -1;
+
+    // 逆色调映射扩展（SDR→HDR，值可超过 1.0）
+    inv_tone_mapper_.applyOnFloat(flt, itmp);
+
+    // BT.2390 正向色调映射（HDR→SDR，压缩回 0-1）
     ToneMapParams tmp = {};
     tmp.peak_luminance = itmp.target_peak;
     tmp.exposure = 0.0;
     tmp.saturation = 1.0;
-    tone_mapper_.apply(frame, tmp);
+    tone_mapper_.applyOnFloat(flt, tmp);
 
-    // 步骤3：色彩空间转换 + 转 YUV420P
+    // 转回 YUV420P 并做色彩空间转换
     AVFrame* dst = av_frame_alloc();
     dst->format = AV_PIX_FMT_YUV420P;
     dst->width = frame->width;
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);
 
-    color_converter_.convert(frame, dst, 0, 1);
+    color_converter_.convert(flt, dst, 0, 1);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);
     av_frame_free(&dst);
+    av_frame_free(&flt);
     return 0;
 }
 

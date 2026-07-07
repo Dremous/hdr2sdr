@@ -15,6 +15,8 @@ class InverseToneMapper {
 public:
     InverseToneMapper();
     void apply(AVFrame* frame, const InvToneMapParams& params);
+    /// 直接在 GBRPF32 float 帧上做逆色调映射扩展（不转换格式）
+    void applyOnFloat(AVFrame* float_frame, const InvToneMapParams& params);
 private:
     void applyExpansion(AVFrame* frame, const InvToneMapParams& params);
 };

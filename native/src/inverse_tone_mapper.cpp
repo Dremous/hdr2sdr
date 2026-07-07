@@ -16,6 +16,11 @@ void InverseToneMapper::apply(AVFrame* frame, const InvToneMapParams& params) {
     av_frame_free(&float_frame);
 }
 
+void InverseToneMapper::applyOnFloat(AVFrame* float_frame, const InvToneMapParams& params) {
+    if (!float_frame) return;
+    applyExpansion(float_frame, params);
+}
+
 void InverseToneMapper::applyExpansion(AVFrame* frame, const InvToneMapParams& params) {
     int width = frame->width;
     int height = frame->height;

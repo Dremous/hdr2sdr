@@ -24,6 +24,10 @@ void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params) {
     av_frame_free(&float_frame);
 }
 
+void ToneMapper::applyOnFloat(AVFrame* float_frame, const ToneMapParams& params) {
+    applyBt2390(float_frame, params);
+}
+
 void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params) {
     int width = frame->width;
     int height = frame->height;
