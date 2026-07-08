@@ -40,6 +40,8 @@ void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params) {
     float peak = params.peak_luminance > 0 ? params.peak_luminance : 1000.0f;
     float ev = powf(2.0f, params.exposure);
     float sat = params.saturation;
+    // BT.2020 亮度系数（0.2627/0.6780/0.0593），与 tone_mapper HDR 输入匹配
+    const float kr = 0.2627f, kg = 0.6780f, kb = 0.0593f;
 
     // GBRPF32 格式：data[0]=R, data[1]=G, data[2]=B, 每像素 float
     for (int y = 0; y < height; ++y) {
@@ -63,8 +65,8 @@ void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params) {
                 *b = bv * scale;
             }
 
-            // 饱和度调整
-            float lum = 0.2126f * (*r) + 0.7152f * (*g) + 0.0722f * (*b);
+            // 饱和度调整（BT.2020 亮度系数）
+            float lum = kr * (*r) + kg * (*g) + kb * (*b);
             *r = lum + sat * (*r - lum);
             *g = lum + sat * (*g - lum);
             *b = lum + sat * (*b - lum);

@@ -39,10 +39,12 @@ HDRMetadata HDRAnalyzer::analyze(AVFormatContext* fmt_ctx,
 
     for (int i = 0; i < stream->codecpar->nb_coded_side_data; ++i) {
         auto* sd = &stream->codecpar->coded_side_data[i];
-        if (sd->type == AV_PKT_DATA_MASTERING_DISPLAY_METADATA) {
+        if (sd->type == AV_PKT_DATA_MASTERING_DISPLAY_METADATA
+            && sd->size >= sizeof(AVMasteringDisplayMetadata)) {
             mastering = (AVMasteringDisplayMetadata*)sd->data;
         }
-        if (sd->type == AV_PKT_DATA_CONTENT_LIGHT_LEVEL) {
+        if (sd->type == AV_PKT_DATA_CONTENT_LIGHT_LEVEL
+            && sd->size >= sizeof(AVContentLightMetadata)) {
             light = (AVContentLightMetadata*)sd->data;
         }
     }

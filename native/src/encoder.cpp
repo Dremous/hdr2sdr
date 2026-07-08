@@ -60,7 +60,8 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
 
     enc_ctx_->width = out_w;
     enc_ctx_->height = out_h;
-    enc_ctx_->pix_fmt = AV_PIX_FMT_YUV420P;
+    // HDR 需要 10-bit 避免色带，SDR 用 8-bit
+    enc_ctx_->pix_fmt = is_hdr_output ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
     // 帧率：优先用解码器帧率，无效则回退 30fps
     HDR_LOG("Encoder::open: step4 设置参数...");
     AVRational fr = dec_ctx->framerate;

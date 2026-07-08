@@ -17,12 +17,6 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     int src_range = AVCOL_RANGE_MPEG;
     int dst_range = AVCOL_RANGE_MPEG;
 
-    // GBRPF32 浮点输入已经是线性值（convertToFloatPlanar 已做去 gamma 处理）
-    // 必须用 LINEAR 避免 swscale 二次逆 gamma
-    if (src->format == AV_PIX_FMT_GBRPF32) {
-        src_color_trc = AVCOL_TRC_LINEAR;
-    }
-
     if (src_csp == 0) { // BT.709 SDR 输入
         src_colorspace = AVCOL_SPC_BT709;
         src_color_prim = AVCOL_PRI_BT709;
@@ -31,7 +25,13 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
         src_colorspace = AVCOL_SPC_SMPTE170M;
         src_color_prim = AVCOL_PRI_SMPTE432;
     }
-    // src_csp==1 (BT.2020): 默认值，HDR→SDR 时帧数据已被 tone_mapper 压缩到 SDR 范围
+    // src_csp==1 (BT.2020): 默认值
+
+    // GBRPF32 浮点输入已经是线性值（convertToFloatPlanar 已做去 gamma 处理）
+    // 必须用 LINEAR 避免 swscale 二次逆 gamma —— 放在 src_csp 之后，防止被覆盖
+    if (src->format == AV_PIX_FMT_GBRPF32) {
+        src_color_trc = AVCOL_TRC_LINEAR;
+    }
 
     if (dst_csp == 0) { // BT.709 SDR 输出
         dst_colorspace = AVCOL_SPC_BT709;
@@ -44,11 +44,9 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     // dst_csp==1 (BT.2020): 默认值通过 is_hdr_output 控制 TRC
     //   HDR 输出 → PQ，SDR 输出 → BT.709 gamma
     //
-    // 注：sws_setColorspaceDetails 仅控制 YUV 编解码矩阵和传递函数，
-    // 不执行完整色域映射（BT.709↔BT.2020 的 primaries 3×3 转换）。
-    // SDR→HDR 时 BT.709 色彩嵌在 BT.2020 容器中，高饱和色会略微欠饱和；
-    // HDR→SDR 时 BT.2020 高饱和色可能超出 BT.709 色域被裁切。
-    // 完整色域映射需引入 zscale/LUT 引擎，暂不实现。
+    // 注：色域映射（BT.709↔BT.2020 primaries 3×3 矩阵）已在 gamut_mapper.h 中实现，
+    // 在 pipeline.cpp 的 processSdrToHdr / processHdrToSdr 中调用。
+    // sws_setColorspaceDetails 仅控制 YUV 编解码矩阵和传递函数。
 
     SwsContext* sws = sws_getContext(
         src->width, src->height, (AVPixelFormat)src->format,

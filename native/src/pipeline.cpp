@@ -133,7 +133,10 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
     tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL, AVCOL_SPC_BT709, 1);
 
     AVFrame* dst = av_frame_alloc();
-    dst->format = AV_PIX_FMT_YUV420P;
+    // HDR 输出用 10-bit 避免色带，SDR 用 8-bit
+    int pix_fmt = (params_.target_color_space == 1)
+        ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
+    dst->format = pix_fmt;
     dst->width = frame->width;
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);
@@ -178,7 +181,10 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
 
     // 转回 YUV420P 并做色彩空间转换
     AVFrame* dst = av_frame_alloc();
-    dst->format = AV_PIX_FMT_YUV420P;
+    // HDR 输出用 10-bit 避免色带，SDR 用 8-bit
+    int pix_fmt = (params_.target_color_space == 1)
+        ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
+    dst->format = pix_fmt;
     dst->width = frame->width;
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);

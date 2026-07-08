@@ -56,7 +56,13 @@ bool Decoder::isOpen() const {
 
 int Decoder::getFrameCount() const {
     if (!isOpen()) return 0;
-    return fmt_ctx_->streams[video_stream_index_]->nb_frames;
+    int nb = fmt_ctx_->streams[video_stream_index_]->nb_frames;
+    if (nb > 0) return nb;
+    // 流式格式（webm/ts）nb_frames 为 0，用 duration × fps 推算
+    double dur = getDurationSec();
+    double fps = getFps();
+    if (dur > 0 && fps > 0) return (int)(dur * fps);
+    return 0;
 }
 
 double Decoder::getFps() const {
