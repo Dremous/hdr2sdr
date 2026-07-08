@@ -81,8 +81,10 @@ int Pipeline::swFrameToBgra(AVFrame* frame, uint8_t* out_buffer, int* w, int* h)
 
     uint8_t* dst_data[4] = {nullptr};
     int dst_linesize[4] = {0};
-    av_image_alloc(dst_data, dst_linesize, out_w, out_h,
-                   AV_PIX_FMT_BGRA, 1);
+    if (av_image_alloc(dst_data, dst_linesize, out_w, out_h,
+                       AV_PIX_FMT_BGRA, 1) < 0) {
+        return -1;
+    }
 
     SwsContext* sws = sws_getContext(
         frame->width, frame->height, (AVPixelFormat)frame->format,
@@ -143,7 +145,10 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
     dst->format = pix_fmt;
     dst->width = frame->width;
     dst->height = frame->height;
-    av_frame_get_buffer(dst, 32);
+    if (av_frame_get_buffer(dst, 32) < 0) {
+        av_frame_free(&dst);
+        return -1;
+    }
 
     color_converter_.convert(frame, dst, src_csp, params_.target_color_space, false);
 
@@ -191,7 +196,11 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
     dst->format = pix_fmt;
     dst->width = frame->width;
     dst->height = frame->height;
-    av_frame_get_buffer(dst, 32);
+    if (av_frame_get_buffer(dst, 32) < 0) {
+        av_frame_free(&dst);
+        av_frame_free(&flt);
+        return -1;
+    }
 
     // 转回 YUV420P，目标色彩空间由 is_output_hdr 决定 TRC（PQ 或 BT.709）
     // gamut 转换后 RGB 原色已匹配目标色域，src_csp 需与之一致

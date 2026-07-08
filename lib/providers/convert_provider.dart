@@ -50,6 +50,7 @@ void _runConversionInIsolate(List<dynamic> args) {
           'frames': info.frameCount,
           'duration': info.durationSec,
           'isHdr': info.isHdr,
+          'hdrType': info.hdrType,
         });
       } else {
         sendPort.send({
@@ -261,6 +262,7 @@ class ConvertProvider extends ChangeNotifier {
       if (message is Map) {
         final type = message['type'] as String?;
         if (type == 'info') {
+          final hdrTypeIndex = (message['hdrType'] as num?)?.toInt() ?? 0;
           _currentInfo = VideoInfo(
             width: (message['width'] as num?)?.toInt() ?? 0,
             height: (message['height'] as num?)?.toInt() ?? 0,
@@ -268,9 +270,13 @@ class ConvertProvider extends ChangeNotifier {
             frameCount: (message['frames'] as num?)?.toInt() ?? 0,
             durationSec: (message['duration'] as num?)?.toDouble() ?? 0.0,
             isHdr: message['isHdr'] as bool? ?? false,
-            hdrType: 0,
+            hdrType: hdrTypeIndex,
           );
           _totalFrames = _currentInfo!.frameCount;
+          // 更新当前文件的 HDR 类型，确保输出文件命名正确
+          if (hdrTypeIndex >= 0 && hdrTypeIndex < HdrType.values.length) {
+            _currentFile!.hdrType = HdrType.values[hdrTypeIndex];
+          }
           notifyListeners();
         } else if (type == 'complete') {
           receivePort.close();
