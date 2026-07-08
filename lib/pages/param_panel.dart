@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import '../models/convert_params.dart';
 import '../models/video_file.dart';
 import '../providers/convert_provider.dart';
+import '../widgets/slider_row.dart';
+import '../widgets/preset_selector.dart';
 
 /// 不含 H.264 的可用编码器列表（libx264 未编译）
 const _visibleEncoders = [EncoderType.h265, EncoderType.av1, EncoderType.h265Hardware];
-import '../widgets/slider_row.dart';
-import '../widgets/preset_selector.dart';
 
 class ParamPanel extends StatelessWidget {
   final bool isMobile;
