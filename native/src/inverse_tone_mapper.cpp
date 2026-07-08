@@ -31,8 +31,12 @@ void InverseToneMapper::applyExpansion(AVFrame* frame, const InvToneMapParams& p
 
     // SDR 参考白点 (nits) — 标准 SDR 峰值亮度
     const float kSdrWhite = 100.0f;
+    // PQ 全量程峰值 (nits)：swscale LINEAR→PQ 将线性 1.0 映射到 10000 nits
+    const float kPQPeak = 10000.0f;
     // 相对峰值 = 目标峰值 / SDR 白点，控制展开曲线形状
     float p = target_peak / kSdrWhite;
+    // 归一化因子：将 "SDR-相对线性值" (1.0 = 100 nits) 缩放到 "PQ-相对线性值" (1.0 = 10000 nits)
+    float pq_norm = kSdrWhite / kPQPeak;
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
@@ -47,13 +51,15 @@ void InverseToneMapper::applyExpansion(AVFrame* frame, const InvToneMapParams& p
             // 逆 BT.2390 色调映射曲线:
             //   前向:  mapped = x*(1+x/p)/(1+x)   用于 HDR→SDR 压缩
             //   逆向:  x = (p*(m-1) + sqrt(p²*(m-1)² + 4*p*m)) / 2
-            //   效果:  中灰度保持 ~85 nits, 白点展开到 ~316 nits (peak=1000)
+            //   x 输出是 "SDR-相对线性值" (1.0 = 100 nits)
+            //   乘以 pq_norm 归一化到 PQ 域 (1.0 = 10000 nits)
+            //   效果:  SDR 中灰 0.5 → ~0.0085 (85 nits), 白点 1.0 → ~0.0316 (316 nits)
             float max_rgb = fmaxf(rv, fmaxf(gv, bv));
             if (max_rgb > 0.0f) {
                 float m = max_rgb;
                 float tmp = p * (m - 1.0f);
                 float x = (tmp + sqrtf(tmp * tmp + 4.0f * p * m)) * 0.5f;
-                float scale = x / m;
+                float scale = (x * pq_norm) / m;
                 *r = rv * scale;
                 *g = gv * scale;
                 *b = bv * scale;
