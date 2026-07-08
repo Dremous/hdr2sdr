@@ -184,8 +184,10 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
     av_frame_get_buffer(dst, 32);
 
     // 转回 YUV420P，目标色彩空间由 is_output_hdr 决定 TRC（PQ 或 BT.709）
+    // gamut 转换后 RGB 原色已匹配目标色域，src_csp 需与之一致
     bool is_output_hdr = (params_.target_color_space == 1);
-    color_converter_.convert(flt, dst, 0, params_.target_color_space, is_output_hdr);
+    int src_csp = is_output_hdr ? 1 : 0; // HDR→BT.2020, SDR→BT.709
+    color_converter_.convert(flt, dst, src_csp, params_.target_color_space, is_output_hdr);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);

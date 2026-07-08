@@ -7,6 +7,7 @@ extern "C" {
 
 /// BT.709 → BT.2020 色域扩展矩阵（通过 XYZ D65 白点）
 /// 在 GBRPF32 浮点帧上逐像素应用 3×3 primaries 转换
+/// 仅裁剪负值（防止上游饱和度过高导致的非法值），HDR 可 >1 不设上限
 inline void gamutConvert709To2020(AVFrame* frame) {
     if (!frame || frame->format != AV_PIX_FMT_GBRPF32) return;
 
@@ -20,15 +21,20 @@ inline void gamutConvert709To2020(AVFrame* frame) {
 
             // BT.709 primaries → BT.2020 primaries (D65 white)
             // Matrix from ITU-R BT.2087 / colormath.org
-            *r = 0.6274f * ri + 0.3293f * gi + 0.0433f * bi;
-            *g = 0.0691f * ri + 0.9195f * gi + 0.0114f * bi;
-            *b = 0.0164f * ri + 0.0880f * gi + 0.8956f * bi;
+            float rr = 0.6274f * ri + 0.3293f * gi + 0.0433f * bi;
+            float gg = 0.0691f * ri + 0.9195f * gi + 0.0114f * bi;
+            float bb = 0.0164f * ri + 0.0880f * gi + 0.8956f * bi;
+
+            *r = rr < 0.0f ? 0.0f : rr; // BT.709⊂BT.2020，不应有负值，但防御上游非法值
+            *g = gg < 0.0f ? 0.0f : gg;
+            *b = bb < 0.0f ? 0.0f : bb;
         }
     }
 }
 
 /// BT.2020 → BT.709 色域压缩矩阵（D65 白点）
 /// 在 GBRPF32 浮点帧上逐像素应用逆 3×3 primaries 转换
+/// 窄色域值会超出 [0,1]（负值或 >1），需裁剪到有效范围
 inline void gamutConvert2020To709(AVFrame* frame) {
     if (!frame || frame->format != AV_PIX_FMT_GBRPF32) return;
 
@@ -42,9 +48,14 @@ inline void gamutConvert2020To709(AVFrame* frame) {
 
             // BT.2020 primaries → BT.709 primaries (D65 white)
             // Inverse of the 709→2020 matrix above
-            *r =  1.6605f * ri - 0.5876f * gi - 0.0729f * bi;
-            *g = -0.1245f * ri + 1.1329f * gi - 0.0084f * bi;
-            *b = -0.0182f * ri - 0.1006f * gi + 1.1187f * bi;
+            float rr =  1.6605f * ri - 0.5876f * gi - 0.0729f * bi;
+            float gg = -0.1245f * ri + 1.1329f * gi - 0.0084f * bi;
+            float bb = -0.0182f * ri - 0.1006f * gi + 1.1187f * bi;
+
+            // 窄色域裁剪：BT.2020 色域 > BT.709，转换后裁剪到 [0,1]
+            *r = rr < 0.0f ? 0.0f : (rr > 1.0f ? 1.0f : rr);
+            *g = gg < 0.0f ? 0.0f : (gg > 1.0f ? 1.0f : gg);
+            *b = bb < 0.0f ? 0.0f : (bb > 1.0f ? 1.0f : bb);
         }
     }
 }
