@@ -25,7 +25,10 @@ flutter build macos --release       # 同需复制 .dylib + install_name_tool
 ### Android APK（需要 NDK 27.0.12077973）
 
 ```bash
-bash native/build_android.sh        # 交叉编译 FFmpeg 6.1.2 + libhdr_converter.so，复制到 jniLibs
+# 第 1 步：交叉编译 x265 + FFmpeg 6.1.2 + libhdr_converter.so，复制到 jniLibs
+# 耗时 ~20 分钟（x265 ~2min + FFmpeg ~18min），CI 有缓存可跳过
+bash native/build_android.sh
+# 第 2 步：构建 APK
 flutter build apk --release
 ```
 
@@ -57,11 +60,21 @@ Dart UI (provider + Material 3)
 | `lib/pages/home_page.dart` | 自适应主页面（宽屏左右栏、移动端 Tab） |
 | `native/include/hdr_converter.h` | C API 接口定义（9 函数 + 4 结构体） |
 | `native/CMakeLists.txt` | 3 种编译模式：默认(pkg-config)/FFMPEG_ROOT(Android)/COMPILE_ONLY(iOS) |
-| `native/build_ffmpeg_android.sh` | NDK 交叉编译 FFmpeg 6.1.2（arm64-v8a + x86_64） |
-| `native/build_android.sh` | Android 总控：先编译 FFmpeg，再 cmake，最后复制 .so |
+| `native/build_ffmpeg_android.sh` | NDK 交叉编译 x265 + FFmpeg 6.1.2（arm64-v8a + x86_64） |
+| `native/build_android.sh` | Android 总控：先编译 x265/FFmpeg，再 cmake，最后复制 .so |
+| `native/toolchain-android.cmake` | Android NDK 工具链配置（c++_static，minSdk 24） |
 | `.github/workflows/ci.yml` | 3 job：desktop-build×3 + android-build + ios-build |
 
 ## 非显而易见的注意事项
+
+### Android x265 交叉编译陷阱（NDK r27 + cmake ≥3.31）
+
+| 问题 | 表现 | 解决方案 |
+|------|------|----------|
+| cmake 3.31 ARM64 汇编检测 | `-mcpu=armv8-a` 不被 NDK clang 识别 | `-DENABLE_ASSEMBLY=OFF -DCMAKE_ASM_COMPILER=...`（必须两个一起设） |
+| x265 不生成 `.pc` 文件 | FFmpeg configure 找不到 x265 | **必须完整 git clone**（不能 `--depth 1`），cmake 需要 git tag 才能生成 x265.pc |
+| FFmpeg 的 pkg-config 被覆盖 | configure 使用不存在的 `aarch64-linux-android24-pkg-config` | 在 `./configure` 前 `export PKG_CONFIG=pkg-config` 强制使用系统 pkg-config |
+| CROSS_PREFIX 未绑定变量 | `build_ffmpeg_android.sh` 报 `unbound variable` | 在循环内补上 `CROSS_PREFIX=...` 定义（`set -euo pipefail` 下必须） |
 
 ### AGP 9 + Gradle 9 兼容性
 - `file_picker` 和 `flutter_plugin_android_lifecycle` 的 `compileSdk` 需强制设为 36（见 `android/app/build.gradle.kts` 第 49-54 行）

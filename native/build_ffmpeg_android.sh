@@ -67,7 +67,7 @@ for ABI in "${ABIS[@]}"; do
   cmake --install .
 
   # cmake 已生成 x265.pc，但缺少 C++ 运行时依赖
-  # --start-group 解决 libx265 ↔ libc++_static 循环符号依赖
+  # --whole-archive 强制加载 libc++_static.a 全部对象文件，绕过静态库内部循环符号依赖
   mkdir -p "$PREFIX/lib/pkgconfig"
   cat > "$PREFIX/lib/pkgconfig/x265.pc" <<EOF
 prefix=$PREFIX
@@ -78,7 +78,7 @@ includedir=\${prefix}/include
 Name: x265
 Description: H.265/HEVC video encoder
 Version: 3.6
-Libs: -L\${libdir} -Wl,--start-group -lx265 -lc++_static -Wl,--end-group -lm
+Libs: -L\${libdir} -lx265 -Wl,--whole-archive -lc++_static -Wl,--no-whole-archive -lm
 Cflags: -I\${includedir}
 EOF
 
@@ -117,17 +117,8 @@ for ABI in "${ABIS[@]}"; do
   # pkg-config 包装器：自动追加 C++ 运行时库，确保无论 FFmpeg configure 如何调用都生效
   cat > "$WRAPPER_DIR/pkg-config" <<'PKGBODY'
 #!/bin/bash
-# 调用真实 pkg-config，对 x265 额外追加 -lc++_static -lm
-args=("$@")
-result=$(/usr/bin/pkg-config "${args[@]}" 2>&1) || exit $?
-# 如果查询中有 x265（--exists、--cflags、--libs 等），追加 C++ 运行时库
-for arg in "${args[@]}"; do
-  if [ "$arg" = "x265" ]; then
-    result="$result -lc++_static -lm"
-    break
-  fi
-done
-echo "$result"
+# 直通真实 pkg-config —— x265.pc 中已包含所有必要依赖
+/usr/bin/pkg-config "$@"
 PKGBODY
   chmod +x "$WRAPPER_DIR/pkg-config"
 
