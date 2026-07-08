@@ -12,11 +12,8 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     int dst_colorspace = AVCOL_SPC_BT709;
     int src_color_prim = AVCOL_PRI_BT2020;
     int dst_color_prim = AVCOL_PRI_BT709;
-    // 默认 SDR TRC（BT.709 gamma），HDR 输出时覆盖为 PQ
     int src_color_trc = AVCOL_TRC_BT709;
     int dst_color_trc = is_hdr_output ? AVCOL_TRC_SMPTE2084 : AVCOL_TRC_BT709;
-    int src_range = AVCOL_RANGE_MPEG;
-    int dst_range = AVCOL_RANGE_MPEG;
 
     if (src_csp == 0) { // BT.709 SDR 输入
         src_colorspace = AVCOL_SPC_BT709;
@@ -28,8 +25,7 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     }
     // src_csp==1 (BT.2020): 默认值
 
-    // GBRPF32 浮点输入已经是线性值（convertToFloatPlanar 已做去 gamma 处理）
-    // 必须用 LINEAR 避免 swscale 二次逆 gamma —— 放在 src_csp 之后，防止被覆盖
+    // GBRPF32 浮点输入已由 convertToFloatPlanar 线性化，TRC=LINEAR
     if (src->format == AV_PIX_FMT_GBRPF32) {
         src_color_trc = AVCOL_TRC_LINEAR;
     }
@@ -45,9 +41,19 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     // dst_csp==1 (BT.2020): 默认值通过 is_hdr_output 控制 TRC
     //   HDR 输出 → PQ，SDR 输出 → BT.709 gamma
     //
-    // 注：色域映射（BT.709↔BT.2020 primaries 3×3 矩阵）已在 gamut_mapper.h 中实现，
-    // 在 pipeline.cpp 的 processSdrToHdr / processHdrToSdr 中调用。
-    // sws_setColorspaceDetails 仅控制 YUV 编解码矩阵和传递函数。
+    // 注：色域映射已在 gamut_mapper.h 中实现
+
+    // 在帧上设置色度元数据——sws_scale_frame 据此做 TRC 转换
+    src->color_trc = src_color_trc;
+    src->color_primaries = src_color_prim;
+    src->colorspace = src_colorspace;
+    src->color_range = (src->format == AV_PIX_FMT_GBRPF32)
+        ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG;
+
+    dst->color_trc = dst_color_trc;
+    dst->color_primaries = dst_color_prim;
+    dst->colorspace = dst_colorspace;
+    dst->color_range = AVCOL_RANGE_MPEG;
 
     SwsContext* sws = sws_getContext(
         src->width, src->height, (AVPixelFormat)src->format,
@@ -56,9 +62,13 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
 
     if (!sws) return -1;
 
+    // sws_setColorspaceDetails 的 range 值：0=limited, 1=full
+    // AVCOL_RANGE_MPEG=1, AVCOL_RANGE_JPEG=2，需转换
+    int sws_src_range = (src->color_range == AVCOL_RANGE_JPEG) ? 1 : 0;
+    int sws_dst_range = (dst->color_range == AVCOL_RANGE_JPEG) ? 1 : 0;
     sws_setColorspaceDetails(sws,
-        sws_getCoefficients(src_colorspace), src_color_trc,
-        sws_getCoefficients(dst_colorspace), dst_color_trc,
+        sws_getCoefficients(src_colorspace), sws_src_range,
+        sws_getCoefficients(dst_colorspace), sws_dst_range,
         0, 1 << 16, 1 << 16);
 
     // 首帧时输出转换参数
@@ -72,9 +82,7 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
         call_count++;
     }
 
-    sws_scale(sws, src->data, src->linesize, 0, src->height,
-              dst->data, dst->linesize);
-
+    sws_scale_frame(sws, dst, src);
     sws_freeContext(sws);
     return 0;
 }
