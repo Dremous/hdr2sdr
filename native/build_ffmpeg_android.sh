@@ -66,7 +66,8 @@ for ABI in "${ABIS[@]}"; do
   cmake --build . --config Release -- -j$(nproc)
   cmake --install .
 
-  # cmake 已生成 x265.pc，但缺少 C++ 运行时依赖，手动补充 -lc++_static -lm
+  # cmake 已生成 x265.pc，但缺少 C++ 运行时依赖
+  # --start-group 解决 libx265 ↔ libc++_static 循环符号依赖
   mkdir -p "$PREFIX/lib/pkgconfig"
   cat > "$PREFIX/lib/pkgconfig/x265.pc" <<EOF
 prefix=$PREFIX
@@ -77,7 +78,7 @@ includedir=\${prefix}/include
 Name: x265
 Description: H.265/HEVC video encoder
 Version: 3.6
-Libs: -L\${libdir} -lx265 -lc++_static -lm
+Libs: -L\${libdir} -Wl,--start-group -lx265 -lc++_static -Wl,--end-group -lm
 Cflags: -I\${includedir}
 EOF
 
@@ -176,7 +177,7 @@ PKGBODY
     --enable-filter=scale,format \
     --extra-cflags="-I$PREFIX/include" \
     --extra-ldflags="-L$PREFIX/lib" \
-    --extra-libs="-lc++_static -lc++_static -lm"; then
+    --extra-libs="-lm"; then
     echo "  [ERROR] configure failed, config.log tail:"
     tail -50 ffbuild/config.log 2>/dev/null || echo "(no config.log)"
     exit 1
