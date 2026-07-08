@@ -19,7 +19,7 @@ void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params,
     if (!float_frame) return;
 
     // BT.2390 色调映射
-    applyBt2390(float_frame, params);
+    applyBt2390(float_frame, params, true);  // HDR 输入为 BT.2020 原色
 
     // 色域转换（浮点域 primaries 矩阵映射）
     if (gamut_dir == 1)       gamutConvert2020To709(float_frame);
@@ -30,18 +30,22 @@ void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params,
     av_frame_free(&float_frame);
 }
 
-void ToneMapper::applyOnFloat(AVFrame* float_frame, const ToneMapParams& params) {
-    applyBt2390(float_frame, params);
+void ToneMapper::applyOnFloat(AVFrame* float_frame, const ToneMapParams& params,
+                               bool is_bt2020) {
+    applyBt2390(float_frame, params, is_bt2020);
 }
 
-void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params) {
+void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params,
+                             bool is_bt2020) {
     int width = frame->width;
     int height = frame->height;
     float peak = params.peak_luminance > 0 ? params.peak_luminance : 1000.0f;
     float ev = powf(2.0f, params.exposure);
     float sat = params.saturation;
-    // BT.2020 亮度系数（0.2627/0.6780/0.0593），与 tone_mapper HDR 输入匹配
-    const float kr = 0.2627f, kg = 0.6780f, kb = 0.0593f;
+    // 根据输入原色选择亮度系数（BT.2020 或 BT.709）
+    const float kr = is_bt2020 ? 0.2627f : 0.2126f;
+    const float kg = is_bt2020 ? 0.6780f : 0.7152f;
+    const float kb = is_bt2020 ? 0.0593f : 0.0722f;
 
     // GBRPF32 格式：data[0]=R, data[1]=G, data[2]=B, 每像素 float
     for (int y = 0; y < height; ++y) {

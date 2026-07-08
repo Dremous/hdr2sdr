@@ -176,7 +176,8 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
         tmp.peak_luminance = itmp.target_peak;
         tmp.exposure = 0.0;
         tmp.saturation = 1.0;
-        tone_mapper_.applyOnFloat(flt, tmp);
+        // SDR 路径使用 BT.709 亮度系数
+        tone_mapper_.applyOnFloat(flt, tmp, false);
     }
 
     // 转回 YUV420P 并做色彩空间转换
