@@ -150,6 +150,7 @@ PKGBODY
     --cc="$CC" \
     --cxx="$CXX" \
     --cross-prefix="$CROSS_PREFIX" \
+    --pkg-config=pkg-config \
     --sysroot="$SYSROOT" \
     --enable-shared \
     --disable-static \
