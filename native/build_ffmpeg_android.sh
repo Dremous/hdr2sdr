@@ -150,7 +150,7 @@ PKGBODY
     --cc="$CC" \
     --cxx="$CXX" \
     --cross-prefix="$CROSS_PREFIX" \
-    --pkg-config=pkg-config \
+    --pkg-config="$WRAPPER_DIR/pkg-config" \
     --sysroot="$SYSROOT" \
     --enable-shared \
     --disable-static \
@@ -176,7 +176,7 @@ PKGBODY
     --enable-filter=scale,format \
     --extra-cflags="-I$PREFIX/include" \
     --extra-ldflags="-L$PREFIX/lib" \
-    --extra-libs="-lc++_static -lm"; then
+    --extra-libs="-lc++_static -lc++_static -lm"; then
     echo "  [ERROR] configure failed, config.log tail:"
     tail -50 ffbuild/config.log 2>/dev/null || echo "(no config.log)"
     exit 1
