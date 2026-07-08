@@ -1,5 +1,6 @@
 #include "tone_mapper.h"
 #include "pixel_utils.h"
+#include "gamut_mapper.h"
 #include <cmath>
 #include <cstring>
 
@@ -10,7 +11,7 @@ void ToneMapper::setAlgorithm(int algo) {
 }
 
 void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params,
-                       int src_colorspace) {
+                       int src_colorspace, int gamut_dir) {
     if (!frame) return;
 
     // 转换为 GBRPF32 用于浮点 tone mapping（使用源视频的矩阵系数）
@@ -19,6 +20,10 @@ void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params,
 
     // 在 float 帧上应用 BT.2390
     applyBt2390(float_frame, params);
+
+    // 色域转换（在浮点域进行 primaries 矩阵映射）
+    if (gamut_dir == 1)       gamutConvert2020To709(float_frame);
+    else if (gamut_dir == 2)  gamutConvert709To2020(float_frame);
 
     // 将结果写回原始帧（使用相同的矩阵系数保持对称）
     convertFromFloatPlanar(frame, float_frame, src_colorspace);

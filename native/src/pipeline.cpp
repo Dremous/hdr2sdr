@@ -1,6 +1,7 @@
 #include "pipeline.h"
 #include "debug_log.h"
 #include "pixel_utils.h"
+#include "gamut_mapper.h"
 #include <cstring>
 #include <iostream>
 extern "C" {
@@ -128,7 +129,8 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
         ? params_.peak_luminance : hdr_meta_.max_luminance;
     tmp.exposure = params_.exposure;
     tmp.saturation = params_.saturation;
-    tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL);
+    // HDR→SDR: 色调压缩 + BT.2020→BT.709 色域压缩
+    tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL, 1);
 
     AVFrame* dst = av_frame_alloc();
     dst->format = AV_PIX_FMT_YUV420P;
@@ -157,6 +159,11 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
 
     // 逆色调映射扩展（SDR→HDR，值可超过 1.0）
     inv_tone_mapper_.applyOnFloat(flt, itmp);
+
+    // 色域扩展：BT.709 → BT.2020（仅在 HDR 输出时）
+    if (params_.target_color_space == 1) {
+        gamutConvert709To2020(flt);
+    }
 
     // BT.2390 正向色调映射（仅 BT.709/SDR 输出时需要压缩回 0-1）
     bool needs_tone_compress = (params_.target_color_space == 0); // BT.709
