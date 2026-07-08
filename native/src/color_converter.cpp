@@ -11,13 +11,13 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     int dst_colorspace = AVCOL_SPC_BT709;
     int src_color_prim = AVCOL_PRI_BT2020;
     int dst_color_prim = AVCOL_PRI_BT709;
-    // 默认 BT.709 gamma — 色调映射后数据已在 SDR 范围，且编码器统一写 BT.709 gamma
+    // 默认 SDR TRC（BT.709 gamma），HDR 输出时覆盖为 PQ
     int src_color_trc = AVCOL_TRC_BT709;
-    int dst_color_trc = AVCOL_TRC_BT709;
+    int dst_color_trc = is_hdr_output ? AVCOL_TRC_SMPTE2084 : AVCOL_TRC_BT709;
     int src_range = AVCOL_RANGE_MPEG;
     int dst_range = AVCOL_RANGE_MPEG;
 
-    if (src_csp == 0) { // BT.709
+    if (src_csp == 0) { // BT.709 SDR 输入
         src_colorspace = AVCOL_SPC_BT709;
         src_color_prim = AVCOL_PRI_BT709;
         src_color_trc = AVCOL_TRC_BT709;
@@ -25,10 +25,9 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
         src_colorspace = AVCOL_SPC_SMPTE170M;
         src_color_prim = AVCOL_PRI_SMPTE432;
     }
-    // src_csp==1 (BT.2020): 使用默认值，但 TRC 保持 BT.709
-    // 因为 HDR→SDR 已通过 tone_mapper 调到 SDR 范围
+    // src_csp==1 (BT.2020): 默认值，HDR→SDR 时帧数据已被 tone_mapper 压缩到 SDR 范围
 
-    if (dst_csp == 0) { // BT.709
+    if (dst_csp == 0) { // BT.709 SDR 输出
         dst_colorspace = AVCOL_SPC_BT709;
         dst_color_prim = AVCOL_PRI_BT709;
         dst_color_trc = AVCOL_TRC_BT709;
@@ -36,7 +35,8 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
         dst_colorspace = AVCOL_SPC_SMPTE170M;
         dst_color_prim = AVCOL_PRI_SMPTE432;
     }
-    // dst_csp==1 (BT.2020): 默认值，TRC 保持 BT.709 — encoder 写的是 BT.709 gamma
+    // dst_csp==1 (BT.2020): 默认值通过 is_hdr_output 控制 TRC
+    //   HDR 输出 → PQ，SDR 输出 → BT.709 gamma
 
     SwsContext* sws = sws_getContext(
         src->width, src->height, (AVPixelFormat)src->format,

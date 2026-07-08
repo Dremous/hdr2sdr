@@ -122,17 +122,13 @@ int Pipeline::getFrame(uint8_t* out_buffer, int64_t timestamp_us,
 }
 
 int Pipeline::processHdrToSdr(AVFrame* frame) {
-    // BT.2020 输出时跳过亮度压缩，只做色域转换
-    bool needs_tone_compress = (params_.target_color_space == 0); // BT.709
-
-    if (needs_tone_compress) {
-        ToneMapParams tmp = {};
-        tmp.peak_luminance = params_.peak_luminance > 0
-            ? params_.peak_luminance : hdr_meta_.max_luminance;
-        tmp.exposure = params_.exposure;
-        tmp.saturation = params_.saturation;
-        tone_mapper_.apply(frame, tmp);
-    }
+    // HDR→SDR 始终做色调压缩，将亮度压缩到 SDR 范围后再做色域转换
+    ToneMapParams tmp = {};
+    tmp.peak_luminance = params_.peak_luminance > 0
+        ? params_.peak_luminance : hdr_meta_.max_luminance;
+    tmp.exposure = params_.exposure;
+    tmp.saturation = params_.saturation;
+    tone_mapper_.apply(frame, tmp);
 
     AVFrame* dst = av_frame_alloc();
     dst->format = AV_PIX_FMT_YUV420P;
@@ -140,7 +136,7 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);
 
-    color_converter_.convert(frame, dst, 1, params_.target_color_space);
+    color_converter_.convert(frame, dst, 1, params_.target_color_space, false);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);
@@ -179,8 +175,9 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);
 
-    // 转回 YUV420P，目标 BT.2020（HDR 输出色彩空间）
-    color_converter_.convert(flt, dst, 0, params_.target_color_space);
+    // 转回 YUV420P，目标色彩空间由 is_output_hdr 决定 TRC（PQ 或 BT.709）
+    bool is_output_hdr = (params_.target_color_space == 1);
+    color_converter_.convert(flt, dst, 0, params_.target_color_space, is_output_hdr);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);
