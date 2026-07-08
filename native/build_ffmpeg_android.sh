@@ -112,6 +112,24 @@ for ABI in "${ABIS[@]}"; do
   ln -sf "$TOOLCHAIN/bin/llvm-ranlib" "$WRAPPER_DIR/${CROSS_PREFIX}ranlib"
   ln -sf "$TOOLCHAIN/bin/llvm-strip"  "$WRAPPER_DIR/${CROSS_PREFIX}strip"
   ln -sf "$TOOLCHAIN/bin/llvm-nm"     "$WRAPPER_DIR/${CROSS_PREFIX}nm"
+
+  # pkg-config 包装器：自动追加 C++ 运行时库，确保无论 FFmpeg configure 如何调用都生效
+  cat > "$WRAPPER_DIR/pkg-config" <<'PKGBODY'
+#!/bin/bash
+# 调用真实 pkg-config，对 x265 额外追加 -lc++_static -lm
+args=("$@")
+result=$(/usr/bin/pkg-config "${args[@]}" 2>&1) || exit $?
+# 如果查询中有 x265（--exists、--cflags、--libs 等），追加 C++ 运行时库
+for arg in "${args[@]}"; do
+  if [ "$arg" = "x265" ]; then
+    result="$result -lc++_static -lm"
+    break
+  fi
+done
+echo "$result"
+PKGBODY
+  chmod +x "$WRAPPER_DIR/pkg-config"
+
   export PATH="$WRAPPER_DIR:$PATH"
 
   echo "  配置 FFmpeg（含 libx265）..."
@@ -119,13 +137,11 @@ for ABI in "${ABIS[@]}"; do
   make clean > /dev/null 2>&1 || true
 
   export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-  # FFmpeg 的 --cross-prefix 会让它使用 ${CROSS_PREFIX}pkg-config（不存在），强制使用系统 pkg-config
-  export PKG_CONFIG=pkg-config
 
   # 诊断：检查手动写入的 x265.pc（cmake 生成的版本不含 -lc++_static -lm）
   echo "  [DIAG] x265.pc Libs: $(grep '^Libs:' "$PREFIX/lib/pkgconfig/x265.pc" 2>/dev/null || echo NOT_FOUND)"
 
-  ./configure \
+  if ! ./configure \
     --prefix="$PREFIX" \
     --enable-cross-compile \
     --target-os=android \
@@ -134,7 +150,6 @@ for ABI in "${ABIS[@]}"; do
     --cc="$CC" \
     --cxx="$CXX" \
     --cross-prefix="$CROSS_PREFIX" \
-    --pkg-config=pkg-config \
     --sysroot="$SYSROOT" \
     --enable-shared \
     --disable-static \
@@ -160,7 +175,11 @@ for ABI in "${ABIS[@]}"; do
     --enable-filter=scale,format \
     --extra-cflags="-I$PREFIX/include" \
     --extra-ldflags="-L$PREFIX/lib" \
-    --extra-libs="-lc++_static -lm"
+    --extra-libs="-lc++_static -lm"; then
+    echo "  [ERROR] configure failed, config.log tail:"
+    tail -50 ffbuild/config.log 2>/dev/null || echo "(no config.log)"
+    exit 1
+  fi
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
   make -j$(nproc)
