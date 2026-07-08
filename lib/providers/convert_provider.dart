@@ -166,10 +166,22 @@ class ConvertProvider extends ChangeNotifier {
 
   String _buildOutputPath() {
     final dir = _outputDirectory;
-    final baseName = '${_currentFile!.fileName}_sdr.mp4';
-    if (dir == null || dir.isEmpty) return baseName;
+
+    // 去掉原文件扩展名
+    final fullName = _currentFile!.fileName;
+    final dotIndex = fullName.lastIndexOf('.');
+    final baseName = dotIndex > 0 ? fullName.substring(0, dotIndex) : fullName;
+
+    // 确定转换方向（自动模式根据输入 HDR 类型推断）
+    final isHdrToSdr = _params.autoMode
+        ? _currentFile!.hdrType != HdrType.sdr
+        : _params.direction == ConvertDirection.hdrToSdr;
+    final suffix = isHdrToSdr ? '_sdr' : '_hdr';
+
+    final outputName = '$baseName$suffix.mp4';
+    if (dir == null || dir.isEmpty) return outputName;
     final separator = dir.endsWith('/') || dir.endsWith('\\') ? '' : '/';
-    return '$dir$separator$baseName';
+    return '$dir$separator$outputName';
   }
 
   void startConversion() {
