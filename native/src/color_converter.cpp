@@ -43,6 +43,12 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     }
     // dst_csp==1 (BT.2020): 默认值通过 is_hdr_output 控制 TRC
     //   HDR 输出 → PQ，SDR 输出 → BT.709 gamma
+    //
+    // 注：sws_setColorspaceDetails 仅控制 YUV 编解码矩阵和传递函数，
+    // 不执行完整色域映射（BT.709↔BT.2020 的 primaries 3×3 转换）。
+    // SDR→HDR 时 BT.709 色彩嵌在 BT.2020 容器中，高饱和色会略微欠饱和；
+    // HDR→SDR 时 BT.2020 高饱和色可能超出 BT.709 色域被裁切。
+    // 完整色域映射需引入 zscale/LUT 引擎，暂不实现。
 
     SwsContext* sws = sws_getContext(
         src->width, src->height, (AVPixelFormat)src->format,
