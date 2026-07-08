@@ -66,8 +66,8 @@ for ABI in "${ABIS[@]}"; do
   cmake --build . --config Release -- -j$(nproc)
   cmake --install .
 
-  # cmake 已生成 x265.pc，但缺少 C++ 运行时依赖
-  # --whole-archive 强制加载 libc++_static.a 全部对象文件，绕过静态库内部循环符号依赖
+  # cmake 已生成 x265.pc，但缺少 C++ 运行时依赖（libc++ + libc++abi）
+  # NDK r27 的 libc++_static.a 不含 ABI 层（__cxa_*、vtable、typeinfo），需单独链接 libc++abi.a
   mkdir -p "$PREFIX/lib/pkgconfig"
   cat > "$PREFIX/lib/pkgconfig/x265.pc" <<EOF
 prefix=$PREFIX
@@ -78,7 +78,7 @@ includedir=\${prefix}/include
 Name: x265
 Description: H.265/HEVC video encoder
 Version: 3.6
-Libs: -L\${libdir} -lx265 -Wl,--whole-archive -lc++_static -Wl,--no-whole-archive -lm
+Libs: -L\${libdir} -lx265 -lc++_static -lc++abi -lm
 Cflags: -I\${includedir}
 EOF
 
