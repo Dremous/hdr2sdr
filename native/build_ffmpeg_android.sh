@@ -122,6 +122,9 @@ for ABI in "${ABIS[@]}"; do
   # FFmpeg 的 --cross-prefix 会让它使用 ${CROSS_PREFIX}pkg-config（不存在），强制使用系统 pkg-config
   export PKG_CONFIG=pkg-config
 
+  # 诊断：检查手动写入的 x265.pc（cmake 生成的版本不含 -lc++_static -lm）
+  echo "  [DIAG] x265.pc Libs: $(grep '^Libs:' "$PREFIX/lib/pkgconfig/x265.pc" 2>/dev/null || echo NOT_FOUND)"
+
   ./configure \
     --prefix="$PREFIX" \
     --enable-cross-compile \
@@ -156,7 +159,8 @@ for ABI in "${ABIS[@]}"; do
     --enable-protocol=file \
     --enable-filter=scale,format \
     --extra-cflags="-I$PREFIX/include" \
-    --extra-ldflags="-L$PREFIX/lib"
+    --extra-ldflags="-L$PREFIX/lib" \
+    --extra-libs="-lc++_static -lm"
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
   make -j$(nproc)
