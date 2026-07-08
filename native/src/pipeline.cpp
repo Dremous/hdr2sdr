@@ -152,7 +152,7 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
 
     AVFrame* dst = av_frame_alloc();
     if (!dst) return -1;
-    int pix_fmt = AV_PIX_FMT_YUV420P; // x265 Android 编译仅 8-bit
+    int pix_fmt = target_is_bt709 ? AV_PIX_FMT_YUV420P : AV_PIX_FMT_YUV420P10LE;
     dst->format = pix_fmt;
     dst->width = frame->width;
     dst->height = frame->height;
@@ -195,13 +195,13 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
     }
     // SDR→SDR: 跳过色调映射，BT.709→BT.709 无需 expand/compress/gamut
 
-    // 分配输出帧（x265 Android 仅 8-bit）
+    // 分配输出帧（HDR 用 10-bit 避免色带）
     AVFrame* dst = av_frame_alloc();
     if (!dst) {
         av_frame_free(&flt);
         return -1;
     }
-    int pix_fmt = AV_PIX_FMT_YUV420P;
+    int pix_fmt = is_hdr_target ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
     dst->format = pix_fmt;
     dst->width = frame->width;
     dst->height = frame->height;
@@ -237,7 +237,9 @@ void Pipeline::conversionThread(const std::string& output_path,
 
     // HDR 输出标志：仅 SDR→HDR 且目标 BT.2020 时才是真 HDR(PQ)
     bool is_hdr_output = (params_.direction == 1 && params_.target_color_space == 1);
-    HDR_LOG("转换线程: 目标色彩=%d isHdr=%d pix=8bit",
+    HDR_LOG("转换线程: 目标色彩=%d isHdr=%d pix=%s",
+        params_.target_color_space, (int)is_hdr_output,
+        is_hdr_output ? "10bit" : "8bit");
 
     HDR_LOG("转换线程: 开始, 打开编码器...");
     int ret = encoder_.open(output_path,

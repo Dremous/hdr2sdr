@@ -41,9 +41,9 @@ for ABI in "${ABIS[@]}"; do
   API_LEVEL="${API[$ABI]}"
   CROSS_PREFIX="${ARCH_NAME}-linux-android${API_LEVEL}-"
 
-  # 只编一次 x265（不重复编，用 git 判断）
-  if [ -f "$PREFIX/lib/libx265.a" ]; then
-    echo "  x265 $ABI 已存在，跳过"
+  # 只编一次 x265（检查 10-bit 标记，旧缓存无标记则重编）
+  if [ -f "$PREFIX/lib/libx265.a" ] && [ -f "$PREFIX/lib/.x265_10bit" ]; then
+    echo "  x265 $ABI 已存在(10-bit)，跳过"
     continue
   fi
 
@@ -58,6 +58,7 @@ for ABI in "${ABIS[@]}"; do
     -DANDROID_PLATFORM="android-${API_LEVEL}" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_ASM_COMPILER="$TOOLCHAIN/bin/${CROSS_PREFIX}clang" \
+    -DHIGH_BIT_DEPTH=ON \
     -DENABLE_SHARED=OFF \
     -DENABLE_CLI=OFF \
     -DENABLE_ASSEMBLY=OFF \
@@ -65,6 +66,7 @@ for ABI in "${ABIS[@]}"; do
 
   cmake --build . --config Release -- -j$(nproc)
   cmake --install .
+  touch "$PREFIX/lib/.x265_10bit"  # 标记 10-bit 编译完成
 
   # cmake 已生成 x265.pc，但缺少 C++ 运行时依赖（libc++ + libc++abi）
   # NDK r27 的 libc++_static.a 不含 ABI 层（__cxa_*、vtable、typeinfo），需单独链接 libc++abi.a
