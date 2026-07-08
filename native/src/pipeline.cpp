@@ -165,43 +165,34 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
 }
 
 int Pipeline::processSdrToHdr(AVFrame* frame) {
-    InvToneMapParams itmp = {};
-    itmp.target_peak = params_.peak_luminance > 0
-        ? params_.peak_luminance : 1000.0;
-    itmp.exposure = params_.exposure;
-    itmp.saturation = params_.saturation;
+    bool is_hdr_target = (params_.target_color_space == 1);
 
     // 一次转换到 float，全程在 float 域处理，避免中间 YUV 截断
     AVFrame* flt = convertToFloatPlanar(frame);
     if (!flt) return -1;
     debugFloatFrameStats("SDR→HDR step1 float", flt, 0);
 
-    // 逆色调映射扩展（SDR→HDR，值可超过 1.0）
-    inv_tone_mapper_.applyOnFloat(flt, itmp);
-    debugFloatFrameStats("SDR→HDR step2 expand", flt, 0);
+    if (is_hdr_target) {
+        // ── 真正的 SDR→HDR ──
+        InvToneMapParams itmp = {};
+        itmp.target_peak = params_.peak_luminance > 0
+            ? params_.peak_luminance : 1000.0;
+        itmp.exposure = params_.exposure;
+        itmp.saturation = params_.saturation;
 
-    // 色域扩展：BT.709 → BT.2020（仅在 HDR 输出时）
-    if (params_.target_color_space == 1) {
+        // 逆色调映射扩展（SDR→HDR，值可超过 1.0）
+        inv_tone_mapper_.applyOnFloat(flt, itmp);
+        debugFloatFrameStats("SDR→HDR step2 expand", flt, 0);
+
+        // 色域扩展：BT.709 → BT.2020
         gamutConvert709To2020(flt);
         debugFloatFrameStats("SDR→HDR step3 gamut709→2020", flt, 0);
     }
+    // SDR→SDR: 跳过色调映射，BT.709→BT.709 无需 expand/compress/gamut
 
-    // BT.2390 正向色调映射（仅 BT.709/SDR 输出时需要压缩回 0-1）
-    bool needs_tone_compress = (params_.target_color_space == 0); // BT.709
-    if (needs_tone_compress) {
-        ToneMapParams tmp = {};
-        tmp.peak_luminance = itmp.target_peak;
-        tmp.exposure = 0.0;
-        tmp.saturation = 1.0;
-        // SDR 路径使用 BT.709 亮度系数
-        tone_mapper_.applyOnFloat(flt, tmp, false);
-    }
-
-    // 转回 YUV420P 并做色彩空间转换
+    // 分配输出帧
     AVFrame* dst = av_frame_alloc();
-    // HDR 输出用 10-bit 避免色带，SDR 用 8-bit
-    int pix_fmt = (params_.target_color_space == 1)
-        ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
+    int pix_fmt = is_hdr_target ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
     dst->format = pix_fmt;
     dst->width = frame->width;
     dst->height = frame->height;
@@ -211,11 +202,8 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
         return -1;
     }
 
-    // 转回 YUV420P，目标色彩空间由 is_output_hdr 决定 TRC（PQ 或 BT.709）
-    // gamut 转换后 RGB 原色已匹配目标色域，src_csp 需与之一致
-    bool is_output_hdr = (params_.target_color_space == 1);
-    int src_csp = is_output_hdr ? 1 : 0; // HDR→BT.2020, SDR→BT.709
-    color_converter_.convert(flt, dst, src_csp, params_.target_color_space, is_output_hdr);
+    int src_csp = is_hdr_target ? 1 : 0;
+    color_converter_.convert(flt, dst, src_csp, params_.target_color_space, is_hdr_target);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);
