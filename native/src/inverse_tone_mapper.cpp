@@ -4,15 +4,16 @@
 
 InverseToneMapper::InverseToneMapper() {}
 
-void InverseToneMapper::apply(AVFrame* frame, const InvToneMapParams& params) {
+void InverseToneMapper::apply(AVFrame* frame, const InvToneMapParams& params,
+                              int src_colorspace) {
     if (!frame) return;
 
-    AVFrame* float_frame = convertToFloatPlanar(frame);
+    AVFrame* float_frame = convertToFloatPlanar(frame, src_colorspace);
     if (!float_frame) return;
 
     applyExpansion(float_frame, params);
 
-    convertFromFloatPlanar(frame, float_frame);
+    convertFromFloatPlanar(frame, float_frame, src_colorspace);
     av_frame_free(&float_frame);
 }
 

@@ -9,18 +9,19 @@ void ToneMapper::setAlgorithm(int algo) {
     algorithm_ = algo;
 }
 
-void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params) {
+void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params,
+                       int src_colorspace) {
     if (!frame) return;
 
-    // 转换为 GBRPF32 用于浮点 tone mapping
-    AVFrame* float_frame = convertToFloatPlanar(frame);
+    // 转换为 GBRPF32 用于浮点 tone mapping（使用源视频的矩阵系数）
+    AVFrame* float_frame = convertToFloatPlanar(frame, src_colorspace);
     if (!float_frame) return;
 
     // 在 float 帧上应用 BT.2390
     applyBt2390(float_frame, params);
 
-    // 将结果写回原始帧
-    convertFromFloatPlanar(frame, float_frame);
+    // 将结果写回原始帧（使用相同的矩阵系数保持对称）
+    convertFromFloatPlanar(frame, float_frame, src_colorspace);
     av_frame_free(&float_frame);
 }
 

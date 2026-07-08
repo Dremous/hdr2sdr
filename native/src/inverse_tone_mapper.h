@@ -3,6 +3,7 @@
 
 extern "C" {
 #include <libavutil/frame.h>
+#include <libavutil/pixfmt.h>
 }
 
 struct InvToneMapParams {
@@ -14,7 +15,8 @@ struct InvToneMapParams {
 class InverseToneMapper {
 public:
     InverseToneMapper();
-    void apply(AVFrame* frame, const InvToneMapParams& params);
+    void apply(AVFrame* frame, const InvToneMapParams& params,
+               int src_colorspace = AVCOL_SPC_BT709);
     /// 直接在 GBRPF32 float 帧上做逆色调映射扩展（不转换格式）
     void applyOnFloat(AVFrame* float_frame, const InvToneMapParams& params);
 private:

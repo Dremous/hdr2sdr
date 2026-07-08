@@ -128,7 +128,7 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
         ? params_.peak_luminance : hdr_meta_.max_luminance;
     tmp.exposure = params_.exposure;
     tmp.saturation = params_.saturation;
-    tone_mapper_.apply(frame, tmp);
+    tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL);
 
     AVFrame* dst = av_frame_alloc();
     dst->format = AV_PIX_FMT_YUV420P;
