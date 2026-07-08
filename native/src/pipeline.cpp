@@ -36,10 +36,16 @@ int Pipeline::open(const std::string& input_path) {
         decoder_.getCodecContext(),
         decoder_.getVideoStreamIndex());
 
-    HDR_LOG("Pipeline::open: 成功, %dx%d fps=%.2f frames=%d duration=%.1fs hdr_type=%d",
+    auto* codecpar = decoder_.getFormatContext()
+        ->streams[decoder_.getVideoStreamIndex()]->codecpar;
+    HDR_LOG("Pipeline::open: 成功, %dx%d pix=%d fps=%.2f frames=%d dur=%.1fs hdr=%d maxLum=%.0f",
             decoder_.getWidth(), decoder_.getHeight(),
-            decoder_.getFps(), decoder_.getFrameCount(),
-            decoder_.getDurationSec(), hdr_meta_.hdr_type);
+            codecpar->format, decoder_.getFps(), decoder_.getFrameCount(),
+            decoder_.getDurationSec(), hdr_meta_.hdr_type,
+            hdr_meta_.max_luminance);
+    HDR_LOG("Pipeline::open: 输入色彩 pri=%d trc=%d spc=%d range=%d",
+            codecpar->color_primaries, codecpar->color_trc,
+            codecpar->color_space, codecpar->color_range);
 
     initialized_ = true;
     return 0;
@@ -168,13 +174,16 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
     // 一次转换到 float，全程在 float 域处理，避免中间 YUV 截断
     AVFrame* flt = convertToFloatPlanar(frame);
     if (!flt) return -1;
+    debugFloatFrameStats("SDR→HDR step1 float", flt, 0);
 
     // 逆色调映射扩展（SDR→HDR，值可超过 1.0）
     inv_tone_mapper_.applyOnFloat(flt, itmp);
+    debugFloatFrameStats("SDR→HDR step2 expand", flt, 0);
 
     // 色域扩展：BT.709 → BT.2020（仅在 HDR 输出时）
     if (params_.target_color_space == 1) {
         gamutConvert709To2020(flt);
+        debugFloatFrameStats("SDR→HDR step3 gamut709→2020", flt, 0);
     }
 
     // BT.2390 正向色调映射（仅 BT.709/SDR 输出时需要压缩回 0-1）
@@ -224,10 +233,16 @@ void Pipeline::conversionThread(const std::string& output_path,
     //   HDR 输入（hdr_type>0）→ HDR→SDR
     if (params_.auto_mode) {
         params_.direction = (hdr_meta_.hdr_type > 0) ? 0 : 1;
+        HDR_LOG("转换线程: 自动模式 hdr_type=%d → 方向=%d (%s)",
+            hdr_meta_.hdr_type, params_.direction,
+            params_.direction == 0 ? "HDR→SDR" : "SDR→HDR");
     }
 
     // HDR 输出标志：仅 SDR→HDR 且目标 BT.2020 时才是真 HDR(PQ)
     bool is_hdr_output = (params_.direction == 1 && params_.target_color_space == 1);
+    HDR_LOG("转换线程: 目标色彩=%d isHdr=%d pix=%s",
+        params_.target_color_space, (int)is_hdr_output,
+        is_hdr_output ? "10bit" : "8bit");
 
     HDR_LOG("转换线程: 开始, 打开编码器...");
     int ret = encoder_.open(output_path,

@@ -1,4 +1,5 @@
 #include "color_converter.h"
+#include "debug_log.h"
 #include <cstring>
 
 ColorConverter::ColorConverter() {}
@@ -59,6 +60,17 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
         sws_getCoefficients(src_colorspace), src_color_trc,
         sws_getCoefficients(dst_colorspace), dst_color_trc,
         0, 1 << 16, 1 << 16);
+
+    // 首帧时输出转换参数
+    static int call_count = 0;
+    if (call_count == 0) {
+        HDR_LOG("color_converter[0]: fmt %d→%d | srcCSP=%d(spc=%d,pri=%d,trc=%d) dstCSP=%d(spc=%d,pri=%d,trc=%d) hdr=%d",
+            src->format, dst->format,
+            src_csp, src_colorspace, src_color_prim, src_color_trc,
+            dst_csp, dst_colorspace, dst_color_prim, dst_color_trc,
+            (int)is_hdr_output);
+        call_count++;
+    }
 
     sws_scale(sws, src->data, src->linesize, 0, src->height,
               dst->data, dst->linesize);

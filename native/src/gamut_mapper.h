@@ -4,6 +4,32 @@
 extern "C" {
 #include <libavutil/frame.h>
 }
+#include <cmath>
+#include <cstdio>
+
+/// 输出 GBRPF32 浮点帧各通道 min/max/avg（仅首帧，避免日志洪水）
+inline void debugFloatFrameStats(const char* label, AVFrame* frame, int frame_idx = 0) {
+    if (!frame || frame->format != AV_PIX_FMT_GBRPF32 || frame_idx > 0) return;
+
+    float rMin=1e9f, rMax=-1e9f, gMin=1e9f, gMax=-1e9f, bMin=1e9f, bMax=-1e9f;
+    double rSum=0, gSum=0, bSum=0;
+    int n = frame->width * frame->height;
+    for (int y = 0; y < frame->height; ++y) {
+        for (int x = 0; x < frame->width; ++x) {
+            float r = *((float*)(frame->data[0] + y*1LL*frame->linesize[0]) + x);
+            float g = *((float*)(frame->data[1] + y*1LL*frame->linesize[1]) + x);
+            float b = *((float*)(frame->data[2] + y*1LL*frame->linesize[2]) + x);
+            if (r < rMin) rMin = r; if (r > rMax) rMax = r;
+            if (g < gMin) gMin = g; if (g > gMax) gMax = g;
+            if (b < bMin) bMin = b; if (b > bMax) bMax = b;
+            rSum += r; gSum += g; bSum += b;
+        }
+    }
+    fprintf(stderr, "[hdr2sdr] %s %dx%d | R[%.4f~%.4f avg=%.4f] G[%.4f~%.4f avg=%.4f] B[%.4f~%.4f avg=%.4f]\n",
+        label, frame->width, frame->height,
+        rMin, rMax, rSum/n, gMin, gMax, gSum/n, bMin, bMax, bSum/n);
+    fflush(stderr);
+}
 
 /// BT.709 → BT.2020 色域扩展矩阵（通过 XYZ D65 白点）
 /// 在 GBRPF32 浮点帧上逐像素应用 3×3 primaries 转换
