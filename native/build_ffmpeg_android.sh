@@ -66,7 +66,7 @@ for ABI in "${ABIS[@]}"; do
   cmake --build . --config Release -- -j$(nproc)
   cmake --install .
 
-  # 保险：x265 cmake --depth 1 无 tag 时不生成 .pc
+  # cmake 已生成 x265.pc，但缺少 C++ 运行时依赖，手动补充 -lc++_static -lm
   mkdir -p "$PREFIX/lib/pkgconfig"
   cat > "$PREFIX/lib/pkgconfig/x265.pc" <<EOF
 prefix=$PREFIX
@@ -77,7 +77,7 @@ includedir=\${prefix}/include
 Name: x265
 Description: H.265/HEVC video encoder
 Version: 3.6
-Libs: -L\${libdir} -lx265
+Libs: -L\${libdir} -lx265 -lc++_static -lm
 Cflags: -I\${includedir}
 EOF
 
@@ -122,19 +122,7 @@ for ABI in "${ABIS[@]}"; do
   # FFmpeg 的 --cross-prefix 会让它使用 ${CROSS_PREFIX}pkg-config（不存在），强制使用系统 pkg-config
   export PKG_CONFIG=pkg-config
 
-  # 诊断：检查 x265.pc 是否可被 pkg-config 找到
-  echo "  [DEBUG] PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
-  echo "  [DEBUG] x265.pc exists: $(test -f "$PREFIX/lib/pkgconfig/x265.pc" && echo YES || echo NO)"
-  if [ -f "$PREFIX/lib/pkgconfig/x265.pc" ]; then
-    echo "  [DEBUG] === x265.pc 内容 ==="
-    cat "$PREFIX/lib/pkgconfig/x265.pc" 2>/dev/null || echo "(读取失败)"
-    echo "  [DEBUG] pkg-config --exists x265"
-    pkg-config --exists x265 && echo "  [DEBUG] => OK" || echo "  [DEBUG] => FAIL"
-    echo "  [DEBUG] pkg-config --cflags --libs x265:"
-    pkg-config --cflags --libs x265 2>&1 || echo "(查询失败)"
-  fi
-
-  if ! ./configure \
+  ./configure \
     --prefix="$PREFIX" \
     --enable-cross-compile \
     --target-os=android \
@@ -168,13 +156,7 @@ for ABI in "${ABIS[@]}"; do
     --enable-protocol=file \
     --enable-filter=scale,format \
     --extra-cflags="-I$PREFIX/include" \
-    --extra-ldflags="-L$PREFIX/lib"; then
-    echo "  [ERROR] FFmpeg configure 失败，输出 config.log 尾部 (last 150 lines):"
-    echo "  ========================================"
-    tail -150 ffbuild/config.log 2>/dev/null || echo "(config.log 不存在)"
-    echo "  ========================================"
-    exit 1
-  fi
+    --extra-ldflags="-L$PREFIX/lib"
 
   echo "  编译 FFmpeg ($(nproc) 核)..."
   make -j$(nproc)
