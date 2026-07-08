@@ -15,7 +15,8 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
                    int encoder_type, int crf,
                    int target_width, int target_height,
                    int crop_left, int crop_right, int crop_top, int crop_bottom,
-                   int target_color_space) {
+                   int target_color_space,
+                   bool is_hdr_output) {
     int ret;
     HDR_LOG("Encoder::open: 开始, 输出=%s", filename.c_str());
 
@@ -34,7 +35,6 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
 
     // 选择编码器（仅 libx265 / libsvtav1）
     const AVCodec* codec = nullptr;
-    bool is_hdr_output = (target_color_space == 1);
 
     codec = avcodec_find_encoder_by_name("libx265");
     if (!codec) {

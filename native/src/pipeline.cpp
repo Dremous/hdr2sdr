@@ -123,26 +123,29 @@ int Pipeline::getFrame(uint8_t* out_buffer, int64_t timestamp_us,
 }
 
 int Pipeline::processHdrToSdr(AVFrame* frame) {
-    // HDR→SDR 始终做色调压缩，将亮度压缩到 SDR 范围后再做色域转换
+    // HDR→SDR 始终做色调压缩，色域压缩取决于目标色彩空间
     ToneMapParams tmp = {};
     tmp.peak_luminance = params_.peak_luminance > 0
         ? params_.peak_luminance : hdr_meta_.max_luminance;
     tmp.exposure = params_.exposure;
     tmp.saturation = params_.saturation;
-    // HDR→SDR: 色调压缩 + BT.2020→BT.709 色域压缩
-    tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL, AVCOL_SPC_BT709, 1);
+
+    bool target_is_bt709 = (params_.target_color_space == 0);
+    // 目标 BT.709: BT.2020→BT.709 色域压缩 + BT.709 YUV 矩阵
+    // 目标 BT.2020: 保持 BT.2020 色域，仅压缩亮度（SDR BT.2020）
+    int gamut_dir     = target_is_bt709 ? 1 : 0;
+    int dst_colorspace = target_is_bt709 ? AVCOL_SPC_BT709 : AVCOL_SPC_BT2020_NCL;
+    int src_csp        = target_is_bt709 ? 0 : 1;
+    tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL, dst_colorspace, gamut_dir);
 
     AVFrame* dst = av_frame_alloc();
-    // HDR 输出用 10-bit 避免色带，SDR 用 8-bit
-    int pix_fmt = (params_.target_color_space == 1)
-        ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
+    int pix_fmt = target_is_bt709 ? AV_PIX_FMT_YUV420P : AV_PIX_FMT_YUV420P10LE;
     dst->format = pix_fmt;
     dst->width = frame->width;
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);
 
-    // tone_mapper 已完成 BT.2020→BT.709 色域和 YUV 矩阵转换，源已是 BT.709
-    color_converter_.convert(frame, dst, 0, params_.target_color_space, false);
+    color_converter_.convert(frame, dst, src_csp, params_.target_color_space, false);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);
@@ -207,6 +210,16 @@ void Pipeline::conversionThread(const std::string& output_path,
                                  ProgressCallback progress_cb,
                                  CompletionCallback complete_cb,
                                  void* user_data) {
+    // 自动模式：根据输入视频的 HDR 类型决定转换方向
+    //   SDR 输入（hdr_type=0）→ SDR→HDR
+    //   HDR 输入（hdr_type>0）→ HDR→SDR
+    if (params_.auto_mode) {
+        params_.direction = (hdr_meta_.hdr_type > 0) ? 0 : 1;
+    }
+
+    // HDR 输出标志：仅 SDR→HDR 且目标 BT.2020 时才是真 HDR(PQ)
+    bool is_hdr_output = (params_.direction == 1 && params_.target_color_space == 1);
+
     HDR_LOG("转换线程: 开始, 打开编码器...");
     int ret = encoder_.open(output_path,
         decoder_.getCodecContext(),
@@ -214,7 +227,8 @@ void Pipeline::conversionThread(const std::string& output_path,
         params_.target_width, params_.target_height,
         params_.crop_left, params_.crop_right,
         params_.crop_top, params_.crop_bottom,
-        params_.target_color_space);
+        params_.target_color_space,
+        is_hdr_output);
     if (ret < 0) {
         HDR_LOG("转换线程: 编码器初始化失败 ret=%d", ret);
         if (complete_cb) complete_cb(0, "编码器初始化失败", user_data);
@@ -225,12 +239,6 @@ void Pipeline::conversionThread(const std::string& output_path,
     int total_frames = getFrameCount();
     int frame_idx = 0;
 
-    // 自动模式：根据输入视频的 HDR 类型决定转换方向
-    //   SDR 输入（hdr_type=0）→ SDR→HDR
-    //   HDR 输入（hdr_type>0）→ HDR→SDR
-    if (params_.auto_mode) {
-        params_.direction = (hdr_meta_.hdr_type > 0) ? 0 : 1;
-    }
     HDR_LOG("转换线程: 总帧数=%d, 方向=%d", total_frames, params_.direction);
 
     // seek 到开头（丢弃解码出的第一帧，它已在 open() 时被解码过）
