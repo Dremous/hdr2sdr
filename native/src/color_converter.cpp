@@ -17,6 +17,12 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     int src_range = AVCOL_RANGE_MPEG;
     int dst_range = AVCOL_RANGE_MPEG;
 
+    // GBRPF32 浮点输入已经是线性值（convertToFloatPlanar 已做去 gamma 处理）
+    // 必须用 LINEAR 避免 swscale 二次逆 gamma
+    if (src->format == AV_PIX_FMT_GBRPF32) {
+        src_color_trc = AVCOL_TRC_LINEAR;
+    }
+
     if (src_csp == 0) { // BT.709 SDR 输入
         src_colorspace = AVCOL_SPC_BT709;
         src_color_prim = AVCOL_PRI_BT709;
