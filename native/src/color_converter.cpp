@@ -44,15 +44,15 @@ int ColorConverter::convert(AVFrame* src, AVFrame* dst, int src_csp, int dst_csp
     // 注：色域映射已在 gamut_mapper.h 中实现
 
     // 在帧上设置色度元数据——sws_scale_frame 据此做 TRC 转换
-    src->color_trc = src_color_trc;
-    src->color_primaries = src_color_prim;
-    src->colorspace = src_colorspace;
+    src->color_trc = (AVColorTransferCharacteristic)src_color_trc;
+    src->color_primaries = (AVColorPrimaries)src_color_prim;
+    src->colorspace = (AVColorSpace)src_colorspace;
     src->color_range = (src->format == AV_PIX_FMT_GBRPF32)
         ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG;
 
-    dst->color_trc = dst_color_trc;
-    dst->color_primaries = dst_color_prim;
-    dst->colorspace = dst_colorspace;
+    dst->color_trc = (AVColorTransferCharacteristic)dst_color_trc;
+    dst->color_primaries = (AVColorPrimaries)dst_color_prim;
+    dst->colorspace = (AVColorSpace)dst_colorspace;
     dst->color_range = AVCOL_RANGE_MPEG;
 
     SwsContext* sws = sws_getContext(
