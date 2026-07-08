@@ -8,7 +8,7 @@ extern "C" {
 }
 
 /// 辅助：根据 YCbCr 矩阵系数推断输入 TRC（仅当解码器未设时使用）
-inline int inferColorTrc(int colorspace) {
+inline AVColorTransferCharacteristic inferColorTrc(int colorspace) {
     return (colorspace == AVCOL_SPC_BT2020_NCL || colorspace == AVCOL_SPC_BT2020_CL)
         ? AVCOL_TRC_SMPTE2084    // BT.2020 → 假定 PQ（HDR）
         : AVCOL_TRC_BT709;       // 其他 → 假定 BT.709 gamma（SDR）
