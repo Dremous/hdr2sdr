@@ -130,7 +130,7 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
     tmp.exposure = params_.exposure;
     tmp.saturation = params_.saturation;
     // HDR→SDR: 色调压缩 + BT.2020→BT.709 色域压缩
-    tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL, 1);
+    tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL, AVCOL_SPC_BT709, 1);
 
     AVFrame* dst = av_frame_alloc();
     dst->format = AV_PIX_FMT_YUV420P;
@@ -138,7 +138,8 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
     dst->height = frame->height;
     av_frame_get_buffer(dst, 32);
 
-    color_converter_.convert(frame, dst, 1, params_.target_color_space, false);
+    // tone_mapper 已完成 BT.2020→BT.709 色域和 YUV 矩阵转换，源已是 BT.709
+    color_converter_.convert(frame, dst, 0, params_.target_color_space, false);
 
     av_frame_unref(frame);
     av_frame_move_ref(frame, dst);

@@ -11,22 +11,22 @@ void ToneMapper::setAlgorithm(int algo) {
 }
 
 void ToneMapper::apply(AVFrame* frame, const ToneMapParams& params,
-                       int src_colorspace, int gamut_dir) {
+                       int src_colorspace, int dst_colorspace, int gamut_dir) {
     if (!frame) return;
 
-    // 转换为 GBRPF32 用于浮点 tone mapping（使用源视频的矩阵系数）
+    // YUV→GBRPF32（使用源视频矩阵系数）
     AVFrame* float_frame = convertToFloatPlanar(frame, src_colorspace);
     if (!float_frame) return;
 
-    // 在 float 帧上应用 BT.2390
+    // BT.2390 色调映射
     applyBt2390(float_frame, params);
 
-    // 色域转换（在浮点域进行 primaries 矩阵映射）
+    // 色域转换（浮点域 primaries 矩阵映射）
     if (gamut_dir == 1)       gamutConvert2020To709(float_frame);
     else if (gamut_dir == 2)  gamutConvert709To2020(float_frame);
 
-    // 将结果写回原始帧（使用相同的矩阵系数保持对称）
-    convertFromFloatPlanar(frame, float_frame, src_colorspace);
+    // GBRPF32→YUV（使用目标视频矩阵系数，色域转换后为 BT.709）
+    convertFromFloatPlanar(frame, float_frame, dst_colorspace);
     av_frame_free(&float_frame);
 }
 
