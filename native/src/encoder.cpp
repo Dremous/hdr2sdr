@@ -88,10 +88,17 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
         enc_ctx_->color_trc = AVCOL_TRC_SMPTE2084;
         enc_ctx_->colorspace = AVCOL_SPC_BT2020_NCL;
         HDR_LOG("Encoder::open: HDR metadata (BT.2020 + PQ)");
+    } else if (target_color_space == 1) {
+        // SDR 输出但目标 BT.2020 原色（HDR→SDR 保留宽色域或 SDR→BT.2020 SDR）
+        enc_ctx_->color_primaries = AVCOL_PRI_BT2020;
+        enc_ctx_->color_trc = AVCOL_TRC_BT709;
+        enc_ctx_->colorspace = AVCOL_SPC_BT2020_NCL;
+        HDR_LOG("Encoder::open: SDR BT.2020 metadata");
     } else {
         enc_ctx_->color_primaries = AVCOL_PRI_BT709;
         enc_ctx_->color_trc = AVCOL_TRC_BT709;
         enc_ctx_->colorspace = AVCOL_SPC_BT709;
+        HDR_LOG("Encoder::open: SDR metadata (BT.709)");
     }
     enc_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     HDR_LOG("Encoder::open: step4 OK, timebase=%d/%d", enc_ctx_->time_base.num, enc_ctx_->time_base.den);
