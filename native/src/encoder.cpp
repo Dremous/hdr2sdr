@@ -146,9 +146,13 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     HDR_LOG("Encoder::open: step7 OK");
 
     HDR_LOG("Encoder::open: step8 准备写入 header...");
-    // mpeg4 在 mp4 容器中可能需要显式设置 codec_tag
+    // mpeg4 在 mp4 容器中可能需要显式设置 codec_tag，HEVC 需 hev1
     if (stream_->codecpar->codec_tag == 0) {
-        stream_->codecpar->codec_tag = MKTAG('m', 'p', '4', 'v');
+        if (enc_ctx_->codec_id == AV_CODEC_ID_MPEG4) {
+            stream_->codecpar->codec_tag = MKTAG('m', 'p', '4', 'v');
+        } else if (enc_ctx_->codec_id == AV_CODEC_ID_HEVC) {
+            stream_->codecpar->codec_tag = MKTAG('h', 'e', 'v', '1');
+        }
     }
     ret = avformat_write_header(fmt_ctx_, nullptr);
     if (ret < 0) {
@@ -157,7 +161,7 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
     }
     HDR_LOG("Encoder::open: header 写入成功");
 
-    HDR_LOG("Encoder::open: 全部完成, codec=mpeg4, %dx%d", out_w, out_h);
+    HDR_LOG("Encoder::open: 全部完成, codec=%s, %dx%d", codec->name, out_w, out_h);
     initialized_ = true;
     return 0;
 }
