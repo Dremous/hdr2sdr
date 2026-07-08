@@ -97,7 +97,10 @@ int Pipeline::swFrameToBgra(AVFrame* frame, uint8_t* out_buffer, int* w, int* h)
         out_w, out_h, AV_PIX_FMT_BGRA,
         SWS_BILINEAR, nullptr, nullptr, nullptr);
 
-    if (!sws) return -1;
+    if (!sws) {
+        av_freep(&dst_data[0]);
+        return -1;
+    }
 
     sws_scale(sws, frame->data, frame->linesize, 0, frame->height,
               dst_data, dst_linesize);
@@ -147,6 +150,7 @@ int Pipeline::processHdrToSdr(AVFrame* frame) {
     tone_mapper_.apply(frame, tmp, AVCOL_SPC_BT2020_NCL, dst_colorspace, gamut_dir);
 
     AVFrame* dst = av_frame_alloc();
+    if (!dst) return -1;
     int pix_fmt = target_is_bt709 ? AV_PIX_FMT_YUV420P : AV_PIX_FMT_YUV420P10LE;
     dst->format = pix_fmt;
     dst->width = frame->width;
@@ -192,6 +196,10 @@ int Pipeline::processSdrToHdr(AVFrame* frame) {
 
     // 分配输出帧
     AVFrame* dst = av_frame_alloc();
+    if (!dst) {
+        av_frame_free(&flt);
+        return -1;
+    }
     int pix_fmt = is_hdr_target ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
     dst->format = pix_fmt;
     dst->width = frame->width;
