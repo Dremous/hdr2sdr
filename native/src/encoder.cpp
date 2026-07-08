@@ -60,9 +60,8 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
 
     enc_ctx_->width = out_w;
     enc_ctx_->height = out_h;
-    // HDR 或 BT.2020 输出用 10-bit 避免色带，SDR BT.709 用 8-bit
-    enc_ctx_->pix_fmt = (is_hdr_output || target_color_space == 1)
-        ? AV_PIX_FMT_YUV420P10LE : AV_PIX_FMT_YUV420P;
+    // 像素格式：Android x265 默认仅支持 8-bit（需 HIGH_BIT_DEPTH=ON 编译才有 10-bit）
+    enc_ctx_->pix_fmt = AV_PIX_FMT_YUV420P;
     // 帧率：优先用解码器帧率，无效则回退 30fps
     HDR_LOG("Encoder::open: step4 设置参数...");
     AVRational fr = dec_ctx->framerate;
@@ -124,7 +123,7 @@ int Encoder::open(const std::string& filename, AVCodecContext* dec_ctx,
         ret = avcodec_open2(enc_ctx_, codec, nullptr);
     }
     if (ret < 0) {
-        HDR_LOG("Encoder::open: avcodec_open2 失败 ret=%d", ret);
+        HDR_LOG("Encoder::open: avcodec_open2 失敗 ret=%d", ret);
         return ret;
     }
     HDR_LOG("Encoder::open: step5 OK");
