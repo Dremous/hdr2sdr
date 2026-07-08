@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../models/convert_params.dart';
 import '../models/video_file.dart';
 import '../providers/convert_provider.dart';
+
+/// 不含 H.264 的可用编码器列表（libx264 未编译）
+const _visibleEncoders = [EncoderType.h265, EncoderType.av1, EncoderType.h265Hardware];
 import '../widgets/slider_row.dart';
 import '../widgets/preset_selector.dart';
 
@@ -152,7 +155,7 @@ class ParamPanel extends StatelessWidget {
                   DropdownButton<EncoderType>(
                     value: params.encoder,
                     isExpanded: true,
-                    items: EncoderType.values.map((e) {
+                    items: _visibleEncoders.map((e) {
                       return DropdownMenuItem(
                         value: e,
                         child: Text(_encoderLabel(e)),
@@ -167,8 +170,6 @@ class ParamPanel extends StatelessWidget {
                 else
                   SegmentedButton<EncoderType>(
                     segments: const [
-                      ButtonSegment(
-                          value: EncoderType.h264, label: Text('H.264')),
                       ButtonSegment(
                           value: EncoderType.h265, label: Text('H.265')),
                       ButtonSegment(
