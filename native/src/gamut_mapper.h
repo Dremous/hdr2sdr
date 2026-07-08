@@ -60,7 +60,8 @@ inline void gamutConvert709To2020(AVFrame* frame) {
 
 /// BT.2020 → BT.709 色域压缩矩阵（D65 白点）
 /// 在 GBRPF32 浮点帧上逐像素应用逆 3×3 primaries 转换
-/// 窄色域值会超出 [0,1]（负值或 >1），需裁剪到有效范围
+/// 窄色域值会超出范围（负值或 >1），只裁负值防非法色度
+/// 亮度裁剪由最终的 YUV 编码钳位处理，保留高光 >1.0 值
 inline void gamutConvert2020To709(AVFrame* frame) {
     if (!frame || frame->format != AV_PIX_FMT_GBRPF32) return;
 
@@ -78,10 +79,10 @@ inline void gamutConvert2020To709(AVFrame* frame) {
             float gg = -0.1245f * ri + 1.1329f * gi - 0.0084f * bi;
             float bb = -0.0182f * ri - 0.1006f * gi + 1.1187f * bi;
 
-            // 窄色域裁剪：BT.2020 色域 > BT.709，转换后裁剪到 [0,1]
-            *r = rr < 0.0f ? 0.0f : (rr > 1.0f ? 1.0f : rr);
-            *g = gg < 0.0f ? 0.0f : (gg > 1.0f ? 1.0f : gg);
-            *b = bb < 0.0f ? 0.0f : (bb > 1.0f ? 1.0f : bb);
+            // 只裁负值（BT.2020⊃BT.709，矩阵可能产生非法负色度），保留高光 >1
+            *r = rr < 0.0f ? 0.0f : rr;
+            *g = gg < 0.0f ? 0.0f : gg;
+            *b = bb < 0.0f ? 0.0f : bb;
         }
     }
 }

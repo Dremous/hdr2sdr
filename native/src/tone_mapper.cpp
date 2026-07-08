@@ -39,9 +39,16 @@ void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params,
                              bool is_bt2020) {
     int width = frame->width;
     int height = frame->height;
-    float peak = params.peak_luminance > 0 ? params.peak_luminance : 1000.0f;
-    float ev = powf(2.0f, params.exposure);
-    float sat = params.saturation;
+    float peak_nits = params.peak_luminance > 0 ? (float)params.peak_luminance : 1000.0f;
+    float ev = powf(2.0f, (float)params.exposure);
+    float sat = (float)params.saturation;
+
+    // swscale PQ→LINEAR 后 1.0=10000nits，但 BT.2390 公式期望 SDR 空间 (1.0=100nits)
+    const float kSdrWhite = 100.0f;
+    const float kPQPeak = 10000.0f;
+    float pq_to_sdr = kSdrWhite / kPQPeak;   // 0.01: PQ-rel → SDR-rel
+    float peak_sdr = peak_nits / kSdrWhite;  // 相对峰值，BT.2390 公式单位
+
     // 根据输入原色选择亮度系数（BT.2020 或 BT.709）
     const float kr = is_bt2020 ? 0.2627f : 0.2126f;
     const float kg = is_bt2020 ? 0.6780f : 0.7152f;
@@ -58,18 +65,23 @@ void ToneMapper::applyBt2390(AVFrame* frame, const ToneMapParams& params,
             float gv = *g * ev;
             float bv = *b * ev;
 
-            // BT.2390 tone mapping curve
-            float max_rgb = fmaxf(rv, fmaxf(gv, bv));
+            // 1) PQ-relative → SDR-relative（÷100）
+            float rv_sdr = rv * pq_to_sdr;
+            float gv_sdr = gv * pq_to_sdr;
+            float bv_sdr = bv * pq_to_sdr;
+
+            // 2) BT.2390 色调映射（在 SDR-relative 空间）
+            float max_rgb = fmaxf(rv_sdr, fmaxf(gv_sdr, bv_sdr));
             if (max_rgb > 0.0f) {
-                float mapped = (max_rgb * (1.0f + max_rgb / peak)) /
+                float mapped = (max_rgb * (1.0f + max_rgb / peak_sdr)) /
                                (1.0f + max_rgb);
                 float scale = mapped / max_rgb;
-                *r = rv * scale;
-                *g = gv * scale;
-                *b = bv * scale;
+                *r = rv_sdr * scale;
+                *g = gv_sdr * scale;
+                *b = bv_sdr * scale;
             }
 
-            // 饱和度调整（BT.2020 亮度系数）
+            // 3) 饱和度调整（SDR-relative 空间）
             float lum = kr * (*r) + kg * (*g) + kb * (*b);
             *r = lum + sat * (*r - lum);
             *g = lum + sat * (*g - lum);

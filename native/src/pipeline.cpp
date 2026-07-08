@@ -255,6 +255,23 @@ void Pipeline::conversionThread(const std::string& output_path,
         if (complete_cb) complete_cb(0, "编码器初始化失败", user_data);
         return;
     }
+
+    // SDR→HDR 输出时注入 HDR10 元数据
+    if (is_hdr_output) {
+        HDRInjectParams inj = {};
+        inj.max_luminance = hdr_meta_.max_luminance > 0
+            ? hdr_meta_.max_luminance : params_.peak_luminance;
+        inj.min_luminance = 0.005;
+        inj.max_cll = 0;
+        inj.max_fall = 0;
+        inj.hdr_type = 1;
+        HDRMetadataInjector::injectSideData(
+            encoder_.getCodecContext(),
+            encoder_.getFormatContext(),
+            inj);
+        HDR_LOG("转换线程: HDR10 元数据已注入, maxLum=%.0f", inj.max_luminance);
+    }
+
     HDR_LOG("转换线程: 编码器已打开, 开始解码...");
     // 抑制 FFmpeg swscale 每帧警告（"No accelerated colorspace conversion"）
     int old_log_level = av_log_get_level();

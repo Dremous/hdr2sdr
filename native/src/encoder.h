@@ -31,6 +31,7 @@ public:
     int finalize();
     void cancel();
     AVFormatContext* getFormatContext() const { return fmt_ctx_; }
+    AVCodecContext* getCodecContext() const { return enc_ctx_; }
 
 private:
     AVFormatContext* fmt_ctx_;
