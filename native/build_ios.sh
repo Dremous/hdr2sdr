@@ -1,60 +1,90 @@
 #!/bin/bash
-# iOS 静态库交叉编译脚本
-# 用法: ./build_ios.sh [--compile-only]
+# iOS FFmpeg 交叉编译脚本
+# 编译 arm64 架构的静态 FFmpeg 二进制（含 libx265 + z.lib + tonemap/zscale）
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$SCRIPT_DIR"
-IOS_DIR="$PROJECT_DIR/../ios"
+BUILD_DIR="$SCRIPT_DIR/build/ios-ffmpeg"
+IOS_DIR="$SCRIPT_DIR/../ios"
 
-# ── 解析参数 ──
-COMPILE_ONLY=false
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --compile-only) COMPILE_ONLY=true; shift ;;
-        *) echo "未知参数: $1"; exit 1 ;;
-    esac
-done
+MIN_IOS="15.0"
+XCODE_DEV="$(xcode-select -p)"
+SDK="$XCODE_DEV/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 
-CMAKE_EXTRA_ARGS=""
-if $COMPILE_ONLY; then
-  # ── 交叉编译模式：隔离 FFmpeg 头文件 ──
-  # macOS 宿主 include 路径可能包含与 iOS SDK 冲突的系统头文件
-  FFMPEG_TEMP_INC=$(mktemp -d)
-  trap "rm -rf $FFMPEG_TEMP_INC" EXIT
-  
-  # 从 pkg-config 获取宿主 FFmpeg 的 include 路径
-  FFMPEG_HOST_INC=$(pkg-config --cflags-only-I libavcodec | sed 's/-I//g' | tr ' ' '\n' | head -1)
-  echo "宿主 FFmpeg 头文件路径: $FFMPEG_HOST_INC"
-  
-  # 只复制 FFmpeg 相关的子目录
-  for subdir in libavcodec libavformat libavutil libswresample libswscale; do
-    if [ -d "$FFMPEG_HOST_INC/$subdir" ]; then
-      cp -r "$FFMPEG_HOST_INC/$subdir" "$FFMPEG_TEMP_INC/"
-    fi
-  done
-  echo "隔离头文件目录: $FFMPEG_TEMP_INC"
-  ls "$FFMPEG_TEMP_INC"/ 2>/dev/null || echo "(空)"
-  
-  CMAKE_EXTRA_ARGS="-DCOMPILE_ONLY=ON -DFFMPEG_INCLUDE_DIR=$FFMPEG_TEMP_INC"
+echo "编译 iOS arm64 FFmpeg..."
+echo "SDK: $SDK"
+
+# 下载 z.lib
+ZIMG_DIR="$BUILD_DIR/zimg"
+if [ ! -d "$ZIMG_DIR" ]; then
+  mkdir -p "$BUILD_DIR"
+  git clone --depth 1 https://github.com/sekrit-twc/zimg.git "$ZIMG_DIR"
 fi
 
-echo "编译 iOS arm64..."
-
-cmake -B build/ios \
-  -S "$PROJECT_DIR" \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_SYSTEM_NAME=iOS \
-  -DCMAKE_OSX_ARCHITECTURES=arm64 \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
-  -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED=NO \
-  $CMAKE_EXTRA_ARGS
-
-cmake --build build/ios --config Release
-
-if ! $COMPILE_ONLY; then
-  # 复制静态库到 ios/ 目录
-  cp build/ios/libhdr_converter.a "$IOS_DIR/"
+# 下载 FFmpeg
+FFMPEG_DIR="$BUILD_DIR/ffmpeg-6.1.2"
+if [ ! -d "$FFMPEG_DIR" ]; then
+  wget -q "https://ffmpeg.org/releases/ffmpeg-6.1.2.tar.bz2" -O "$BUILD_DIR/ffmpeg.tar.bz2"
+  tar -xjf "$BUILD_DIR/ffmpeg.tar.bz2" -C "$BUILD_DIR"
 fi
 
-echo "iOS 编译完成"
+# 编译 z.lib
+if [ -f "$BUILD_DIR/ios/lib/libzimg.a" ]; then
+  echo "  z.lib 已存在，跳过"
+else
+  echo "  编译 z.lib..."
+  cd "$ZIMG_DIR"
+  ./autogen.sh
+  ./configure \
+    --host=arm-apple-darwin \
+    --prefix="$BUILD_DIR/ios" \
+    --enable-static --disable-shared \
+    CFLAGS="-arch arm64 -isysroot $SDK -mios-version-min=$MIN_IOS -fembed-bitcode" \
+    LDFLAGS="-arch arm64 -isysroot $SDK"
+  make -j$(sysctl -n hw.ncpu)
+  make install
+  cd "$SCRIPT_DIR"
+fi
+
+# 编译 FFmpeg
+if [ -f "$BUILD_DIR/ios/bin/ffmpeg" ]; then
+  echo "  ffmpeg 二进制已存在，跳过"
+else
+  echo "  配置 FFmpeg..."
+  cd "$FFMPEG_DIR"
+  make clean > /dev/null 2>&1 || true
+
+  ./configure \
+    --prefix="$BUILD_DIR/ios" \
+    --enable-cross-compile \
+    --target-os=darwin \
+    --arch=arm64 \
+    --cc="$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" \
+    --enable-static --disable-shared \
+    --disable-doc --disable-avdevice --disable-postproc --disable-network \
+    --disable-ffplay --enable-ffmpeg --enable-ffprobe \
+    --enable-avcodec --enable-avformat --enable-avutil \
+    --enable-swresample --enable-swscale \
+    --enable-avfilter \
+    --enable-gpl \
+    --enable-libx265 --enable-libzimg \
+    --enable-encoder=libx265 \
+    --enable-decoder=h264,hevc,vp8,vp9 \
+    --enable-parser=h264,hevc,vp8,vp9 \
+    --enable-demuxer=mov,matroska,mp4,mpegts,avi,webm \
+    --enable-muxer=mp4,matroska \
+    --enable-protocol=file \
+    --enable-filter=scale,format,tonemap,zscale \
+    --extra-cflags="-arch arm64 -isysroot $SDK -mios-version-min=$MIN_IOS -I$BUILD_DIR/ios/include -fembed-bitcode" \
+    --extra-ldflags="-arch arm64 -isysroot $SDK -L$BUILD_DIR/ios/lib" \
+    --extra-libs="-lm -lc++" \
+    --disable-symver
+
+  echo "  编译 FFmpeg..."
+  make -j$(sysctl -n hw.ncpu)
+  make install
+
+  echo "  iOS FFmpeg 完成:"
+  ls -la "$BUILD_DIR/ios/bin/"
+  cd "$SCRIPT_DIR"
+fi

@@ -9,7 +9,7 @@ on:
 
 jobs:
   # ──────────────────────────────────────────────
-  # 桌面全平台构建：Native C++ → Flutter analyze/test → 打包可执行文件
+  # 桌面全平台构建：只需 Flutter（FFmpeg 运行时依赖系统安装）
   # ──────────────────────────────────────────────
   desktop-build:
     name: Desktop (${{ matrix.os }})
@@ -24,56 +24,27 @@ jobs:
         with:
           channel: stable
 
-      # ── FFmpeg 依赖（按平台） ──
-      - name: Install FFmpeg dev (Ubuntu)
+      # ── 安装 FFmpeg 运行时（用于测试，最终用户需自行安装） ──
+      - name: Install FFmpeg (Ubuntu)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libavcodec-dev libavformat-dev libavutil-dev \
-            libswresample-dev libswscale-dev \
-            cmake pkg-config libgtk-3-dev liblzma-dev
+          sudo apt-get install -y ffmpeg libgtk-3-dev
 
-      - name: Install FFmpeg dev (macOS)
+      - name: Install FFmpeg (macOS)
         if: runner.os == 'macOS'
         env:
           HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
-        run: brew install ffmpeg cmake pkgconf
+        run: brew install ffmpeg
 
-      - name: Install FFmpeg via vcpkg (Windows)
+      - name: Install FFmpeg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        env:
-          VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
         run: |
-          $vcpkg = "C:\vcpkg\vcpkg.exe"
-          if (-not (Test-Path $vcpkg)) {
-            Write-Error "vcpkg not found at $vcpkg"
-            exit 1
-          }
-          & $vcpkg install ffmpeg:x64-windows pkgconf:x64-windows --recurse --clean-after-build
-          $pkgCfgDir = "C:\vcpkg\installed\x64-windows\lib\pkgconfig"
-          "PKG_CONFIG_PATH=$pkgCfgDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "PATH=$env:PATH;C:\vcpkg\installed\x64-windows\tools\pkgconf" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          choco install ffmpeg -y
+          echo "FFMPEG_PATH=C:\ProgramData\chocolatey\lib\ffmpeg\tools\ffmpeg\bin" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      # ── 原生 C++ 编译（先于 Flutter） ──
-      - name: Build native library
-        run: |
-          cmake -B build -S native
-          cmake --build build --config Release
-
-      - name: Deploy native lib to project root
-        shell: bash
-        run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            cp build/libhdr_converter.so .
-          elif [ "$RUNNER_OS" = "Windows" ]; then
-            cp build/Release/hdr_converter.dll . 2>/dev/null || cp build/hdr_converter.dll .
-          else
-            cp build/libhdr_converter.dylib .
-          fi
-
-      # ── Flutter（在 native 之后） ──
+      # ── Flutter ──
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:
@@ -90,53 +61,11 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
             flutter build linux --release
-            mkdir -p build/linux/x64/release/bundle/lib
-            cp libhdr_converter.so build/linux/x64/release/bundle/lib/
-            # 打包 FFmpeg 依赖 .so（检查 libhdr_converter.so 而不是 Flutter 主程序）
-            ldd build/linux/x64/release/bundle/lib/libhdr_converter.so 2>/dev/null | grep -E 'libav|libsw|libx26|libvpx' | awk '{print $3}' | while read dep; do
-              if [ -n "$dep" ] && [ -f "$dep" ]; then cp "$dep" build/linux/x64/release/bundle/lib/; fi
-            done || true
           elif [ "$RUNNER_OS" = "Windows" ]; then
             flutter build windows --release
-            cp hdr_converter.dll build/windows/x64/runner/Release/
-            # 打包 FFmpeg 依赖 .dll（vcpkg 安装路径）
-            cp C:/vcpkg/installed/x64-windows/bin/avcodec-*.dll build/windows/x64/runner/Release/ 2>/dev/null || true
-            cp C:/vcpkg/installed/x64-windows/bin/avformat-*.dll build/windows/x64/runner/Release/ 2>/dev/null || true
-            cp C:/vcpkg/installed/x64-windows/bin/avutil-*.dll build/windows/x64/runner/Release/ 2>/dev/null || true
-            cp C:/vcpkg/installed/x64-windows/bin/swresample-*.dll build/windows/x64/runner/Release/ 2>/dev/null || true
-            cp C:/vcpkg/installed/x64-windows/bin/swscale-*.dll build/windows/x64/runner/Release/ 2>/dev/null || true
           else
             flutter build macos --release
-            MACOS_BIN="build/macos/Build/Products/Release/hdr2sdr.app/Contents/MacOS"
-            cp libhdr_converter.dylib "$MACOS_BIN/"
-            # 打包 FFmpeg 依赖 .dylib 并修正 install_name
-            otool -L build/macos/Build/Products/Release/hdr2sdr.app/Contents/MacOS/hdr2sdr 2>/dev/null | grep -E 'libav|libsw' | awk '{print $1}' | while read dep; do
-              if [ -f "$dep" ]; then
-                base=$(basename "$dep")
-                cp "$dep" "$MACOS_BIN/"
-                install_name_tool -change "$dep" "@executable_path/$base" "$MACOS_BIN/hdr2sdr" 2>/dev/null || true
-                for lib in "$MACOS_BIN"/lib*.dylib; do
-                  install_name_tool -change "$dep" "@executable_path/$base" "$lib" 2>/dev/null || true
-                done
-              fi
-            done || true
           fi
-
-      - name: Upload native library
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: libhdr_converter-${{ runner.os }}
-          path: |
-            build/*.dll
-            build/*.so
-            build/*.dylib
-            build/*.lib
-            build/Release/*.dll
-            build/Release/*.pdb
-            *.dll
-            *.so
-            *.dylib
 
       - name: Upload desktop app
         if: success()
@@ -149,7 +78,7 @@ jobs:
             build/macos/Build/Products/Release/hdr2sdr.app/**
 
   # ──────────────────────────────────────────────
-  # Android APK 构建
+  # Android APK 构建（FFmpeg 二进制 + Flutter）
   # ──────────────────────────────────────────────
   android-build:
     name: Build Android APK
@@ -159,28 +88,34 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+
       - name: Setup Android SDK
         run: |
           echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
           yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
-      # ── 原生 C++ 交叉编译（编译 FFmpeg + 完整链接） ──
+
+      # ── 安装构建依赖 ──
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm make cmake pkg-config git wget
+          sudo apt-get install -y nasm make cmake pkg-config git wget autoconf libtool
+
       - name: Install Android NDK
         run: |
           ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
           echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/27.0.12077973" >> $GITHUB_ENV
-      # ── 缓存 FFmpeg + x264 交叉编译产物（命中后跳过编译直接链接） ──
-      - name: Cache FFmpeg Android libs
+
+      # ── 缓存 FFmpeg + x265 + z.lib 交叉编译产物 ──
+      - name: Cache FFmpeg Android build
         uses: actions/cache@v4
         with:
           path: native/build/ffmpeg-android
-          key: ffmpeg-android-${{ hashFiles('native/build_ffmpeg_android.sh') }}-v8
-      - name: Native compile for Android (含 FFmpeg)
+          key: ffmpeg-android-${{ hashFiles('native/build_ffmpeg_android.sh') }}-v9
+
+      - name: Build FFmpeg binary for Android
         run: |
           bash native/build_android.sh
+
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:
@@ -188,37 +123,39 @@ jobs:
           key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
           restore-keys: |
             pub-${{ runner.os }}-
+
       - run: flutter pub get
+
       - name: Patch file_picker compileSdk
         run: |
           set -ex
-          # 查找 file_picker 的 build 脚本（Groovy .gradle 或 Kotlin .gradle.kts）
           FILE_PICKER_DIR=$(find ~/.pub-cache -maxdepth 4 -type d -name "file_picker-*" 2>/dev/null | head -1)
-          echo "file_picker dir: ${FILE_PICKER_DIR:-NOT FOUND}"
           if [ -n "$FILE_PICKER_DIR" ]; then
-            # 列出目录内容以便调试
-            find "$FILE_PICKER_DIR" -name "build.gradle*" -exec echo "Found: {}" \;
-            # 修改 Groovy DSL 版本的 compileSdk
             find "$FILE_PICKER_DIR" -name "build.gradle" | while read f; do
               sed -i 's/\(compileSdkVersion\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
               sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
             done
-            # 修改 Kotlin DSL 版本的 compileSdk
             find "$FILE_PICKER_DIR" -name "build.gradle.kts" | while read f; do
               sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
             done
           fi
-          # 同样修改 flutter_plugin_android_lifecycle
           LIFECYCLE_DIR=$(find ~/.pub-cache -maxdepth 4 -type d -name "flutter_plugin_android_lifecycle-*" 2>/dev/null | head -1)
-          echo "lifecycle dir: ${LIFECYCLE_DIR:-NOT FOUND}"
+          if [ -n "$LIFECYCLE_DIR" ]; then
+            find "$LIFECYCLE_DIR" -name "build.gradle.kts" | while read f; do
+              sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
+            done
+          fi
+
       - name: Build APK
         run: flutter build apk --release
         continue-on-error: true
+
       - name: List APK output
         if: always()
         run: |
           find build -name "*.apk" -type f 2>/dev/null || true
           ls -la build/app/outputs/ 2>/dev/null || true
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -226,19 +163,20 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/*.apk
             build/app/outputs/**/*.apk
-            build/**/*.apk
 
   # ──────────────────────────────────────────────
-  # iOS IPA 构建
+  # iOS 构建（仅编译验证，FFmpeg 运行时通过 subprocess 调用系统安装）
   # ──────────────────────────────────────────────
   ios-build:
     name: Build iOS IPA
     runs-on: macos-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+
       - name: Cache pub dependencies
         uses: actions/cache@v4
         with:
@@ -246,19 +184,10 @@ jobs:
           key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
           restore-keys: |
             pub-${{ runner.os }}-
+
       - run: flutter pub get
-      # ── 原生 C++ 交叉编译（仅编译验证，使用 macOS 宿主 FFmpeg 头文件 + iOS SDK） ──
-      - name: Install FFmpeg dev for headers
-        run: brew install ffmpeg pkgconf cmake
-      - name: Native compile for iOS
-        run: bash native/build_ios.sh --compile-only
-      - name: CocoaPods install
-        run: |
-          cd ios
-          pod install --repo-update
-      - name: Build IPA
-        run: flutter build ios --no-codesign --release
-        continue-on-error: true
+      - run: flutter build ios --no-codesign --release
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -266,4 +195,3 @@ jobs:
           path: |
             build/ios/iphoneos/Runner.app
             build/ios/Release-iphoneos/Runner.app
-            build/ios/*.app
