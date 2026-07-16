@@ -19,16 +19,18 @@ echo "=== 第 2 步：复制 ffmpeg 到 assets ==="
 mkdir -p "$ASSETS_DIR"
 
 for ABI in arm64-v8a x86_64; do
-  SRC="$FFMPEG_BUILD_DIR/$ABI/bin/ffmpeg"
-  if [ -f "$SRC" ]; then
-    # 按 ABI 命名的子目录，Dart 层根据设备架构选择
-    DST_DIR="$ASSETS_DIR/ffmpeg/$ABI"
-    mkdir -p "$DST_DIR"
-    cp "$SRC" "$DST_DIR/ffmpeg"
-    echo "  $ABI: $(ls -lh "$DST_DIR/ffmpeg" | awk '{print $5}')"
-  else
-    echo "  [警告] $ABI 的 ffmpeg 未找到: $SRC"
-  fi
+  BIN_DIR="$FFMPEG_BUILD_DIR/$ABI/bin"
+  DST_DIR="$ASSETS_DIR/ffmpeg/$ABI"
+  mkdir -p "$DST_DIR"
+  for name in ffmpeg ffprobe; do
+    SRC="$BIN_DIR/$name"
+    if [ -f "$SRC" ]; then
+      cp "$SRC" "$DST_DIR/$name"
+      echo "  $ABI/$name: $(ls -lh "$DST_DIR/$name" | awk '{print $5}')"
+    else
+      echo "  [警告] $ABI/$name 未找到: $SRC"
+    fi
+  done
 done
 
 echo "=== Android FFmpeg 编译完成 ==="
