@@ -55,6 +55,25 @@ class MainActivity : FlutterActivity() {
                         startService(intent)
                         result.success(true)
                     }
+                    "extractAsset" -> {
+                        val assetPath = call.argument<String>("assetPath")
+                        val destPath = call.argument<String>("destPath")
+                        if (assetPath != null && destPath != null) {
+                            try {
+                                assets.open(assetPath).use { input ->
+                                    java.io.File(destPath).outputStream().use { output ->
+                                        input.copyTo(output)
+                                    }
+                                }
+                                java.io.File(destPath).setExecutable(true)
+                                result.success(true)
+                            } catch (e: Exception) {
+                                result.error("EXTRACT_FAILED", e.message, null)
+                            }
+                        } else {
+                            result.error("INVALID_ARGS", "缺少 assetPath/destPath", null)
+                        }
+                    }
                     else -> result.notImplemented()
                 }
             }

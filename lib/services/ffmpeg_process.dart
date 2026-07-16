@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,6 +12,8 @@ class FFmpegProcess {
   String? _ffmpegPath;
   String? _ffprobePath;
   Process? _process;
+
+  static const _channel = MethodChannel('hdr2sdr/background');
 
   /// 检测 Android 设备 ABI
   static Future<String> _detectAbi() async {
@@ -32,7 +33,7 @@ class FFmpegProcess {
   static Future<String> get abi async =>
       _abi.isNotEmpty ? _abi : _abi = await _detectAbi();
 
-  /// 从 assets 提取二进制到可执行路径
+  /// 通过 Android AssetManager 提取 assets 中的文件（桌面直返系统路径）
   static Future<String> extractBinary(String name) async {
     final abi = await FFmpegProcess.abi;
     final appDir = await getApplicationDocumentsDirectory();
@@ -42,9 +43,15 @@ class FFmpegProcess {
     }
     final destPath = '${binDir.path}/${name}_$abi';
     if (!await File(destPath).exists()) {
-      final data = await rootBundle.load('assets/ffmpeg/$abi/$name');
-      await File(destPath).writeAsBytes(data.buffer.asUint8List(), flush: true);
-      await Process.run('chmod', ['+x', destPath]);
+      if (Platform.isAndroid) {
+        final ok = await _channel.invokeMethod('extractAsset', {
+          'assetPath': 'ffmpeg/$abi/$name',
+          'destPath': destPath,
+        });
+        if (ok != true) {
+          throw Exception('无法从 assets 提取 $name/$abi');
+        }
+      }
     }
     return destPath;
   }
