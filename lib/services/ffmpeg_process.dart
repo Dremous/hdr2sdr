@@ -134,7 +134,9 @@ class FFmpegProcess {
     if (isHdrToSdr) {
       args.addAll([
         '-vf',
-        'tonemap=tonemap=bt2390:peak=${peak.toInt()}:desat=0,format=yuv420p',
+        'tonemap=tonemap=bt2390:peak=${peak.toInt()}:desat=0,'
+            'setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709,'
+            'format=yuv420p',
         '-c:v', 'libx265',
         '-crf', '$crf', '-preset', 'medium',
       ]);
@@ -143,6 +145,7 @@ class FFmpegProcess {
         '-vf',
         'zscale=t=linear:npl=100,'
             'zscale=p=bt2020:t=smpte2084:min=0:max=${peak.toInt()},'
+            'setparams=color_primaries=bt2020:color_trc=smpte2084:colorspace=bt2020nc,'
             'format=yuv420p10le',
         '-c:v', 'libx265',
         '-crf', '$crf', '-preset', 'medium',

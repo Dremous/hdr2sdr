@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 
 import '../models/video_file.dart';
@@ -19,13 +17,10 @@ class ConvertProvider extends ChangeNotifier {
   bool _isConverting = false;
   String? _outputDirectory;
   String? _errorMessage;
-  Uint8List? _previewFrame;
 
   final FFmpegProcess _ffmpeg = FFmpegProcess();
-  StreamSubscription? _stderrSub;
-  Timer? _pollTimer;
 
-  Uint8List? get previewFrame => _previewFrame;
+  Uint8List? get previewFrame => null;
   List<VideoFile> get queue => List.unmodifiable(_queue);
   ConvertParams get params => _params;
   VideoFile? get currentFile => _currentFile;
@@ -129,21 +124,28 @@ class ConvertProvider extends ChangeNotifier {
 
   Future<void> _runConversion() async {
     final input = _currentFile!.filePath;
-    final output = _buildOutputPath();
     final params = _params;
-    final isHdrToSdr = _isHdrToSdr();
 
     debugPrint('[convert] 输入: $input');
-    debugPrint('[convert] 输出: $output');
-    debugPrint('[convert] 方向: ${isHdrToSdr ? "HDR→SDR" : "SDR→HDR"}');
 
-    // 先查视频时长
+    try {
+    // 先查视频信息——auto mode 需要 hdrType 来判断方向
     final info = await FFmpegProcess.getVideoInfo(input);
     if (info != null) {
       _currentInfo = info;
       _totalFrames = info.frameCount;
+      // 更新当前文件的 HDR 类型（用于输出文件名和方向判断）
+      final hdrIndex = info.hdrType.clamp(0, HdrType.values.length - 1);
+      _currentFile!.hdrType = HdrType.values[hdrIndex];
       notifyListeners();
     }
+
+    // 在获取视频信息后确定方向和输出路径
+    final isHdrToSdr = _isHdrToSdr();
+    final output = _buildOutputPath();
+
+    debugPrint('[convert] 输出: $output');
+    debugPrint('[convert] 方向: ${isHdrToSdr ? "HDR→SDR" : "SDR→HDR"}');
 
     final exitCode = await _ffmpeg.run(
       input: input,
@@ -159,7 +161,6 @@ class ConvertProvider extends ChangeNotifier {
 
     final success = exitCode == 0;
     _progress = success ? 1.0 : _progress;
-    _isConverting = false;
     if (_currentFile != null) {
       _currentFile!.status = success ? FileStatus.completed : FileStatus.failed;
       if (!success) {
@@ -167,13 +168,21 @@ class ConvertProvider extends ChangeNotifier {
         _errorMessage = _currentFile!.errorMessage;
       }
     }
+    } catch (e) {
+      debugPrint('[convert] 异常: $e');
+      _errorMessage = '转换异常: $e';
+      if (_currentFile != null) {
+        _currentFile!.status = FileStatus.failed;
+        _currentFile!.errorMessage = _errorMessage;
+      }
+    } finally {
+    _isConverting = false;
     notifyListeners();
+    }
   }
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
-    _stderrSub?.cancel();
     _ffmpeg.cancel();
     super.dispose();
   }
