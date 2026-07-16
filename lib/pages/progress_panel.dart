@@ -66,7 +66,7 @@ class ProgressPanel extends StatelessWidget {
                 const SizedBox(height: 12),
                 LinearProgressIndicator(
                   value: provider.isConverting
-                      ? (provider.progress / 100.0).clamp(0.0, 1.0)
+                      ? provider.progress.clamp(0.0, 1.0)
                       : 1.0,
                   minHeight: 8,
                   borderRadius: BorderRadius.circular(4),
@@ -76,7 +76,7 @@ class ProgressPanel extends StatelessWidget {
                 Text(
                   isComplete
                       ? '100%'
-                      : '${provider.progress.toStringAsFixed(1)}%',
+                      : '${(provider.progress * 100).toStringAsFixed(1)}%',
                 ),
                 if (provider.isConverting) ...[
                   const SizedBox(height: 8),
