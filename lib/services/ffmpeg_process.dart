@@ -120,6 +120,17 @@ class FFmpegProcess {
     }
   }
 
+  /// 映射 UI 编码器枚举到 FFmpeg 编码器名
+  static String _ffmpegEncoder(EncoderType type) {
+    switch (type) {
+      case EncoderType.h265:
+      case EncoderType.h265Hardware:
+        return 'libx265';
+      default:
+        return 'libx265'; // AV1/H.264 回退到 x265
+    }
+  }
+
   /// 构建 FFmpeg 参数
   List<String> buildArgs({
     required String input,
@@ -129,29 +140,48 @@ class FFmpegProcess {
   }) {
     final peak = params.peakLuminance > 0 ? params.peakLuminance : 1000.0;
     final crf = params.crf.clamp(0, 51);
+    final encoder = _ffmpegEncoder(params.encoder);
     final args = <String>['-i', input, '-y'];
 
     if (isHdrToSdr) {
-      args.addAll([
-        '-vf',
-        'tonemap=tonemap=bt2390:peak=${peak.toInt()}:desat=0,'
-            'setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709,'
-            'format=yuv420p',
-        '-c:v', 'libx265',
-        '-crf', '$crf', '-preset', 'medium',
-      ]);
+      if (params.targetColorSpace == ColorSpace.bt2020) {
+        // HDR→SDR，目标 BT.2020 原色（10-bit 避免色带）
+        args.addAll([
+          '-vf',
+          'tonemap=tonemap=bt2390:peak=${peak.toInt()}:desat=0,'
+              'setparams=color_primaries=bt2020:color_trc=bt709:colorspace=bt2020nc,'
+              'format=yuv420p10le',
+        ]);
+      } else {
+        // HDR→SDR，目标 BT.709
+        args.addAll([
+          '-vf',
+          'tonemap=tonemap=bt2390:peak=${peak.toInt()}:desat=0,'
+              'setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709,'
+              'format=yuv420p',
+        ]);
+      }
     } else {
-      args.addAll([
-        '-vf',
-        'zscale=t=linear:npl=100,'
-            'zscale=p=bt2020:t=smpte2084:min=0:max=${peak.toInt()},'
-            'setparams=color_primaries=bt2020:color_trc=smpte2084:colorspace=bt2020nc,'
-            'format=yuv420p10le',
-        '-c:v', 'libx265',
-        '-crf', '$crf', '-preset', 'medium',
-      ]);
+      if (params.targetColorSpace == ColorSpace.bt2020) {
+        // SDR→HDR，扩展到 BT.2020 PQ
+        args.addAll([
+          '-vf',
+          'zscale=t=linear:npl=100,'
+              'zscale=p=bt2020:t=smpte2084:min=0:max=${peak.toInt()},'
+              'setparams=color_primaries=bt2020:color_trc=smpte2084:colorspace=bt2020nc,'
+              'format=yuv420p10le',
+        ]);
+      } else {
+        // SDR→SDR，只转码不展开
+        args.addAll([
+          '-vf',
+          'setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709,'
+              'format=yuv420p',
+        ]);
+      }
     }
 
+    args.addAll(['-c:v', encoder, '-crf', '$crf', '-preset', 'medium']);
     args.addAll(['-c:a', 'copy', output]);
     return args;
   }
