@@ -13,7 +13,6 @@ class FFmpegProcess {
   String? _ffmpegPath;
   String? _ffprobePath;
   Process? _process;
-  bool _cancelled = false;
 
   /// 检测 Android 设备 ABI
   static Future<String> _detectAbi() async {
@@ -93,8 +92,11 @@ class FFmpegProcess {
 
       int hdrType = 0;
       final trc = vs['color_transfer'] as String?;
-      if (trc == 'smpte2084') hdrType = 1;
-      else if (trc == 'arib-std-b67') hdrType = 2;
+      if (trc == 'smpte2084') {
+        hdrType = 1;
+      } else if (trc == 'arib-std-b67') {
+        hdrType = 2;
+      }
 
       double fps = 0;
       final rfr = vs['r_frame_rate'] as String?;
@@ -160,7 +162,6 @@ class FFmpegProcess {
     double? totalDurationSec,
     void Function(double progress)? onProgress,
   }) async {
-    _cancelled = false;
     final exe = await ffmpegPath;
     final args = buildArgs(
       input: input, output: output, params: params, isHdrToSdr: isHdrToSdr);
@@ -192,7 +193,6 @@ class FFmpegProcess {
   }
 
   void cancel() {
-    _cancelled = true;
     _process?.kill();
     _process = null;
   }
