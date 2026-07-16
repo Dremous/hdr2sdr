@@ -126,25 +126,24 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Patch file_picker compileSdk
+      - name: Patch plugin compileSdk
         run: |
           set -ex
-          FILE_PICKER_DIR=$(find ~/.pub-cache -maxdepth 4 -type d -name "file_picker-*" 2>/dev/null | head -1)
-          if [ -n "$FILE_PICKER_DIR" ]; then
-            find "$FILE_PICKER_DIR" -name "build.gradle" | while read f; do
-              sed -i 's/\(compileSdkVersion\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
-              sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
-            done
-            find "$FILE_PICKER_DIR" -name "build.gradle.kts" | while read f; do
-              sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
-            done
-          fi
-          LIFECYCLE_DIR=$(find ~/.pub-cache -maxdepth 4 -type d -name "flutter_plugin_android_lifecycle-*" 2>/dev/null | head -1)
-          if [ -n "$LIFECYCLE_DIR" ]; then
-            find "$LIFECYCLE_DIR" -name "build.gradle.kts" | while read f; do
-              sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' "$f" 2>/dev/null || true
-            done
-          fi
+          # 从 pubspec.lock 读取 resolved 版本，只 patch 实际使用的版本
+          patch_compile_sdk() {
+            local pkg="$1"
+            local ver
+            ver=$(grep -A2 "  $pkg:" pubspec.lock 2>/dev/null | grep "version:" | awk '{print $2}' | tr -d '"' || true)
+            if [ -z "$ver" ]; then echo "  $pkg: 未在 lock 中找到"; return; fi
+            local dir=$(find ~/.pub-cache -maxdepth 4 -type d -name "${pkg}-${ver}" 2>/dev/null | head -1)
+            if [ -z "$dir" ]; then echo "  $pkg $ver: 缓存目录未找到"; return; fi
+            echo "  $pkg $ver: $dir"
+            find "$dir" -name "build.gradle" -exec sed -i 's/\(compileSdkVersion\s*=\?\)\s*[0-9]\+/\1 36/g' {} + 2>/dev/null || true
+            find "$dir" -name "build.gradle" -exec sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' {} + 2>/dev/null || true
+            find "$dir" -name "build.gradle.kts" -exec sed -i 's/\(compileSdk\s*=\?\)\s*[0-9]\+/\1 36/g' {} + 2>/dev/null || true
+          }
+          patch_compile_sdk "file_picker"
+          patch_compile_sdk "flutter_plugin_android_lifecycle"
 
       - name: Build APK
         run: flutter build apk --release
