@@ -29,12 +29,11 @@ fi
 
 # ── 下载 z.lib 源码 ──
 ZIMG_DIR="$BUILD_DIR/zimg-$ZIMG_VERSION"
-if [ ! -f "$ZIMG_DIR/configure" ]; then
+if [ ! -f "$ZIMG_DIR/configure" ] && [ ! -f "$ZIMG_DIR/CMakeLists.txt" ]; then
   echo "下载 z.lib $ZIMG_VERSION..."
-  mkdir -p "$BUILD_DIR"
-  wget -q "https://github.com/sekrit-twc/zimg/archive/refs/tags/release-$ZIMG_VERSION.tar.gz" -O "$BUILD_DIR/zimg.tar.gz"
-  tar -xzf "$BUILD_DIR/zimg.tar.gz" -C "$BUILD_DIR"
-  mv "$BUILD_DIR/zimg-release-$ZIMG_VERSION" "$ZIMG_DIR"
+  rm -rf "$ZIMG_DIR"
+  git clone --depth 1 --branch "release-$ZIMG_VERSION" \
+    https://github.com/sekrit-twc/zimg.git "$ZIMG_DIR"
 fi
 
 # ── 下载并编译 x265（静态库，每个 ABI）──
@@ -94,26 +93,36 @@ EOF
     cd "$SCRIPT_DIR"
   fi
 
-  # ── z.lib（CMake 交叉编译）──
+  # ── z.lib（autotools 交叉编译）──
   if [ -f "$PREFIX/lib/libzimg.a" ]; then
     echo "  z.lib $ABI 已存在，跳过"
   else
     echo "  编译 z.lib for $ABI..."
+    # 首 ABI 时生成 configure（源码不含 pre-generated configure）
+    if [ ! -f "$ZIMG_DIR/configure" ]; then
+      cd "$ZIMG_DIR"
+      ./autogen.sh
+      cd "$SCRIPT_DIR"
+    fi
+
     rm -rf "$ZIMG_DIR/build-$ABI"
     mkdir -p "$ZIMG_DIR/build-$ABI"
     cd "$ZIMG_DIR/build-$ABI"
 
-    cmake "$ZIMG_DIR" \
-      -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
-      -DANDROID_ABI="$ABI" \
-      -DANDROID_PLATFORM="android-${API_LEVEL}" \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DBUILD_TESTING=OFF \
-      -DCMAKE_INSTALL_PREFIX="$PREFIX"
+    CC="$TOOLCHAIN/bin/${CROSS_PREFIX}clang" \
+    CXX="$TOOLCHAIN/bin/${CROSS_PREFIX}clang++" \
+    AR="$TOOLCHAIN/bin/llvm-ar" \
+    RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
+    STRIP="$TOOLCHAIN/bin/llvm-strip" \
+    "$ZIMG_DIR/configure" \
+      --host="${ARCH_NAME}-linux-android" \
+      --prefix="$PREFIX" \
+      --enable-static \
+      --disable-shared \
+      --disable-test
 
-    cmake --build . --config Release -- -j$(nproc)
-    cmake --install .
+    make -j$(nproc)
+    make install
 
     mkdir -p "$PREFIX/lib/pkgconfig"
     cat > "$PREFIX/lib/pkgconfig/zimg.pc" <<EOF

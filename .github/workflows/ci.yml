@@ -98,7 +98,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm make cmake pkg-config git wget autoconf libtool
+          sudo apt-get install -y nasm make cmake pkg-config git wget autoconf automake libtool
 
       - name: Install Android NDK
         run: |
