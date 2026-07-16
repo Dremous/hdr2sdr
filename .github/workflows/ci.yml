@@ -133,7 +133,7 @@ jobs:
           patch_compile_sdk() {
             local pkg="$1"
             local ver
-            ver=$(grep -A2 "  $pkg:" pubspec.lock 2>/dev/null | grep "version:" | awk '{print $2}' | tr -d '"' || true)
+            ver=$(grep -A8 "  $pkg:" pubspec.lock 2>/dev/null | grep "version:" | awk '{print $2}' | tr -d '"' || true)
             if [ -z "$ver" ]; then echo "  $pkg: 未在 lock 中找到"; return; fi
             local dir=$(find ~/.pub-cache -maxdepth 4 -type d -name "${pkg}-${ver}" 2>/dev/null | head -1)
             if [ -z "$dir" ]; then echo "  $pkg $ver: 缓存目录未找到"; return; fi
