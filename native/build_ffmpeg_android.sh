@@ -94,7 +94,7 @@ EOF
     cd "$SCRIPT_DIR"
   fi
 
-  # ── z.lib ──
+  # ── z.lib（CMake 交叉编译）──
   if [ -f "$PREFIX/lib/libzimg.a" ]; then
     echo "  z.lib $ABI 已存在，跳过"
   else
@@ -103,17 +103,17 @@ EOF
     mkdir -p "$ZIMG_DIR/build-$ABI"
     cd "$ZIMG_DIR/build-$ABI"
 
-    CC="$TOOLCHAIN/bin/${CROSS_PREFIX}clang" \
-    CXX="$TOOLCHAIN/bin/${CROSS_PREFIX}clang++" \
-    PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig" \
-    "$ZIMG_DIR/configure" \
-      --host="${ARCH_NAME}-linux-android" \
-      --prefix="$PREFIX" \
-      --enable-static \
-      --disable-shared
+    cmake "$ZIMG_DIR" \
+      -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+      -DANDROID_ABI="$ABI" \
+      -DANDROID_PLATFORM="android-${API_LEVEL}" \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DBUILD_TESTING=OFF \
+      -DCMAKE_INSTALL_PREFIX="$PREFIX"
 
-    make -j$(nproc)
-    make install
+    cmake --build . --config Release -- -j$(nproc)
+    cmake --install .
 
     mkdir -p "$PREFIX/lib/pkgconfig"
     cat > "$PREFIX/lib/pkgconfig/zimg.pc" <<EOF
